@@ -58,7 +58,7 @@ export function PosterPreview({
             <div className="shrink-0 mb-2">
               <OfertasHeader
                 textSize={70}
-                title={isImperdiveis ? 'OFERTAS IMPERDÍVEIS' : 'OFERTAS'}
+                title={isImperdiveis ? 'OFERTA IMPERDÍVEL' : 'OFERTA'}
               />
             </div>
 

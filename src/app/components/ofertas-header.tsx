@@ -1,6 +1,6 @@
 export function OfertasHeader({ 
   textSize = 50, 
-  title = "OFERTAS" 
+  title = "OFERTA" 
 }: { 
   textSize?: number;
   title?: string;
@@ -51,7 +51,7 @@ export function OfertasHeader({
       <use href="#starburst" transform="translate(95, 30)" />
       <use href="#starburst" transform="translate(140, 88)" />
 
-      {title === "OFERTAS IMPERDÍVEIS" ? (
+      {title === "OFERTA IMPERDÍVEL" ? (
         <text
           x="50%"
           y="50%"
@@ -61,10 +61,10 @@ export function OfertasHeader({
           fill="black"
         >
           <tspan x="50%" dy="-0.2em" style={{ fontSize: `${textSize * 0.7}px`, letterSpacing: '-1px' }}>
-            OFERTAS
+            OFERTA
           </tspan>
           <tspan x="50%" dy="0.95em" style={{ fontSize: `${textSize * 0.55}px`, letterSpacing: '-1.5px' }}>
-            IMPERDÍVEIS
+            IMPERDÍVEL
           </tspan>
         </text>
       ) : (

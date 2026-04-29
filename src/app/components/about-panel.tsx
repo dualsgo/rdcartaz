@@ -101,7 +101,7 @@ export function AboutPanel({ open, onClose }: AboutPanelProps) {
             <div className="grid grid-cols-2 gap-2 mt-3">
               {[
                 { label: 'Relíquias A4', desc: 'Modelo oficial (2 cartazes por folha)' },
-                { label: 'Ofertas Ativas', desc: 'Filtro automático que remove itens sem desconto' },
+                { label: 'Oferta Ativa', desc: 'Filtro automático que remove itens sem desconto' },
                 { label: 'Base de Dados', desc: 'Integração total com a Planilha Relíquias' },
                 { label: 'Design Premium', desc: 'Layout otimizado para máxima conversão' },
               ].map((m) => (

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+export const dynamic = 'force-dynamic';
 import * as fs from 'fs';
 import * as path from 'path';
 import { invalidateSuggestCache } from '../suggest-cache';
@@ -13,7 +14,7 @@ type ProdutoEntry = {
 
 let produtosCache: Record<string, ProdutoEntry> | null = null;
 
-const DATA_FILE = path.join(process.cwd(), 'src', 'data', 'produtos.json');
+const DATA_FILE = path.join(process.cwd(), 'data', 'produtos.json');
 
 function loadProdutos(): Record<string, ProdutoEntry> {
     if (produtosCache) return produtosCache;

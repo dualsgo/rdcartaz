@@ -30,7 +30,7 @@ export function ImportModal({ status, count, onClose }: ImportModalProps) {
               </div>
               <h3 className="text-lg font-bold text-gray-900">Processando Arquivo</h3>
               <p className="text-sm text-muted-foreground mt-2">
-                Estamos analisando sua planilha e filtrando as melhores ofertas...
+                Estamos analisando sua planilha e filtrando a melhor oferta...
               </p>
             </>
           )}
@@ -42,7 +42,7 @@ export function ImportModal({ status, count, onClose }: ImportModalProps) {
               </div>
               <h3 className="text-lg font-bold text-gray-900">Importação Concluída!</h3>
               <p className="text-sm text-muted-foreground mt-2">
-                Encontramos <span className="font-bold text-green-600">{count} ofertas</span> ativas e elas já foram adicionadas ao seu lote.
+                Encontramos <span className="font-bold text-green-600">{count} oferta</span> ativa e elas já foram adicionadas ao seu lote.
               </p>
               <Button 
                 onClick={onClose} 

@@ -574,7 +574,7 @@ export default function Home() {
                     {/* Filter label (simplified) */}
                     <div className="flex border-b bg-muted/10 px-3 py-1.5 items-center justify-center">
                       <span className="text-[10px] font-bold uppercase tracking-wider text-primary">
-                        Somente Ofertas Ativas
+                        Somente Oferta Ativa
                       </span>
                     </div>
 
