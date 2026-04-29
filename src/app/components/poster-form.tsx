@@ -36,23 +36,28 @@ function useCurrencyInput(initial: string, maxCents?: number) {
   const display = centsToDisplay(cents);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // No Desktop, mantemos o comportamento de apagar último dígito
     if (e.key === 'Backspace') {
       e.preventDefault();
       setCents(prev => Math.floor(prev / 10));
-    } else if (/^\d$/.test(e.key)) {
-      e.preventDefault();
-      setCents(prev => {
-        const next = prev * 10 + parseInt(e.key, 10);
-        const capped = maxCents !== undefined && next > maxCents ? maxCents : next;
-        return capped > 999999 ? prev : capped;
-      });
     }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    const digits = value.replace(/\D/g, '');
+    const next = digits ? parseInt(digits, 10) : 0;
+    
+    // Limite de segurança (99.999,99)
+    if (next > 9999999) return;
+    
+    setCents(next);
   };
 
   const reset = useCallback(() => setCents(0), []);
   const setValue = useCallback((val: string) => setCents(displayToCents(val)), []);
 
-  return { display, handleKeyDown, reset, setValue, cents };
+  return { display, handleKeyDown, handleChange, reset, setValue, cents };
 }
 
 type LookupStatus = 'idle' | 'loading' | 'found' | 'notfound';
@@ -478,8 +483,10 @@ export function PosterForm({ data, setData, posterType, onLookupStatusChange, on
                   <Input
                     value={priceFrom.display}
                     onKeyDown={priceFrom.handleKeyDown}
-                    onChange={() => {}}
-                    className="h-10 font-mono text-lg bg-gray-50/50"
+                    onChange={priceFrom.handleChange}
+                    inputMode="numeric"
+                    placeholder="R$ 0,00"
+                    className="h-12 font-mono text-lg bg-gray-50/50 border-gray-200 focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
               )}
@@ -488,8 +495,10 @@ export function PosterForm({ data, setData, posterType, onLookupStatusChange, on
                 <Input
                   value={priceFor.display}
                   onKeyDown={e => { priceFor.handleKeyDown(e); }}
-                  onChange={() => {}}
-                  className="h-10 font-mono text-xl font-black bg-blue-50/10 border-blue-200"
+                  onChange={priceFor.handleChange}
+                  inputMode="numeric"
+                  placeholder="R$ 0,00"
+                  className="h-12 font-mono text-xl font-black bg-blue-50/10 border-blue-200 focus:ring-2 focus:ring-blue-500"
                 />
               </div>
            </div>
