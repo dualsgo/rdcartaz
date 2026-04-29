@@ -1,0 +1,1247 @@
+
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Relatório Preços a Serem Alterados - Filial: 1187, Filial 1187 1187-CARIOCA SHOPPING, Data 23/04/2026, Com estoque sim</title>
+    <script src="/jquery/jquery.js"></script>
+    <script src="/bootstrap/js/bootstrap.js"></script>
+    <link rel="stylesheet" type="text/css" href="/kwTemplate/css/bootstrap.css" media="all">
+    <style>
+        #container-gestao-a-vista table,
+        #container-gestao-a-vista tr
+        {
+            border: 0px;
+            background-color: #FFFFFF;
+        }
+
+        #container-gestao-a-vista td
+        {
+            border-top: 0px;
+            border-left: 0px;
+        }
+
+        #container-gestao-a-vista table tbody tr td:last-child
+        {
+            border-right: 0px;
+        }
+
+       #container-gestao-a-vista .tr-cabecalho-nome
+       {
+           border-top: 1em solid white;
+       }
+
+       #container-gestao-a-vista .td-cabecalho-nome
+       {
+           background-color: #C4C4C4;
+       }
+    </style>
+</head>
+<body>
+        <div class="a4-landscape" id="container-com-estoque">
+                        <table class="table table-bordered table-striped lista">
+                                    <thead>
+                        <tr>
+                            <th colspan="7">
+                                COM ESTOQUE - KIDS                            </th>
+                        </tr>
+                    </thead>
+                
+                <tbody>
+                    <tr>
+                        <td colspan="7">
+                            <strong>
+                                Fornecedor: BBR IMP E EXP LTDA                  <sup>07397294000186</sup>
+                            </strong>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <strong>Cod. Interno</strong>
+                        </td>
+                        <td>
+                            <strong>Mercadoria</strong>
+                        </td>
+                        <td>
+                            <strong>Cod. Fornecedor</strong>
+                        </td>
+                        <td>
+                            <strong>Estoque</strong>
+                        </td>
+                        <td>
+                            <strong>Preço Atual</strong>
+                        </td>
+                        <td>
+                            <strong>Novo Preço</strong>
+                        </td>
+                        <td>
+                            <strong>Promoção</strong>
+                        </td>
+                    </tr>
+
+                                        <tr>
+                        <td>
+                            5145536                        </td>
+                        <td>
+                            MOCH POKEMON SQUIRTLE                                           </td>
+                        <td>
+                            PK0002                        </td>
+                        <td>
+                            2,000                        </td>
+                        <td>
+                            299,99                        </td>
+                        <td>
+                            349,99                        </td>
+                        <td>
+                            0,00                        </td>
+                    </tr>
+                                        <tr>
+                        <td>
+                            5145539                        </td>
+                        <td>
+                            MOCH POKEMON CHARMANDER                                         </td>
+                        <td>
+                            PK0004                        </td>
+                        <td>
+                            3,000                        </td>
+                        <td>
+                            299,99                        </td>
+                        <td>
+                            349,99                        </td>
+                        <td>
+                            0,00                        </td>
+                    </tr>
+                                        <tr>
+                        <td>
+                            5145538                        </td>
+                        <td>
+                            MOCH POKEMON PIKACHU                                            </td>
+                        <td>
+                            PK0001                        </td>
+                        <td>
+                            3,000                        </td>
+                        <td>
+                            299,99                        </td>
+                        <td>
+                            349,99                        </td>
+                        <td>
+                            0,00                        </td>
+                    </tr>
+                                        <tr>
+                        <td>
+                            5145537                        </td>
+                        <td>
+                            MOCH POKEMON BULBASAURO                                         </td>
+                        <td>
+                            PK0003                        </td>
+                        <td>
+                            4,000                        </td>
+                        <td>
+                            299,99                        </td>
+                        <td>
+                            349,99                        </td>
+                        <td>
+                            0,00                        </td>
+                    </tr>
+                                        <tr>
+                        <td>
+                            5145548                        </td>
+                        <td>
+                            MOCH POKEMON GENGAR                                             </td>
+                        <td>
+                            PK0005                        </td>
+                        <td>
+                            1,000                        </td>
+                        <td>
+                            299,99                        </td>
+                        <td>
+                            349,99                        </td>
+                        <td>
+                            0,00                        </td>
+                    </tr>
+                    
+                <tbody>
+                    <tr>
+                        <td colspan="7">
+                            <strong>
+                                Fornecedor: HASBRO DO BRASIL IND E COM DE BRINQ <sup>08743754000305</sup>
+                            </strong>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <strong>Cod. Interno</strong>
+                        </td>
+                        <td>
+                            <strong>Mercadoria</strong>
+                        </td>
+                        <td>
+                            <strong>Cod. Fornecedor</strong>
+                        </td>
+                        <td>
+                            <strong>Estoque</strong>
+                        </td>
+                        <td>
+                            <strong>Preço Atual</strong>
+                        </td>
+                        <td>
+                            <strong>Novo Preço</strong>
+                        </td>
+                        <td>
+                            <strong>Promoção</strong>
+                        </td>
+                    </tr>
+
+                                        <tr>
+                        <td>
+                            5031088                        </td>
+                        <td>
+                            M AVG 2 MASCAR VALU                                             </td>
+                        <td>
+                            B0440                        </td>
+                        <td>
+                            15,000                        </td>
+                        <td>
+                            29,95                        </td>
+                        <td>
+                            49,99                        </td>
+                        <td>
+                            0,00                        </td>
+                    </tr>
+                                        <tr>
+                        <td>
+                            5091949                        </td>
+                        <td>
+                            BA BANHOS CARINHOSOS                                            </td>
+                        <td>
+                            E8716                        </td>
+                        <td>
+                            44,000                        </td>
+                        <td>
+                            129,99                        </td>
+                        <td>
+                            129,99                        </td>
+                        <td>
+                            89,95                        </td>
+                    </tr>
+                                        <tr>
+                        <td>
+                            5101261                        </td>
+                        <td>
+                            FIG TITAN HERO H.FERRO                                          </td>
+                        <td>
+                            E7873                        </td>
+                        <td>
+                            10,000                        </td>
+                        <td>
+                            99,99                        </td>
+                        <td>
+                            99,99                        </td>
+                        <td>
+                            79,95                        </td>
+                    </tr>
+                                        <tr>
+                        <td>
+                            5101266                        </td>
+                        <td>
+                            FIG TITAN DELUXE HULK                                           </td>
+                        <td>
+                            E7475                        </td>
+                        <td>
+                            72,000                        </td>
+                        <td>
+                            99,95                        </td>
+                        <td>
+                            159,99                        </td>
+                        <td>
+                            0,00                        </td>
+                    </tr>
+                                        <tr>
+                        <td>
+                            5101264                        </td>
+                        <td>
+                            FIG TITAN HERO C.AMERIC                                         </td>
+                        <td>
+                            E7877                        </td>
+                        <td>
+                            4,000                        </td>
+                        <td>
+                            99,99                        </td>
+                        <td>
+                            99,99                        </td>
+                        <td>
+                            79,95                        </td>
+                    </tr>
+                                        <tr>
+                        <td>
+                            5102482                        </td>
+                        <td>
+                            MV FIG TH HOMEM ARANHA                                          </td>
+                        <td>
+                            E7333                        </td>
+                        <td>
+                            73,000                        </td>
+                        <td>
+                            99,99                        </td>
+                        <td>
+                            99,99                        </td>
+                        <td>
+                            79,95                        </td>
+                    </tr>
+                                        <tr>
+                        <td>
+                            5104179                        </td>
+                        <td>
+                            JG SIMON CLASSICO                                               </td>
+                        <td>
+                            E9383                        </td>
+                        <td>
+                            18,000                        </td>
+                        <td>
+                            139,95                        </td>
+                        <td>
+                            179,99                        </td>
+                        <td>
+                            0,00                        </td>
+                    </tr>
+                                        <tr>
+                        <td>
+                            5106478                        </td>
+                        <td>
+                            MV OLY FIG IRON MAN                                             </td>
+                        <td>
+                            E5582                        </td>
+                        <td>
+                            3,000                        </td>
+                        <td>
+                            79,99                        </td>
+                        <td>
+                            79,99                        </td>
+                        <td>
+                            59,95                        </td>
+                    </tr>
+                                        <tr>
+                        <td>
+                            5106477                        </td>
+                        <td>
+                            MV OLY FIG AVG CM                                               </td>
+                        <td>
+                            E5579                        </td>
+                        <td>
+                            4,000                        </td>
+                        <td>
+                            79,99                        </td>
+                        <td>
+                            79,99                        </td>
+                        <td>
+                            59,95                        </td>
+                    </tr>
+                                        <tr>
+                        <td>
+                            5106481                        </td>
+                        <td>
+                            MV OLY FIG THOR ACESSOR                                         </td>
+                        <td>
+                            E7695                        </td>
+                        <td>
+                            18,000                        </td>
+                        <td>
+                            79,99                        </td>
+                        <td>
+                            79,99                        </td>
+                        <td>
+                            59,95                        </td>
+                    </tr>
+                                        <tr>
+                        <td>
+                            5106480                        </td>
+                        <td>
+                            SM OLY FIG SM SPIDERMAN                                         </td>
+                        <td>
+                            E6358                        </td>
+                        <td>
+                            46,000                        </td>
+                        <td>
+                            79,99                        </td>
+                        <td>
+                            79,99                        </td>
+                        <td>
+                            59,95                        </td>
+                    </tr>
+                                        <tr>
+                        <td>
+                            5108428                        </td>
+                        <td>
+                            MV OLYMPUS ARANHA VM                                            </td>
+                        <td>
+                            F0780                        </td>
+                        <td>
+                            2,000                        </td>
+                        <td>
+                            79,99                        </td>
+                        <td>
+                            79,99                        </td>
+                        <td>
+                            59,95                        </td>
+                    </tr>
+                                        <tr>
+                        <td>
+                            5118329                        </td>
+                        <td>
+                            MV OLY FIG XMEN WOLVERI                                         </td>
+                        <td>
+                            F5078                        </td>
+                        <td>
+                            36,000                        </td>
+                        <td>
+                            79,99                        </td>
+                        <td>
+                            79,99                        </td>
+                        <td>
+                            59,95                        </td>
+                    </tr>
+                                        <tr>
+                        <td>
+                            5119406                        </td>
+                        <td>
+                            SM OLY FIG SPIDER BLIND                                         </td>
+                        <td>
+                            F5087                        </td>
+                        <td>
+                            10,000                        </td>
+                        <td>
+                            79,99                        </td>
+                        <td>
+                            79,99                        </td>
+                        <td>
+                            59,95                        </td>
+                    </tr>
+                                        <tr>
+                        <td>
+                            5128401                        </td>
+                        <td>
+                            BEYBLADE PIAO QS ZEAL N                                         </td>
+                        <td>
+                            F7776                        </td>
+                        <td>
+                            1,000                        </td>
+                        <td>
+                            69,91                        </td>
+                        <td>
+                            99,99                        </td>
+                        <td>
+                            0,00                        </td>
+                    </tr>
+                                        <tr>
+                        <td>
+                            5128402                        </td>
+                        <td>
+                            BEYBLADE PIAO QS FIERCE                                         </td>
+                        <td>
+                            F7777                        </td>
+                        <td>
+                            9,000                        </td>
+                        <td>
+                            69,91                        </td>
+                        <td>
+                            99,99                        </td>
+                        <td>
+                            0,00                        </td>
+                    </tr>
+                                        <tr>
+                        <td>
+                            5129265                        </td>
+                        <td>
+                            BEYBLADE PIAO QS XIPHOI                                         </td>
+                        <td>
+                            F7779                        </td>
+                        <td>
+                            8,000                        </td>
+                        <td>
+                            69,91                        </td>
+                        <td>
+                            99,99                        </td>
+                        <td>
+                            0,00                        </td>
+                    </tr>
+                                        <tr>
+                        <td>
+                            5129187                        </td>
+                        <td>
+                            BEYBLADE QS XIPHOID KNI                                         </td>
+                        <td>
+                            F7778                        </td>
+                        <td>
+                            11,000                        </td>
+                        <td>
+                            69,91                        </td>
+                        <td>
+                            99,99                        </td>
+                        <td>
+                            0,00                        </td>
+                    </tr>
+                                        <tr>
+                        <td>
+                            5130930                        </td>
+                        <td>
+                            MV OLY FIG CAP FALCAO                                           </td>
+                        <td>
+                            F6936                        </td>
+                        <td>
+                            8,000                        </td>
+                        <td>
+                            79,99                        </td>
+                        <td>
+                            79,99                        </td>
+                        <td>
+                            59,95                        </td>
+                    </tr>
+                                        <tr>
+                        <td>
+                            5130920                        </td>
+                        <td>
+                            MV TT FIG XMEN 30CM SOR                                         </td>
+                        <td>
+                            F7972                        </td>
+                        <td>
+                            38,000                        </td>
+                        <td>
+                            109,99                        </td>
+                        <td>
+                            109,99                        </td>
+                        <td>
+                            79,95                        </td>
+                    </tr>
+                                        <tr>
+                        <td>
+                            5135212                        </td>
+                        <td>
+                            PLAY DOH ESTILO CABELO                                          </td>
+                        <td>
+                            F8807                        </td>
+                        <td>
+                            20,000                        </td>
+                        <td>
+                            99,95                        </td>
+                        <td>
+                            149,99                        </td>
+                        <td>
+                            0,00                        </td>
+                    </tr>
+                                        <tr>
+                        <td>
+                            5136044                        </td>
+                        <td>
+                            JOGO PIE FACE CLASSICO                                          </td>
+                        <td>
+                            E7638                        </td>
+                        <td>
+                            23,000                        </td>
+                        <td>
+                            99,95                        </td>
+                        <td>
+                            129,99                        </td>
+                        <td>
+                            0,00                        </td>
+                    </tr>
+                                        <tr>
+                        <td>
+                            5136071                        </td>
+                        <td>
+                            BEYBLADE X HELLS SCYT 4                                         </td>
+                        <td>
+                            F9583                        </td>
+                        <td>
+                            24,000                        </td>
+                        <td>
+                            99,95                        </td>
+                        <td>
+                            149,99                        </td>
+                        <td>
+                            0,00                        </td>
+                    </tr>
+                                        <tr>
+                        <td>
+                            5136064                        </td>
+                        <td>
+                            BEYBLADE DRAN SWORD 3                                           </td>
+                        <td>
+                            F9580                        </td>
+                        <td>
+                            11,000                        </td>
+                        <td>
+                            99,95                        </td>
+                        <td>
+                            149,99                        </td>
+                        <td>
+                            0,00                        </td>
+                    </tr>
+                                        <tr>
+                        <td>
+                            5136047                        </td>
+                        <td>
+                            BEYBLADE X ARROW 4                                              </td>
+                        <td>
+                            F9582                        </td>
+                        <td>
+                            16,000                        </td>
+                        <td>
+                            99,91                        </td>
+                        <td>
+                            149,99                        </td>
+                        <td>
+                            0,00                        </td>
+                    </tr>
+                                        <tr>
+                        <td>
+                            5136061                        </td>
+                        <td>
+                            LANCADOR DE TEIA SPIDER                                         </td>
+                        <td>
+                            F8734                        </td>
+                        <td>
+                            26,000                        </td>
+                        <td>
+                            239,95                        </td>
+                        <td>
+                            349,99                        </td>
+                        <td>
+                            0,00                        </td>
+                    </tr>
+                                        <tr>
+                        <td>
+                            5136332                        </td>
+                        <td>
+                            BEYBLADE SWORD ATAQUE                                           </td>
+                        <td>
+                            F9581                        </td>
+                        <td>
+                            6,000                        </td>
+                        <td>
+                            99,91                        </td>
+                        <td>
+                            149,99                        </td>
+                        <td>
+                            0,00                        </td>
+                    </tr>
+                                        <tr>
+                        <td>
+                            5136421                        </td>
+                        <td>
+                            ARENA BEY BLADE                                                 </td>
+                        <td>
+                            F9578                        </td>
+                        <td>
+                            1,000                        </td>
+                        <td>
+                            99,91                        </td>
+                        <td>
+                            149,99                        </td>
+                        <td>
+                            0,00                        </td>
+                    </tr>
+                                        <tr>
+                        <td>
+                            5136823                        </td>
+                        <td>
+                            REFIL SPD REAL WEBS ULT                                         </td>
+                        <td>
+                            F8735                        </td>
+                        <td>
+                            3,000                        </td>
+                        <td>
+                            49,95                        </td>
+                        <td>
+                            79,99                        </td>
+                        <td>
+                            0,00                        </td>
+                    </tr>
+                                        <tr>
+                        <td>
+                            5136901                        </td>
+                        <td>
+                            JG PIAO BEYBLADE BBX KS                                         </td>
+                        <td>
+                            G0194                        </td>
+                        <td>
+                            2,000                        </td>
+                        <td>
+                            69,95                        </td>
+                        <td>
+                            99,99                        </td>
+                        <td>
+                            0,00                        </td>
+                    </tr>
+                                        <tr>
+                        <td>
+                            5138037                        </td>
+                        <td>
+                            BA KATIE ESTUDIOSA                                              </td>
+                        <td>
+                            F9851                        </td>
+                        <td>
+                            7,000                        </td>
+                        <td>
+                            309,99                        </td>
+                        <td>
+                            309,99                        </td>
+                        <td>
+                            199,95                        </td>
+                    </tr>
+                                        <tr>
+                        <td>
+                            5138257                        </td>
+                        <td>
+                            BA SOPHIA ESTUDIOSA                                             </td>
+                        <td>
+                            F9852                        </td>
+                        <td>
+                            1,000                        </td>
+                        <td>
+                            309,99                        </td>
+                        <td>
+                            309,99                        </td>
+                        <td>
+                            199,95                        </td>
+                    </tr>
+                                        <tr>
+                        <td>
+                            5139138                        </td>
+                        <td>
+                            JG PIAO BEY BLADE BBX                                           </td>
+                        <td>
+                            G0184                        </td>
+                        <td>
+                            7,000                        </td>
+                        <td>
+                            99,91                        </td>
+                        <td>
+                            149,99                        </td>
+                        <td>
+                            0,00                        </td>
+                    </tr>
+                                        <tr>
+                        <td>
+                            5140096                        </td>
+                        <td>
+                            JOGO PIAO BEYBL SPI VEN                                         </td>
+                        <td>
+                            G0288AL40                        </td>
+                        <td>
+                            3,000                        </td>
+                        <td>
+                            179,91                        </td>
+                        <td>
+                            299,99                        </td>
+                        <td>
+                            0,00                        </td>
+                    </tr>
+                                        <tr>
+                        <td>
+                            5140145                        </td>
+                        <td>
+                            JOGO PIAO BEYBLADE                                              </td>
+                        <td>
+                            G0283AL40                        </td>
+                        <td>
+                            1,000                        </td>
+                        <td>
+                            69,95                        </td>
+                        <td>
+                            99,99                        </td>
+                        <td>
+                            0,00                        </td>
+                    </tr>
+                                        <tr>
+                        <td>
+                            5140146                        </td>
+                        <td>
+                            JOGO PIAO BEYBLADE                                              </td>
+                        <td>
+                            G0284AL40                        </td>
+                        <td>
+                            2,000                        </td>
+                        <td>
+                            69,91                        </td>
+                        <td>
+                            99,99                        </td>
+                        <td>
+                            0,00                        </td>
+                    </tr>
+                                        <tr>
+                        <td>
+                            5140854                        </td>
+                        <td>
+                            JOGO BEYBLADE THANOS                                            </td>
+                        <td>
+                            G0287AL40                        </td>
+                        <td>
+                            2,000                        </td>
+                        <td>
+                            179,91                        </td>
+                        <td>
+                            299,99                        </td>
+                        <td>
+                            0,00                        </td>
+                    </tr>
+                                        <tr>
+                        <td>
+                            5141976                        </td>
+                        <td>
+                            FIG CAP AMER TITAN HERO                                         </td>
+                        <td>
+                            F92765B00                        </td>
+                        <td>
+                            11,000                        </td>
+                        <td>
+                            99,99                        </td>
+                        <td>
+                            99,99                        </td>
+                        <td>
+                            79,91                        </td>
+                    </tr>
+                    
+                <tbody>
+                    <tr>
+                        <td colspan="7">
+                            <strong>
+                                Fornecedor: HASBRO DO BRASIL INDUSTRIA E COMERC <sup>08743754000496</sup>
+                            </strong>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <strong>Cod. Interno</strong>
+                        </td>
+                        <td>
+                            <strong>Mercadoria</strong>
+                        </td>
+                        <td>
+                            <strong>Cod. Fornecedor</strong>
+                        </td>
+                        <td>
+                            <strong>Estoque</strong>
+                        </td>
+                        <td>
+                            <strong>Preço Atual</strong>
+                        </td>
+                        <td>
+                            <strong>Novo Preço</strong>
+                        </td>
+                        <td>
+                            <strong>Promoção</strong>
+                        </td>
+                    </tr>
+
+                                        <tr>
+                        <td>
+                            5142666                        </td>
+                        <td>
+                            BA FEST DO CHA SOPHIA                                           </td>
+                        <td>
+                            G0609XB00                        </td>
+                        <td>
+                            2,000                        </td>
+                        <td>
+                            259,99                        </td>
+                        <td>
+                            259,99                        </td>
+                        <td>
+                            149,95                        </td>
+                    </tr>
+                                        <tr>
+                        <td>
+                            5143767                        </td>
+                        <td>
+                            BA FESTINHA CHA LALA                                            </td>
+                        <td>
+                            G0608XB00                        </td>
+                        <td>
+                            12,000                        </td>
+                        <td>
+                            259,99                        </td>
+                        <td>
+                            259,99                        </td>
+                        <td>
+                            149,95                        </td>
+                    </tr>
+                                        <tr>
+                        <td>
+                            5143870                        </td>
+                        <td>
+                            JOG BEY BLADE BBX SOR                                           </td>
+                        <td>
+                            G0840AL00                        </td>
+                        <td>
+                            11,000                        </td>
+                        <td>
+                            99,95                        </td>
+                        <td>
+                            149,99                        </td>
+                        <td>
+                            0,00                        </td>
+                    </tr>
+                    
+                <tbody>
+                    <tr>
+                        <td colspan="7">
+                            <strong>
+                                Fornecedor: ILHAS GALAP COMER DE BRINQ SERV LTD <sup>15605065000219</sup>
+                            </strong>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <strong>Cod. Interno</strong>
+                        </td>
+                        <td>
+                            <strong>Mercadoria</strong>
+                        </td>
+                        <td>
+                            <strong>Cod. Fornecedor</strong>
+                        </td>
+                        <td>
+                            <strong>Estoque</strong>
+                        </td>
+                        <td>
+                            <strong>Preço Atual</strong>
+                        </td>
+                        <td>
+                            <strong>Novo Preço</strong>
+                        </td>
+                        <td>
+                            <strong>Promoção</strong>
+                        </td>
+                    </tr>
+
+                                        <tr>
+                        <td>
+                            5145843                        </td>
+                        <td>
+                            JG LEGO BRICK LIKE THIS                                         </td>
+                        <td>
+                            BLT001                        </td>
+                        <td>
+                            13,000                        </td>
+                        <td>
+                            99,91                        </td>
+                        <td>
+                            199,99                        </td>
+                        <td>
+                            0,00                        </td>
+                    </tr>
+                    
+                <tbody>
+                    <tr>
+                        <td colspan="7">
+                            <strong>
+                                Fornecedor: MATTEL DO BRASIL LTDA               <sup>54558002001010</sup>
+                            </strong>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <strong>Cod. Interno</strong>
+                        </td>
+                        <td>
+                            <strong>Mercadoria</strong>
+                        </td>
+                        <td>
+                            <strong>Cod. Fornecedor</strong>
+                        </td>
+                        <td>
+                            <strong>Estoque</strong>
+                        </td>
+                        <td>
+                            <strong>Preço Atual</strong>
+                        </td>
+                        <td>
+                            <strong>Novo Preço</strong>
+                        </td>
+                        <td>
+                            <strong>Promoção</strong>
+                        </td>
+                    </tr>
+
+                                        <tr>
+                        <td>
+                            5055844                        </td>
+                        <td>
+                            FP XILOFONE                                                     </td>
+                        <td>
+                            CMY09                        </td>
+                        <td>
+                            34,000                        </td>
+                        <td>
+                            189,99                        </td>
+                        <td>
+                            189,99                        </td>
+                        <td>
+                            129,95                        </td>
+                    </tr>
+                                        <tr>
+                        <td>
+                            5030020                        </td>
+                        <td>
+                            HW COLOR C ESTAC CIENT                                          </td>
+                        <td>
+                            CCP76                        </td>
+                        <td>
+                            18,000                        </td>
+                        <td>
+                            199,91                        </td>
+                        <td>
+                            369,99                        </td>
+                        <td>
+                            159,91                        </td>
+                    </tr>
+                                        <tr>
+                        <td>
+                            5101170                        </td>
+                        <td>
+                            BB BAILARINA                                                    </td>
+                        <td>
+                            GJL58                        </td>
+                        <td>
+                            1,000                        </td>
+                        <td>
+                            34,91                        </td>
+                        <td>
+                            89,99                        </td>
+                        <td>
+                            29,95                        </td>
+                    </tr>
+                                        <tr>
+                        <td>
+                            5118488                        </td>
+                        <td>
+                            FP LAPTOP APRENDIZAGEM                                          </td>
+                        <td>
+                            HGW98                        </td>
+                        <td>
+                            9,000                        </td>
+                        <td>
+                            299,99                        </td>
+                        <td>
+                            299,99                        </td>
+                        <td>
+                            199,95                        </td>
+                    </tr>
+                                        <tr>
+                        <td>
+                            5134923                        </td>
+                        <td>
+                            BB PROFISSOES BAILARINA                                         </td>
+                        <td>
+                            HRG33                        </td>
+                        <td>
+                            12,000                        </td>
+                        <td>
+                            34,91                        </td>
+                        <td>
+                            89,99                        </td>
+                        <td>
+                            29,91                        </td>
+                    </tr>
+                                        <tr>
+                        <td>
+                            5138078                        </td>
+                        <td>
+                            JW DINOSSAURO BRINQ 12                                          </td>
+                        <td>
+                            GWT54                        </td>
+                        <td>
+                            9,000                        </td>
+                        <td>
+                            59,91                        </td>
+                        <td>
+                            129,99                        </td>
+                        <td>
+                            49,91                        </td>
+                    </tr>
+                    
+                <tbody>
+                    <tr>
+                        <td colspan="7">
+                            <strong>
+                                Fornecedor: MATTEL DO BRASIL LTDA               <sup>54558002001363</sup>
+                            </strong>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <strong>Cod. Interno</strong>
+                        </td>
+                        <td>
+                            <strong>Mercadoria</strong>
+                        </td>
+                        <td>
+                            <strong>Cod. Fornecedor</strong>
+                        </td>
+                        <td>
+                            <strong>Estoque</strong>
+                        </td>
+                        <td>
+                            <strong>Preço Atual</strong>
+                        </td>
+                        <td>
+                            <strong>Novo Preço</strong>
+                        </td>
+                        <td>
+                            <strong>Promoção</strong>
+                        </td>
+                    </tr>
+
+                                        <tr>
+                        <td>
+                            5142570                        </td>
+                        <td>
+                            HW DESA TURBIN DE ACAO                                          </td>
+                        <td>
+                            JBX65                        </td>
+                        <td>
+                            16,000                        </td>
+                        <td>
+                            329,99                        </td>
+                        <td>
+                            329,99                        </td>
+                        <td>
+                            219,95                        </td>
+                    </tr>
+                                        <tr>
+                        <td>
+                            5142595                        </td>
+                        <td>
+                            BON MONS HIGH PIJ MONST                                         </td>
+                        <td>
+                            JGM42                        </td>
+                        <td>
+                            64,000                        </td>
+                        <td>
+                            149,99                        </td>
+                        <td>
+                            149,99                        </td>
+                        <td>
+                            99,95                        </td>
+                    </tr>
+                                        <tr>
+                        <td>
+                            5144241                        </td>
+                        <td>
+                            JW DINO REBIRTH DE 12                                           </td>
+                        <td>
+                            JGC04                        </td>
+                        <td>
+                            17,000                        </td>
+                        <td>
+                            59,91                        </td>
+                        <td>
+                            119,99                        </td>
+                        <td>
+                            49,91                        </td>
+                    </tr>
+                                        <tr>
+                        <td>
+                            5144933                        </td>
+                        <td>
+                            BB DOCES SURPRESAS                                              </td>
+                        <td>
+                            JFY00                        </td>
+                        <td>
+                            21,000                        </td>
+                        <td>
+                            249,99                        </td>
+                        <td>
+                            249,99                        </td>
+                        <td>
+                            149,95                        </td>
+                    </tr>
+                                        <tr>
+                        <td>
+                            5145541                        </td>
+                        <td>
+                            ANDADOR APRENDA AMG MAC                                         </td>
+                        <td>
+                            JGW90                        </td>
+                        <td>
+                            44,000                        </td>
+                        <td>
+                            399,99                        </td>
+                        <td>
+                            399,99                        </td>
+                        <td>
+                            279,95                        </td>
+                    </tr>
+                    
+                <tbody>
+                    <tr>
+                        <td colspan="7">
+                            <strong>
+                                Fornecedor: MATTEL DO BRASIL LTDA               <sup>54558002001100</sup>
+                            </strong>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <strong>Cod. Interno</strong>
+                        </td>
+                        <td>
+                            <strong>Mercadoria</strong>
+                        </td>
+                        <td>
+                            <strong>Cod. Fornecedor</strong>
+                        </td>
+                        <td>
+                            <strong>Estoque</strong>
+                        </td>
+                        <td>
+                            <strong>Preço Atual</strong>
+                        </td>
+                        <td>
+                            <strong>Novo Preço</strong>
+                        </td>
+                        <td>
+                            <strong>Promoção</strong>
+                        </td>
+                    </tr>
+
+                                        <tr>
+                        <td>
+                            5147971                        </td>
+                        <td>
+                            BB REVEAL FLORES                                                </td>
+                        <td>
+                            JMF56                        </td>
+                        <td>
+                            32,000                        </td>
+                        <td>
+                            299,99                        </td>
+                        <td>
+                            299,99                        </td>
+                        <td>
+                            199,95                        </td>
+                    </tr>
+                                        <tr>
+                        <td>
+                            5148155                        </td>
+                        <td>
+                            HW CITY DOWNTOWN                                                </td>
+                        <td>
+                            HDR24                        </td>
+                        <td>
+                            12,000                        </td>
+                        <td>
+                            149,99                        </td>
+                        <td>
+                            169,99                        </td>
+                        <td>
+                            0,00                        </td>
+                    </tr>
+                    
+                </tbody>
+            </table>
+        </div>
+
+                        </body>
+        </html>
+
+        

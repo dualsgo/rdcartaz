@@ -1,0 +1,109 @@
+﻿'use client';
+
+import type { PosterData } from '@/app/lib/types';
+
+function parsePrice(price: string): number {
+  return parseFloat(price.replace('.', '').replace(',', '.')) || 0;
+}
+
+function formatCurrency(value: number): string {
+  return value.toLocaleString('pt-br', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+}
+
+export function PosterPreviewAereo({
+  description,
+  priceFrom,
+  priceFor,
+  code,
+  ean,
+  reference,
+  paymentOption,
+  posterSubType,
+}: PosterData) {
+  const valDe  = parsePrice(priceFrom);
+  const valPor = parsePrice(priceFor);
+
+  const isOffer    = posterSubType === 'offer' && valDe > valPor;
+  const discount   = isOffer ? Math.round(((valDe - valPor) / valDe) * 100) : 0;
+
+  const [porInt, porDec] = formatCurrency(valPor).split(',');
+
+  const numInstallments  = valPor > 0 ? Math.floor(valPor / 29.99) : 0;
+  const maxInstallments  = Math.min(numInstallments, 6);
+  const rawInstallment   = maxInstallments > 1 && valPor > 0 ? valPor / maxInstallments : 0;
+  const installmentValue = Math.ceil(rawInstallment * 100) / 100;
+  const showInstallment  = paymentOption === 'installment' && maxInstallments > 1;
+
+  return (
+    <div style={{ width: '190mm', height: '69mm', background: 'white', color: 'black', display: 'flex', flexDirection: 'column', overflow: 'hidden', fontFamily: 'inherit', boxSizing: 'border-box' }}>
+
+      {/* TOPO: PRE├çO */}
+      <div 
+        style={{ 
+          flex: 1, 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center', 
+          gap: '11mm', 
+          padding: '0 9.5mm', 
+          minHeight: 0,
+          transform: isOffer && showInstallment ? 'scale(0.9)' : 'none',
+          transformOrigin: 'center'
+        }}
+      >
+
+        {isOffer && discount > 0 && (
+          <div style={{ flexShrink: 0, textAlign: 'center', backgroundColor: 'black', color: 'white', padding: '3mm 6mm', lineHeight: 1, borderRadius: '2mm' }}>
+            <div style={{ fontSize: '12pt', fontWeight: 900, letterSpacing: '0.02em', fontFamily: 'inherit' }}>DESCONTO DE</div>
+            <div style={{ fontSize: '50pt', fontWeight: 900, lineHeight: 1, fontFamily: 'inherit' }}>{discount}%</div>
+          </div>
+        )}
+
+        <div style={{ display: 'flex', alignItems: 'flex-start', lineHeight: 1, gap: '1mm' }}>
+          <span style={{ fontSize: '18pt', fontWeight: 900, marginTop: '3mm', fontFamily: 'inherit' }}>R$</span>
+          <span style={{ fontSize: '73pt', fontWeight: 900, lineHeight: 1, fontFamily: 'inherit' }}>{porInt}</span>
+          <div style={{ display: 'flex', flexDirection: 'column', marginTop: '3mm' }}>
+            <span style={{ fontSize: '32pt', fontWeight: 900, lineHeight: 1, fontFamily: 'inherit' }}>,{porDec}</span>
+            {valPor > 0 && (
+              <span style={{ fontSize: '11pt', fontWeight: 900, lineHeight: 1, fontFamily: 'inherit' }}>un.</span>
+            )}
+          </div>
+        </div>
+
+        {showInstallment && (
+          <div style={{ flexShrink: 0, textAlign: 'center', fontSize: '16pt', fontWeight: 900, lineHeight: 1.3, fontFamily: 'inherit' }}>
+            ou {maxInstallments}x de<br />
+            <span style={{ fontSize: '27pt', fontWeight: 900 }}>R$ {formatCurrency(installmentValue)}</span>
+          </div>
+        )}
+
+        {valPor > 0 && !showInstallment && (
+          <span style={{ fontSize: '16pt', fontWeight: 900, alignSelf: 'flex-end', marginBottom: '3mm', fontFamily: 'inherit' }}>├á vista</span>
+        )}
+      </div>
+
+      {/* MEIO: DESCRI├ç├âO */}
+      <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '3.5mm 9.4mm', background: 'rgba(0,0,0,0.08)' }}>
+        <h2 style={{ fontSize: '18pt', fontWeight: 900, textTransform: 'uppercase', lineHeight: 1.2, margin: 0, flex: 1, fontFamily: 'inherit', wordBreak: 'break-word', color: 'black' }}>
+          {description}
+        </h2>
+        {isOffer && valDe > valPor && (
+          <div style={{ flexShrink: 0, marginLeft: '7.5mm', textAlign: 'right', color: 'black' }}>
+            <div style={{ fontSize: '18pt', fontWeight: 900, fontFamily: 'inherit' }}>DE:</div>
+            <div style={{ fontSize: '28pt', fontWeight: 900, textDecoration: 'line-through', fontFamily: 'inherit' }}>R$ {formatCurrency(valDe)}</div>
+          </div>
+        )}
+      </div>
+
+      {/* BASE: METADADOS */}
+      <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: '7.5mm', padding: '2mm 9.4mm', fontSize: '11pt', fontWeight: 700, fontFamily: 'monospace', color: 'black' }}>
+        {code      && <span>SAP: <b style={{ fontWeight: 900 }}>{code}</b></span>}
+        {ean       && <span>EAN: <b style={{ fontWeight: 900 }}>{ean}</b></span>}
+        {reference && <span>Ref.: <b style={{ fontWeight: 900 }}>{reference}</b></span>}
+      </div>
+    </div>
+  );
+}
