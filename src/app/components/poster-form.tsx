@@ -7,7 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import type { PosterData } from '@/app/lib/types';
 import { cn } from '@/lib/utils';
-import { Loader2, CheckCircle2, XCircle, Search, RotateCcw, PlusCircle, Info, AlertTriangle } from 'lucide-react';
+import { Loader2, CheckCircle2, XCircle, Search, RotateCcw, PlusCircle, Info, AlertTriangle, Camera } from 'lucide-react';
+import { BarcodeScanner } from './barcode-scanner';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 function centsToDisplay(cents: number): string {
@@ -78,6 +79,7 @@ const defectOptions = [
 
 export function PosterForm({ data, setData, posterType, onLookupStatusChange, onImportBatch }: PosterFormProps) {
   const [lookupStatus, setLookupStatus] = useState<LookupStatus>('idle');
+  const [showScanner, setShowScanner] = useState(false);
   const [searchValue, setSearchValue] = useState('');
   const [suggestions, setSuggestions] = useState<{ key: string; description: string }[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -211,6 +213,19 @@ export function PosterForm({ data, setData, posterType, onLookupStatusChange, on
     }
   }, [searchValue, setData, onLookupStatusChange]);
 
+  const handleScan = (code: string) => {
+    if (code.length >= 10) {
+      setManualEan(code);
+      setManualCode('');
+    } else {
+      setManualCode(code);
+      setManualEan('');
+    }
+    setShowScanner(false);
+    setSearchValue(code);
+    setTimeout(() => handleLookup(code), 100);
+  };
+
   const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') { e.preventDefault(); handleLookup(); }
     if (e.key === 'Escape') { setShowSuggestions(false); }
@@ -227,19 +242,9 @@ export function PosterForm({ data, setData, posterType, onLookupStatusChange, on
     handleLookup(key);
   };
 
-  const handleSubTypeChange = (value: string) => {
-    setData(prev => ({
-      ...prev,
-      posterSubType: value as 'offer' | 'normal',
-      priceFrom: value === 'normal' ? '' : prev.priceFrom,
-    }));
-    if (value === 'normal') priceFrom.reset();
-  };
-
   const handleDismissWarning = () => {
     setShowWarning(false);
     setIsManualMode(true);
-    // Tenta preencher o SAP ou EAN conforme o que foi pesquisado
     const query = searchValue.trim();
     if (detectInputType(query) === 'code') setManualCode(query);
     else setManualEan(query);
@@ -252,7 +257,7 @@ export function PosterForm({ data, setData, posterType, onLookupStatusChange, on
     notfound: <XCircle className="h-4 w-4 text-destructive" />,
   }[lookupStatus];
 
-  const isOfferType = true; // 'reliquias' is always an offer type in this context
+  const isOfferType = data.posterSubType === 'offer';
 
   const isEnabled = lookupStatus === 'found' || isManualMode;
 
@@ -266,6 +271,13 @@ export function PosterForm({ data, setData, posterType, onLookupStatusChange, on
               1. Encontrar Produto
             </Label>
             <div className="flex items-center gap-3">
+              <button
+                onClick={(e) => { e.preventDefault(); setShowScanner(true); }}
+                className="text-[11px] font-bold text-blue-600 hover:underline flex items-center gap-1.5 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100 transition-colors hover:bg-blue-100"
+              >
+                <Camera className="h-3.5 w-3.5" />
+                SCANNER
+              </button>
               {onImportBatch && (
                 <button 
                   onClick={(e) => { e.preventDefault(); onImportBatch(); }}
@@ -487,6 +499,12 @@ export function PosterForm({ data, setData, posterType, onLookupStatusChange, on
       </fieldset>
 
 
+      {showScanner && (
+        <BarcodeScanner 
+          onScan={handleScan} 
+          onClose={() => setShowScanner(false)} 
+        />
+      )}
     </div>
   );
 }

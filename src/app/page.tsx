@@ -10,7 +10,7 @@ import { SettingsDialog } from '@/app/components/settings-dialog';
 import { ImportModal } from '@/app/components/import-modal';
 import type { PosterData, PosterSettings, PosterType } from '@/app/lib/types';
 import { parseProductCSV, parseProductExcel } from '@/app/lib/poster-utils';
-import { Printer, Plus, Trash2, FileStack, PackageOpen, Info, Database, Upload } from 'lucide-react';
+import { Printer, Plus, Trash2, FileStack, PackageOpen, Info, Database, Upload, Edit3, LayoutGrid } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
@@ -264,6 +264,7 @@ export default function Home() {
   const [importStatus, setImportStatus] = useState<'idle' | 'processing' | 'success' | 'error'>('idle');
   const [importCount, setImportCount] = useState(0);
   const [previewMode, setPreviewMode] = useState<'single' | 'page'>('single');
+  const [activeTab, setActiveTab] = useState<'edit' | 'preview'>('edit');
   const [queueFilter, setQueueFilter] = useState<'all' | 'offer' | 'normal'>('all');
   const [settings, setSettings] = useState<PosterSettings>({
     maxInstallments: 6,
@@ -521,11 +522,14 @@ export default function Home() {
       </div>
 
       {/* ── Main ── */}
-      <main className="no-print flex-1 flex flex-col min-h-0 md:overflow-hidden">
+      <main className="no-print flex-1 flex flex-col min-h-0 md:overflow-hidden pb-[70px] md:pb-0">
         <div className="flex-1 flex flex-col md:grid md:grid-cols-12 min-h-0">
 
           {/* ── Left: Form + Add + Queue ── */}
-          <div className="flex-none md:flex-auto md:col-span-5 lg:col-span-4 flex flex-col border-r border-border bg-muted/10 md:min-h-0 order-2 md:order-1 h-auto md:h-full overflow-x-hidden">
+          <div className={cn(
+            "flex-none md:flex-auto md:col-span-5 lg:col-span-4 flex flex-col border-r border-border bg-muted/10 md:min-h-0 h-full overflow-x-hidden",
+            activeTab !== 'edit' && "hidden md:flex"
+          )}>
             <div className="flex-1 md:overflow-y-auto overflow-y-visible overflow-x-hidden px-4 pt-4 min-h-0 custom-scrollbar">
               <div className="pb-12 space-y-3">
 
@@ -625,7 +629,10 @@ export default function Home() {
           </div>
 
           {/* ── Right: Single poster preview ── */}
-          <div className="md:col-span-7 lg:col-span-8 flex flex-col p-4 gap-2 md:overflow-hidden bg-muted/20 order-1 md:order-2 border-b border-border md:border-b-0 h-[60vh] md:h-full">
+          <div className={cn(
+            "md:col-span-7 lg:col-span-8 flex flex-col p-4 gap-2 md:overflow-hidden bg-muted/20 border-b border-border md:border-b-0 h-full md:h-full",
+            activeTab !== 'preview' && "hidden md:flex"
+          )}>
             <div className="flex items-center justify-between shrink-0 mb-1">
               <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
                 Visualização
@@ -649,13 +656,12 @@ export default function Home() {
                     queue.length === 0 && "opacity-50 cursor-not-allowed"
                   )}
                 >
-                  Página Inteira
+                  Página
                 </button>
               </div>
             </div>
 
-            <div className="flex-1 min-h-0 relative border rounded border-border overflow-hidden">
-            {/* Wrapper absoluto garante dimensões confiáveis para o ResizeObserver */}
+            <div className="flex-1 min-h-0 relative border rounded border-border overflow-hidden bg-white/50">
               <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
                 {previewMode === 'single' ? (
                   <SinglePosterPreview
@@ -677,12 +683,47 @@ export default function Home() {
 
             <p className="text-xs text-muted-foreground text-center shrink-0">
               {queue.length === 0
-                ? 'Preencha o formulário, confira o cartaz e clique em "Adicionar ao Lote".'
-                : `Lote: ${queue.length} cartaz${queue.length !== 1 ? 'es' : ''} → ${totalPages} página${totalPages !== 1 ? 's' : ''} ao imprimir`}
+                ? 'Preencha o formulário e clique em "Adicionar ao Lote".'
+                : `Lote: ${queue.length} cartaz${queue.length !== 1 ? 'es' : ''} → ${totalPages} página${totalPages !== 1 ? 's' : ''}`}
             </p>
           </div>
         </div>
       </main>
+
+      {/* ── Mobile Navigation Tabs ── */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 h-[70px] bg-background border-t border-border flex items-center px-6 gap-4 z-40 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+        <button
+          onClick={() => setActiveTab('edit')}
+          className={cn(
+            "flex-1 flex flex-col items-center justify-center gap-1 transition-all",
+            activeTab === 'edit' ? "text-primary" : "text-muted-foreground"
+          )}
+        >
+          <div className={cn(
+            "p-2 rounded-xl transition-all",
+            activeTab === 'edit' ? "bg-primary/10" : ""
+          )}>
+            <Edit3 className="h-5 w-5" />
+          </div>
+          <span className="text-[10px] font-bold uppercase tracking-widest">Editar</span>
+        </button>
+        
+        <button
+          onClick={() => setActiveTab('preview')}
+          className={cn(
+            "flex-1 flex flex-col items-center justify-center gap-1 transition-all",
+            activeTab === 'preview' ? "text-primary" : "text-muted-foreground"
+          )}
+        >
+          <div className={cn(
+            "p-2 rounded-xl transition-all",
+            activeTab === 'preview' ? "bg-primary/10" : ""
+          )}>
+            <LayoutGrid className="h-5 w-5" />
+          </div>
+          <span className="text-[10px] font-bold uppercase tracking-widest">Prévia</span>
+        </button>
+      </div>
       {/* Modal de Feedback de Importação */}
       <ImportModal 
         status={importStatus} 
