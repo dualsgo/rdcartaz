@@ -59,8 +59,9 @@ type LookupStatus = 'idle' | 'loading' | 'found' | 'notfound';
 type PosterFormProps = {
   data: PosterData;
   setData: Dispatch<SetStateAction<PosterData>>;
-  posterType: 'reliquias' | 'ofertas-imperdiveis' | 'aereo' | 'avaria' | 'etiqueta-oficial' | 'totem';
+  posterType: 'reliquias';
   onLookupStatusChange?: (found: boolean) => void;
+  onImportBatch?: () => void;
 };
 
 function detectInputType(value: string): 'ean' | 'code' {
@@ -75,7 +76,7 @@ const defectOptions = [
   { value: 'outro', label: 'Outro (descrever)', discount: null },
 ];
 
-export function PosterForm({ data, setData, posterType, onLookupStatusChange }: PosterFormProps) {
+export function PosterForm({ data, setData, posterType, onLookupStatusChange, onImportBatch }: PosterFormProps) {
   const [lookupStatus, setLookupStatus] = useState<LookupStatus>('idle');
   const [searchValue, setSearchValue] = useState('');
   const [suggestions, setSuggestions] = useState<{ key: string; description: string }[]>([]);
@@ -106,42 +107,15 @@ export function PosterForm({ data, setData, posterType, onLookupStatusChange }: 
     setData(prev => ({ ...prev, priceFrom: priceFrom.display }));
   }, [priceFrom.display, setData]);
   
-  // Automatização inteligente do parcelamento
+  // Automatização inteligente do parcelamento (Desativada na versão Relíquias)
   useEffect(() => {
-    const canInstall = priceFor.cents >= 6000;
     setData(prev => ({
       ...prev,
-      paymentOption: canInstall ? 'installment' : 'normal'
+      paymentOption: 'normal'
     }));
-  }, [priceFor.cents, setData]);
+  }, [setData]);
 
-  useEffect(() => {
-    if (posterType !== 'avaria') return;
-    if (priceForOverridden) return;
 
-    const fromCents = priceFrom.cents;
-    if (fromCents === 0) {
-      priceFor.setValue('');
-      return;
-    }
-
-    const selectedDefect = defectOptions.find(opt => opt.value === data.defectType);
-    let discount = 0;
-    if (selectedDefect) {
-      discount = selectedDefect.value === 'outro' ? (data.customDefectDiscount ?? 0) : (selectedDefect.discount ?? 0);
-    }
-
-    if (discount > 0) {
-      const discountedCents = Math.round(fromCents * (1 - discount / 100));
-      priceFor.setValue(centsToDisplay(discountedCents));
-    } else {
-      priceFor.setValue('');
-    }
-  }, [priceFrom.cents, data.defectType, data.customDefectDiscount, posterType, priceForOverridden, priceFor.setValue]);
-
-  useEffect(() => {
-    setPriceForOverridden(false);
-  }, [priceFrom.cents, data.defectType, data.customDefectDiscount]);
 
   // Validação para habilitar o botão "Adicionar ao Lote" no modo manual
   useEffect(() => {
@@ -278,11 +252,7 @@ export function PosterForm({ data, setData, posterType, onLookupStatusChange }: 
     notfound: <XCircle className="h-4 w-4 text-destructive" />,
   }[lookupStatus];
 
-  const isOfferType = 
-    posterType === 'reliquias' || 
-    posterType === 'ofertas-imperdiveis' || 
-    posterType === 'totem' || 
-    ((posterType === 'aereo' || posterType === 'etiqueta-oficial') && data.posterSubType === 'offer');
+  const isOfferType = true; // 'reliquias' is always an offer type in this context
 
   const isEnabled = lookupStatus === 'found' || isManualMode;
 
@@ -295,14 +265,25 @@ export function PosterForm({ data, setData, posterType, onLookupStatusChange }: 
             <Label htmlFor="search-code" className="font-bold text-gray-900 uppercase tracking-tight text-sm">
               1. Encontrar Produto
             </Label>
-            {isManualMode && (
-              <button 
-                onClick={() => { setIsManualMode(false); setLookupStatus('idle'); setSearchValue(''); }}
-                className="text-xs text-blue-600 font-bold hover:underline"
-              >
-                Remover Manual
-              </button>
-            )}
+            <div className="flex items-center gap-3">
+              {onImportBatch && (
+                <button 
+                  onClick={(e) => { e.preventDefault(); onImportBatch(); }}
+                  className="text-[11px] font-bold text-primary hover:underline flex items-center gap-1.5 bg-primary/5 px-2 py-0.5 rounded-full border border-primary/10 transition-colors hover:bg-primary/10"
+                >
+                  <PlusCircle className="h-3.5 w-3.5" />
+                  IMPORTAR CSV
+                </button>
+              )}
+              {isManualMode && (
+                <button 
+                  onClick={() => { setIsManualMode(false); setLookupStatus('idle'); setSearchValue(''); }}
+                  className="text-[10px] text-red-600 font-bold hover:underline"
+                >
+                  Remover Manual
+                </button>
+              )}
+            </div>
           </div>
           <div className="relative">
             <Input
@@ -476,27 +457,10 @@ export function PosterForm({ data, setData, posterType, onLookupStatusChange }: 
               2. Preços e Formato
            </Label>
 
-           {(posterType === 'aereo' || posterType === 'etiqueta-oficial') && (
-              <div className="inline-flex bg-gray-100 p-1 rounded-lg w-full">
-                <button
-                  type="button"
-                  onClick={() => handleSubTypeChange('normal')}
-                  className={cn("flex-1 py-1.5 text-[10px] font-bold uppercase rounded-md transition-all", data.posterSubType === 'normal' ? "bg-white text-gray-900 shadow-sm" : "text-gray-500")}
-                >
-                  Preço Normal
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleSubTypeChange('offer')}
-                  className={cn("flex-1 py-1.5 text-[10px] font-bold uppercase rounded-md transition-all", data.posterSubType === 'offer' ? "bg-white text-gray-900 shadow-sm" : "text-gray-500")}
-                >
-                  🔥 Oferta
-                </button>
-              </div>
-           )}
+
 
            <div className="grid grid-cols-2 gap-4">
-              {(isOfferType || posterType === 'avaria') && (
+              {(isOfferType) && (
                 <div className="space-y-1">
                   <Label className="text-[10px] font-bold text-gray-500 uppercase">Preço Anterior (DE)</Label>
                   <Input
@@ -507,112 +471,22 @@ export function PosterForm({ data, setData, posterType, onLookupStatusChange }: 
                   />
                 </div>
               )}
-              <div className={cn("space-y-1", !(isOfferType || posterType === 'avaria') && "col-span-2")}>
+              <div className={cn("space-y-1", !(isOfferType) && "col-span-2")}>
                 <Label className="text-[10px] font-bold text-gray-500 uppercase">Preço Novo (POR)</Label>
                 <Input
                   value={priceFor.display}
-                  onKeyDown={e => { if(posterType==='avaria') setPriceForOverridden(true); priceFor.handleKeyDown(e); }}
+                  onKeyDown={e => { priceFor.handleKeyDown(e); }}
                   onChange={() => {}}
                   className="h-10 font-mono text-xl font-black bg-blue-50/10 border-blue-200"
                 />
               </div>
            </div>
 
-           <div className="flex items-center gap-4 pt-2">
-              <div className="flex-1 space-y-2">
-                <Label className="text-[10px] font-bold text-gray-500 uppercase">Quantidade</Label>
-                <div className="flex items-center h-10">
-                  <button onClick={() => setData(prev => ({ ...prev, quantity: Math.max(1, (prev.quantity || 1) - 1) }))} className="w-10 h-full border rounded-l-lg bg-gray-50 active:bg-gray-200">-</button>
-                  <Input 
-                    value={data.quantity} 
-                    onChange={e => setData(prev => ({ ...prev, quantity: parseInt(e.target.value.replace(/\D/g, '')) || 1 }))}
-                    className="h-full text-center border-x-0 rounded-none font-bold min-w-0"
-                  />
-                  <button onClick={() => setData(prev => ({ ...prev, quantity: Math.min(99, (prev.quantity || 1) + 1) }))} className="w-10 h-full border rounded-r-lg bg-gray-50 active:bg-gray-200">+</button>
-                </div>
-              </div>
 
-              <div className="flex-1 pt-6">
-                <div className={cn(
-                  "h-10 flex items-center justify-center rounded-lg border px-3 text-[10px] font-bold uppercase transition-all",
-                  data.paymentOption === 'installment' ? "bg-gray-900 text-white border-gray-900 shadow-sm" : "bg-gray-50 text-gray-400 border-gray-100"
-                )}>
-                  {data.paymentOption === 'installment' ? 'Parcelamento Ativo' : 'Somente À Vista'}
-                </div>
-              </div>
-           </div>
         </div>
       </fieldset>
 
-      {/* SEÇÃO 3: DETALHES DA AVARIA (Específico para o tipo Avaria) */}
-      {posterType === 'avaria' && (
-        <div className="bg-white border rounded-xl p-5 shadow-sm space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
-           <div className="flex items-center gap-2 border-b pb-2">
-              <AlertTriangle className="h-4 w-4 text-amber-500" />
-              <Label className="font-bold text-gray-900 uppercase tracking-tight text-sm">
-                3. Detalhes da Avaria
-              </Label>
-           </div>
-           
-           <div className="space-y-4">
-              <div className="space-y-1.5">
-                <Label className="text-[10px] font-bold text-gray-500 uppercase">Motivo da Avaria</Label>
-                <Select 
-                  value={data.defectType} 
-                  onValueChange={(v) => setData(prev => ({ ...prev, defectType: v }))}
-                >
-                  <SelectTrigger className="h-11 bg-gray-50/50">
-                    <SelectValue placeholder="Selecione o motivo..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {defectOptions.map(opt => (
-                      <SelectItem key={opt.value} value={opt.value} className="text-xs">
-                        {opt.label} {opt.discount ? `(${opt.discount}% OFF)` : ''}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
 
-              {data.defectType === 'outro' && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-in fade-in zoom-in-95 duration-200">
-                  <div className="space-y-1.5">
-                    <Label className="text-[10px] font-bold text-gray-500 uppercase">Descrever Motivo</Label>
-                    <Input 
-                      value={data.customDefectReason || ''} 
-                      onChange={e => setData(prev => ({ ...prev, customDefectReason: e.target.value.toUpperCase() }))}
-                      placeholder="EX: VIDRO RACHADO"
-                      className="h-10 font-bold uppercase border-amber-200 focus:ring-amber-500"
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label className="text-[10px] font-bold text-gray-500 uppercase">% Desconto</Label>
-                    <Input 
-                      type="number"
-                      value={data.customDefectDiscount || ''} 
-                      onChange={e => setData(prev => ({ ...prev, customDefectDiscount: parseInt(e.target.value) || 0 }))}
-                      placeholder="Ex: 15"
-                      className="h-10 border-amber-200 focus:ring-amber-500"
-                    />
-                  </div>
-                </div>
-              )}
-
-              <div className="space-y-1.5">
-                <Label className="text-[10px] font-bold text-gray-500 uppercase">Observação Complementar</Label>
-                <Input 
-                  value={data.defectNote || ''} 
-                  onChange={e => setData(prev => ({ ...prev, defectNote: e.target.value.toUpperCase() }))}
-                  placeholder="EX: VENDIDO NO ESTADO / SEM TROCA"
-                  className="h-10 font-medium uppercase border-gray-200"
-                />
-                <p className="text-[9px] text-muted-foreground italic leading-tight">
-                  Aparecerá logo abaixo do motivo no cartaz. Use para informações cruciais sobre o estado do item.
-                </p>
-              </div>
-           </div>
-        </div>
-      )}
     </div>
   );
 }

@@ -57,10 +57,10 @@ export function formatCurrency(value: number): string {
   // Limite de segurança para exibição
   const safeValue = Math.min(value, 9999.99);
   return safeValue.toLocaleString('pt-br', {
-    useGrouping: false,
+    useGrouping: true,
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  }).slice(0, 7);
+  });
 }
 
 /**

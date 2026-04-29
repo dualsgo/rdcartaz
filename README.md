@@ -2,7 +2,7 @@
 
 Esta é uma interface web desenvolvida para a planilha **RD Cartaz**, utilizada como uma solução paliativa e eficiente para a geração e impressão de cartazes promocionais. O objetivo é oferecer uma alternativa mais ágil e visual ao uso direto de planilhas.
 
-Atualmente suporta dois modelos principais da loja **Ri Happy**: **Relíquias de Diversão** (folha A4 paisagem, 2×2) e **Aéreo** (folha A4 retrato, fixado em altura elevada).
+Atualmente suporta o modelo principal da loja **Ri Happy**: **Relíquias de Diversão** (folha A4 paisagem, 2×2).
 
 ---
 

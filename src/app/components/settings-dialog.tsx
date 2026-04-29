@@ -5,22 +5,23 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Settings } from 'lucide-react';
+import { Settings, Database } from 'lucide-react';
 import type { PosterSettings } from '@/app/lib/types';
 
 interface SettingsDialogProps {
   settings: PosterSettings;
   onSave: (settings: PosterSettings) => void;
+  onOpenDatabase: () => void;
 }
 
-export function SettingsDialog({ settings, onSave }: SettingsDialogProps) {
+export function SettingsDialog({ settings, onSave, onOpenDatabase }: SettingsDialogProps) {
   const [maxInstallments, setMaxInstallments] = useState(settings.maxInstallments.toString());
   const [minAmount, setMinAmount] = useState(settings.minInstallmentAmount.toString());
 
   const handleSave = () => {
     onSave({
-      maxInstallments: parseInt(maxInstallments) || 1,
-      minInstallmentAmount: parseFloat(minAmount.replace(',', '.')) || 1.0,
+      maxInstallments: 1,
+      minInstallmentAmount: 1.0,
     });
   };
 
@@ -29,10 +30,10 @@ export function SettingsDialog({ settings, onSave }: SettingsDialogProps) {
       <DialogTrigger asChild>
         <button
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-semibold text-muted-foreground hover:text-foreground hover:bg-muted transition-all border border-border/50 hover:border-border"
-          title="Configurações Padrão"
+          title="Configurações do Sistema"
         >
           <Settings className="h-3.5 w-3.5" />
-          <span className="hidden sm:inline">Configurar</span>
+          <span className="hidden sm:inline">Configurações</span>
         </button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
@@ -43,33 +44,38 @@ export function SettingsDialog({ settings, onSave }: SettingsDialogProps) {
           </DialogTitle>
         </DialogHeader>
         <div className="grid gap-6 py-4">
-          <div className="grid gap-2">
-            <Label htmlFor="max-inst">Máximo de Parcelas (ex: 6x ou 10x)</Label>
-            <Input
-              id="max-inst"
-              type="number"
-              value={maxInstallments}
-              onChange={(e) => setMaxInstallments(e.target.value)}
-              className="font-bold"
-            />
+          <div className="p-4 bg-muted/50 rounded-xl border border-dashed border-border flex flex-col items-center gap-3 text-center">
+            <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+              <Database className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold">Banco de Dados de Produtos</h3>
+              <p className="text-[0.75rem] text-muted-foreground mt-1">
+                Gerencie, importe ou exporte sua base local de produtos Relíquias.
+              </p>
+            </div>
+            <DialogTrigger asChild>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="mt-2 w-full font-bold"
+                onClick={onOpenDatabase}
+              >
+                Abrir Gerenciador de Dados
+              </Button>
+            </DialogTrigger>
           </div>
-          <div className="grid gap-2">
-            <Label htmlFor="min-amount">Valor Mínimo da Parcela (R$)</Label>
-            <Input
-              id="min-amount"
-              type="text"
-              value={minAmount}
-              onChange={(e) => setMinAmount(e.target.value)}
-              className="font-bold"
-              placeholder="Ex: 30,00"
-            />
-            <p className="text-[0.7rem] text-muted-foreground">
-              O sistema calcula automaticamente o número de parcelas baseado neste valor mínimo.
+
+          <div className="px-1">
+            <p className="text-[0.7rem] text-muted-foreground italic">
+              * O parcelamento automático foi desativado temporariamente nesta versão.
             </p>
           </div>
         </div>
         <DialogFooter>
-          <Button onClick={handleSave} className="w-full">Salvar Configurações</Button>
+          <DialogTrigger asChild>
+            <Button onClick={handleSave} className="w-full">Fechar</Button>
+          </DialogTrigger>
         </DialogFooter>
       </DialogContent>
     </Dialog>

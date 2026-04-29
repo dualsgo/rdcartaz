@@ -3,15 +3,11 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { PosterForm } from '@/app/components/poster-form';
 import { PosterPreview } from '@/app/components/poster-preview';
-import { PosterPreviewAereo } from '@/app/components/poster-preview-aereo';
-import { PosterPreviewDefeito } from '@/app/components/poster-preview-defeito';
-import { PosterPreviewEtiqueta } from '@/app/components/poster-preview-etiqueta';
-import { PosterPreviewEtiquetaOficial } from '@/app/components/poster-preview-etiqueta-oficial';
-import { PosterPreviewTotem } from '@/app/components/poster-preview-totem';
 import { DisclaimerModal } from '@/app/components/disclaimer-modal';
 import { AboutPanel } from '@/app/components/about-panel';
 import { DatabasePanel } from '@/app/components/database-panel';
 import { SettingsDialog } from '@/app/components/settings-dialog';
+import { ImportModal } from '@/app/components/import-modal';
 import type { PosterData, PosterSettings, PosterType } from '@/app/lib/types';
 import { parseProductCSV, parseProductExcel } from '@/app/lib/poster-utils';
 import { Printer, Plus, Trash2, FileStack, PackageOpen, Info, Database, Upload } from 'lucide-react';
@@ -24,32 +20,16 @@ import { cn } from '@/lib/utils';
 
 const PER_PAGE: Record<PosterType, number> = {
   reliquias: 4,
-  'ofertas-imperdiveis': 4,
-  aereo: 4,           // 4 por página (cada um ocupa 4 espaços de gôndola 2x2)
-  avaria: 4,
-  etiqueta: 16,
-  'etiqueta-oficial': 16,
-  totem: 1,
 };
 
 // Dimensões do cartaz individual para o preview (px)
 const SINGLE_DIMS: Record<PosterType, { w: number; h: number }> = {
   reliquias:            { w: 491, h: 340 },
-  'ofertas-imperdiveis':{ w: 491, h: 340 },
-  aereo:                { w: 760, h: 268 },  // proporcional a 190mm x 67mm (4px/mm)
-  avaria:               { w: 491, h: 340 },
-  'etiqueta-oficial':   { w: 364, h: 136 }, // 91mm x 34.0mm (4px/mm)
-  totem:                { w: 794, h: 1123 }, // A4 a 96dpi (210×297mm em pixels de tela)
 };
 
 // Orientação de impressão por tipo de cartaz
 const POSTER_ORIENTATION: Record<PosterType, 'portrait' | 'landscape'> = {
   reliquias:            'landscape',
-  'ofertas-imperdiveis':'landscape',
-  aereo:                'portrait',
-  avaria:               'landscape',
-  'etiqueta-oficial':   'portrait',
-  totem:                'portrait',
 };
 
 const initialPosterData = (): PosterData => ({
@@ -149,14 +129,71 @@ function SinglePosterPreview({
             overflow: 'hidden',
           }}
         >
-          {posterType === 'reliquias'           && <PosterPreview {...data} isImperdiveis={false} settings={settings} />}
-          {posterType === 'ofertas-imperdiveis' && <PosterPreview {...data} isImperdiveis={true}  settings={settings} />}
-          {posterType === 'aereo'               && <PosterPreviewAereo {...data} settings={settings} />}
-          {posterType === 'avaria'              && <PosterPreviewDefeito {...data} settings={settings} />}
-          {posterType === 'etiqueta-oficial'    && <PosterPreviewEtiquetaOficial {...data} settings={settings} />}
-          {posterType === 'totem'               && <PosterPreviewTotem {...data} settings={settings} />}
+          {posterType === 'reliquias' && <PosterPreview {...data} isImperdiveis={false} settings={settings} />}
         </div>
       )}
+    </div>
+  );
+}
+
+/* ─────────────────────────── PagePreview (Scaled Batch) ─────────────────── */
+function PagePreview({ 
+  items, 
+  posterType, 
+  perPage, 
+  settings 
+}: { 
+  items: PosterData[]; 
+  posterType: PosterType; 
+  perPage: number; 
+  settings: PosterSettings;
+}) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(0.4);
+  const totalPages = Math.ceil(items.length / perPage);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const observer = new ResizeObserver((entries) => {
+      const { width } = entries[0].contentRect;
+      // Base A4 landscape: 297mm. 1mm ~ 3.78px
+      const targetW = 297 * 3.78;
+      const newScale = (width / targetW) * 0.9;
+      setScale(Math.max(0.2, newScale));
+    });
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div ref={containerRef} className="w-full h-full bg-muted/40 overflow-y-auto custom-scrollbar p-8">
+      <div className="flex flex-col items-center gap-12 pb-12">
+        {Array.from({ length: totalPages }).map((_, idx) => (
+          <div key={idx} className="relative group">
+            {/* Page Number Badge */}
+            <div className="absolute -top-6 left-0 bg-primary text-primary-foreground text-[10px] font-black px-2 py-0.5 rounded shadow-sm opacity-60 group-hover:opacity-100 transition-opacity">
+              PÁGINA {idx + 1} DE {totalPages}
+            </div>
+            
+            <div 
+              className="bg-white shadow-2xl origin-top shrink-0"
+              style={{ 
+                width: '297mm', 
+                height: '210mm',
+                transform: `scale(${scale})`,
+                marginBottom: `calc(210mm * (${scale} - 1))` // Compensa o espaço vazio deixado pelo scale
+              }}
+            >
+              <PageGrid 
+                items={items.slice(idx * perPage, (idx + 1) * perPage)} 
+                posterType={posterType} 
+                perPage={perPage} 
+                settings={settings} 
+              />
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -175,121 +212,7 @@ function PageGrid({
 }) {
   const empties = Array.from({ length: perPage - items.length });
 
-  if (posterType === 'aereo') {
-    return (
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: '182mm', 
-        gridTemplateRows: 'repeat(4, 67.6mm)', 
-        gap: '0', 
-        paddingTop: '12.5mm', 
-        paddingBottom: '14.1mm', 
-        paddingLeft: '14mm', 
-        paddingRight: '14mm', 
-        width: '100%', 
-        height: '100%', 
-        boxSizing: 'border-box', 
-        backgroundColor: 'white',
-        border: '0.1mm solid #eee'
-      }}>
-        {items.map((d: PosterData, i: number) => {
-          const isBottom = i === 3;
-          return (
-            <div 
-              key={i} 
-              style={{ 
-                width: '182mm', 
-                height: '67.6mm', 
-                overflow: 'hidden',
-                borderBottom: !isBottom ? '0.3mm dashed #ccc' : 'none',
-                boxSizing: 'border-box'
-              }}
-            >
-              <PosterPreviewAereo {...d} settings={settings} />
-            </div>
-          );
-        })}
-        {empties.map((_, i: number) => {
-          const idx = items.length + i;
-          const isBottom = idx === 3;
-          return (
-            <div 
-              key={`e${i}`} 
-              style={{ 
-                width: '182mm', 
-                height: '67.6mm',
-                borderBottom: !isBottom ? '0.3mm dashed #ccc' : 'none',
-                boxSizing: 'border-box'
-              }}
-            />
-          );
-        })}
-      </div>
-    );
-  }
-  if (posterType === 'etiqueta-oficial') {
-    return (
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: '91mm 91mm', 
-        gridTemplateRows: 'repeat(8, 34.0mm)',
-        columnGap: '0', 
-        paddingTop: '12.5mm', 
-        paddingBottom: '12.5mm', 
-        paddingLeft: '14mm', 
-        paddingRight: '14mm', 
-        width: '100%', 
-        height: '100%', 
-        boxSizing: 'border-box', 
-        backgroundColor: 'white',
-        border: '0.1mm solid #eee'
-      }}>
-        {items.map((d: PosterData, i: number) => {
-          const isLeft = i % 2 === 0;
-          const isBottom = i >= 14;
-          return (
-            <div 
-              key={i} 
-              style={{ 
-                width: '91mm', 
-                height: '34.0mm', 
-                overflow: 'hidden',
-                borderRight: isLeft ? '0.1mm dashed #eee' : 'none',
-                borderBottom: !isBottom ? '0.1mm dashed #eee' : 'none',
-                boxSizing: 'border-box'
-              }}
-            >
-              <PosterPreviewEtiquetaOficial {...d} settings={settings} />
-            </div>
-          );
-        })}
-        {empties.map((_, i: number) => {
-          const idx = items.length + i;
-          const isLeft = idx % 2 === 0;
-          const isBottom = idx >= 14;
-          return (
-            <div 
-              key={`e${i}`} 
-              style={{ 
-                width: '91mm', 
-                height: '34.0mm', 
-                borderRight: isLeft ? '0.1mm dashed #eee' : 'none',
-                borderBottom: !isBottom ? '0.1mm dashed #eee' : 'none',
-                boxSizing: 'border-box'
-              }}
-            />
-          );
-        })}
-      </div>
-    );
-  }
-  if (posterType === 'totem') {
-    return (
-      <div style={{ width: '100%', height: '100%', backgroundColor: 'white' }}>
-        <PosterPreviewTotem {...items[0]} settings={settings} />
-      </div>
-    );
-  }
+
   // reliquias, ofertas-imperdiveis, avaria
   return (
     <div style={{
@@ -320,9 +243,7 @@ function PageGrid({
         }}>
           {/* O Cartaz real, posicionado nos limites do seu padding interno */}
           <div style={{ width: '100%', height: '100%', overflow: 'hidden' }}>
-            {posterType === 'reliquias' || posterType === 'ofertas-imperdiveis'
-              ? <PosterPreview {...(d as PosterData)} isImperdiveis={posterType === 'ofertas-imperdiveis'} settings={settings} />
-              : <PosterPreviewDefeito {...(d as PosterData)} settings={settings} />}
+            <PosterPreview {...(d as PosterData)} isImperdiveis={false} settings={settings} />
           </div>
         </div>
       ))}
@@ -340,6 +261,9 @@ export default function Home() {
   const [formKey, setFormKey] = useState(0);
   const [showAbout, setShowAbout] = useState(false);
   const [showDatabase, setShowDatabase] = useState(false);
+  const [importStatus, setImportStatus] = useState<'idle' | 'processing' | 'success' | 'error'>('idle');
+  const [importCount, setImportCount] = useState(0);
+  const [previewMode, setPreviewMode] = useState<'single' | 'page'>('single');
   const [queueFilter, setQueueFilter] = useState<'all' | 'offer' | 'normal'>('all');
   const [settings, setSettings] = useState<PosterSettings>({
     maxInstallments: 6,
@@ -371,7 +295,19 @@ export default function Home() {
     });
   }, [queue, queueFilter]);
 
-  const totalPages = filteredQueue.length > 0 ? Math.ceil(filteredQueue.length / perPage) : 0;
+  // Expande a fila considerando as quantidades de cada item para impressão
+  const expandedQueue = useMemo(() => {
+    const result: PosterData[] = [];
+    filteredQueue.forEach(item => {
+      const q = item.quantity || 1;
+      for (let i = 0; i < q; i++) {
+        result.push(item);
+      }
+    });
+    return result;
+  }, [filteredQueue]);
+
+  const totalPages = expandedQueue.length > 0 ? Math.ceil(expandedQueue.length / perPage) : 0;
 
   // Update print CSS immediately when poster type changes
   useEffect(() => {
@@ -383,7 +319,27 @@ export default function Home() {
       document.head.appendChild(style);
     }
     const o = POSTER_ORIENTATION[posterType as PosterType] || 'landscape';
-    style.innerHTML = `@media print { @page { size: A4 ${o}; margin: 0; } body { -webkit-print-color-adjust: exact; print-color-adjust: exact; margin: 0; padding: 0; } }`;
+    style.innerHTML = `
+      @media print {
+        @page { size: A4 ${o}; margin: 0 !important; }
+        html, body {
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          width: ${o === 'landscape' ? '297mm' : '210mm'} !important;
+          height: ${o === 'landscape' ? '210mm' : '297mm'} !important;
+          overflow: hidden !important;
+        }
+        .print-page {
+          width: ${o === 'landscape' ? '297mm' : '210mm'} !important;
+          height: ${o === 'landscape' ? '210mm' : '297mm'} !important;
+          overflow: hidden !important;
+          position: relative !important;
+          font-size: 16px !important; /* Base para em/rem no papel */
+        }
+      }
+    `;
   }, [posterType]);
 
   const handlePosterTypeChange = (newType: PosterType) => {
@@ -399,9 +355,8 @@ export default function Home() {
 
   const handleAddToQueue = () => {
     if (!isProductReady) return;
-    const copies = Math.max(1, currentPoster.quantity || 1);
-    const itemsToAdd = Array.from({ length: copies }, () => ({ ...currentPoster }));
-    setQueue((prev: PosterData[]) => [...prev, ...itemsToAdd]);
+    // Sempre adiciona como 1 item único no lote, a quantidade é editada na lista
+    setQueue((prev: PosterData[]) => [...prev, { ...currentPoster, quantity: 1 }]);
     setCurrentPoster({
       ...initialPosterData(),
       posterSubType: currentPoster.posterSubType,
@@ -412,6 +367,16 @@ export default function Home() {
     });
     setIsProductReady(false);
     setFormKey((k: number) => k + 1);
+  };
+
+  const handleUpdateQuantity = (index: number, delta: number) => {
+    setQueue((prev: PosterData[]) => prev.map((item, i) => {
+      if (i === index) {
+        const newQty = Math.max(1, Math.min(99, (item.quantity || 1) + delta));
+        return { ...item, quantity: newQty };
+      }
+      return item;
+    }));
   };
 
   const handleRemoveFromQueue = (index: number) => {
@@ -426,23 +391,33 @@ export default function Home() {
     const reader = new FileReader();
 
     reader.onload = (event) => {
-      let imported: any[] = [];
-      
-      if (isExcel) {
-        const buffer = event.target?.result as ArrayBuffer;
-        imported = parseProductExcel(buffer);
-      } else {
-        const content = event.target?.result as string;
-        imported = parseProductCSV(content);
-      }
+      setImportStatus('processing');
 
-      if (imported.length > 0) {
-        setQueue(prev => [...prev, ...imported]);
-        alert(`${imported.length} itens importados com sucesso!`);
-      } else {
-        alert('Nenhum item encontrado no arquivo. Verifique se as colunas (SAP, Mercadoria, Preços) estão presentes.');
-      }
-      if (fileInputRef.current) fileInputRef.current.value = '';
+      // Pequeno atraso artificial para dar peso à animação de processamento
+      setTimeout(() => {
+        let imported: any[] = [];
+        
+        if (isExcel) {
+          const buffer = event.target?.result as ArrayBuffer;
+          imported = parseProductExcel(buffer);
+        } else {
+          const content = event.target?.result as string;
+          imported = parseProductCSV(content);
+        }
+
+        const onlyOffers = imported.filter((item: any) => item.posterSubType === 'offer');
+
+        if (onlyOffers.length > 0) {
+          setQueue(prev => [...prev, ...onlyOffers]);
+          setQueueFilter('offer');
+          setImportCount(onlyOffers.length);
+          setImportStatus('success');
+          setPreviewMode('page'); // Muda para ver a página inteira após importar
+        } else {
+          setImportStatus('error');
+        }
+        if (fileInputRef.current) fileInputRef.current.value = '';
+      }, 800);
     };
 
     if (isExcel) {
@@ -454,10 +429,10 @@ export default function Home() {
 
   /* Print content: one div per page, each with page-break */
   const renderPrintContent = () => {
-    if (filteredQueue.length === 0) return null;
+    if (expandedQueue.length === 0) return null;
     const orientation = POSTER_ORIENTATION[posterType as PosterType];
     return Array.from({ length: totalPages }).map((_, pageIdx: number) => {
-      const pageItems = filteredQueue.slice(pageIdx * perPage, (pageIdx + 1) * perPage);
+      const pageItems = expandedQueue.slice(pageIdx * perPage, (pageIdx + 1) * perPage);
       return (
         <div
           key={pageIdx}
@@ -479,11 +454,6 @@ export default function Home() {
 
   const typeOptions = [
     { id: 'reliquias',             label: 'Relíquias'          },
-    { id: 'ofertas-imperdiveis',   label: 'Imperdíveis'        },
-    { id: 'avaria',                label: 'Avarias'            },
-    { id: 'aereo',                 label: 'Aéreo'              },
-    { id: 'etiqueta-oficial',      label: 'Gôndola Oficial' },
-    { id: 'totem',                 label: 'Totem'              },
   ] as const;
 
   return (
@@ -501,46 +471,18 @@ export default function Home() {
             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
               <span className="text-primary-foreground font-bold text-sm">P%</span>
             </div>
-            <h1 className="font-headline text-2xl font-bold">GERADOR DE CARTAZES</h1>
+            <h1 className="font-headline text-2xl font-bold uppercase">RD CARTAZ - Cartazes Relíquias da Diversão</h1>
           </div>
           <div className="flex items-center gap-4 w-full md:w-auto mt-2 md:mt-0 justify-between">
             {/* Mobile select */}
-            <div className="flex md:hidden flex-1 overflow-hidden">
-              <Select value={posterType} onValueChange={v => handlePosterTypeChange(v as PosterType)}>
-                <SelectTrigger className="w-full h-9 font-semibold bg-background shadow-sm border-2">
-                  <SelectValue placeholder="Selecione o modelo" />
-                </SelectTrigger>
-                <SelectContent>
-                  {typeOptions.map(o => <SelectItem key={o.id} value={o.id}>{o.label}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
+
             {/* Desktop button group */}
-            <div className="hidden md:flex bg-muted p-1 rounded-lg flex-wrap gap-1">
-              {typeOptions.map(opt => (
-                <button
-                  key={opt.id}
-                  onClick={() => handlePosterTypeChange(opt.id as PosterType)}
-                  className={cn(
-                    'px-3 py-1.5 rounded-md text-[13px] font-semibold transition-all whitespace-nowrap',
-                    posterType === opt.id
-                      ? 'bg-background text-foreground shadow-sm'
-                      : 'text-muted-foreground hover:bg-black/5'
-                  )}
-                >
-                  {opt.label}
-                </button>
-              ))}
+            <div className="hidden md:flex bg-muted p-1 rounded-lg">
+               <span className="px-3 py-1.5 rounded-md text-[13px] font-semibold bg-background text-foreground shadow-sm">
+                 Modelo: Relíquias
+               </span>
             </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setShowDatabase(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-semibold text-muted-foreground hover:text-foreground hover:bg-muted transition-all border border-border/50 hover:border-border"
-                title="Gerenciar banco de dados"
-              >
-                <Database className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">Banco de Dados</span>
-              </button>
+              <AboutPanel open={showAbout} onClose={() => setShowAbout(false)} />
               <button
                 onClick={() => setShowAbout(true)}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-semibold text-muted-foreground hover:text-foreground hover:bg-muted transition-all border border-border/50 hover:border-border"
@@ -549,7 +491,11 @@ export default function Home() {
                 <Info className="h-3.5 w-3.5" />
                 <span className="hidden sm:inline">Sobre</span>
               </button>
-              <SettingsDialog settings={settings} onSave={saveSettings} />
+              <SettingsDialog 
+                settings={settings} 
+                onSave={saveSettings} 
+                onOpenDatabase={() => setShowDatabase(true)} 
+              />
               <input
                 type="file"
                 ref={fileInputRef}
@@ -557,14 +503,6 @@ export default function Home() {
                 accept=".csv, .xls, .xlsx"
                 className="hidden"
               />
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-semibold text-muted-foreground hover:text-foreground hover:bg-muted transition-all border border-border/50 hover:border-border"
-                title="Importar lote via CSV"
-              >
-                <Upload className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">Importar Lote</span>
-              </button>
               <Button
                 onClick={() => window.print()}
                 disabled={queue.length === 0}
@@ -573,7 +511,6 @@ export default function Home() {
                 <Printer className="mr-2 h-4 w-4" />
                 Imprimir{queue.length > 0 ? ` (${totalPages}p)` : ''}
               </Button>
-            </div>
           </div>
         </div>
       </header>
@@ -598,6 +535,7 @@ export default function Home() {
                   setData={setCurrentPoster}
                   posterType={posterType}
                   onLookupStatusChange={setIsProductReady}
+                  onImportBatch={() => fileInputRef.current?.click()}
                 />
 
                 {/* ── Add to queue button ── */}
@@ -629,92 +567,55 @@ export default function Home() {
                       </button>
                     </div>
 
-                    {/* Filter Toggle */}
-                    <div className="flex border-b divide-x divide-border/50">
-                      {(['all', 'offer', 'normal'] as const).map((f) => (
-                        <button
-                          key={f}
-                          onClick={() => setQueueFilter(f)}
-                          className={cn(
-                            "flex-1 py-1.5 text-[10px] font-bold uppercase tracking-wider transition-colors",
-                            queueFilter === f ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted/50"
-                          )}
-                        >
-                          {f === 'all' ? 'Tudo' : f === 'offer' ? 'Ofertas' : 'Normal'}
-                        </button>
-                      ))}
+                    {/* Filter label (simplified) */}
+                    <div className="flex border-b bg-muted/10 px-3 py-1.5 items-center justify-center">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-primary">
+                        Somente Ofertas Ativas
+                      </span>
                     </div>
 
                     <div className="divide-y divide-border/50">
-                      {Array.from({ length: totalPages }).map((_, pageIdx) => {
-                        const pageItems = queue.slice(pageIdx * perPage, (pageIdx + 1) * perPage);
-                        return (
-                          <div key={pageIdx}>
-                            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider px-3 pt-2 pb-1">
-                              Página {pageIdx + 1}
+                      {queue.map((item: PosterData, index: number) => (
+                        <div key={index} className="flex items-center gap-3 px-3 py-2.5 hover:bg-muted/40 transition-colors">
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[11px] font-bold text-gray-900 truncate uppercase leading-none mb-1">
+                              {item.description}
                             </p>
-                            {pageItems.map((item: PosterData, itemIdx: number) => {
-                              const globalIdxInFiltered = pageIdx * perPage + itemIdx;
-                              // Find original index in full queue for deletion
-                              // This is tricky if we have duplicates. 
-                              // For simplicity, let's just use the filtered list and update the whole queue.
-                              // Actually, if we delete from the filtered list, we should delete that specific instance.
-                              
-                              const handleRemove = () => {
-                                const newQueue = [...queue];
-                                // This finds the exact instance if we identify them by something.
-                                // Since they are plain objects, let's find the Nth occurrence that matches.
-                                let count = 0;
-                                const originalIdx = queue.findIndex(qItem => {
-                                  let matches = qItem === item; // Simple ref check if possible, but they are cloned.
-                                  // Since they are cloned, we check value equality + occurrence index
-                                  // BUT the filtered list is just a slice.
-                                  // Better: just find the index of this item in the filtered list and remove it from the total queue.
-                                  // Actually, since we want to remove the specific one clicked:
-                                  return false; // placeholder for logic below
-                                });
-                                // Revised logic: pass the item and remove it from queue by reference? No, they are clones.
-                                // Let's just filter the queue to remove exactly this instance.
-                                setQueue(prev => {
-                                  const idxToRemove = prev.indexOf(item); // Only works if we don't clone every turn.
-                                  // Let's just use indices in the filtered list to manage state.
-                                  const updated = [...prev];
-                                  const itemInPrev = filteredQueue[globalIdxInFiltered];
-                                  const realIdx = prev.indexOf(itemInPrev);
-                                  if (realIdx > -1) updated.splice(realIdx, 1);
-                                  return updated;
-                                });
-                              };
-
-                              return (
-                                <div key={globalIdxInFiltered} className="flex items-center gap-2 px-3 py-2 hover:bg-muted/40 transition-colors">
-                                  <span className="text-[10px] font-mono text-muted-foreground w-5 shrink-0 text-right">
-                                    {globalIdxInFiltered + 1}.
-                                  </span>
-                                  <span className="text-xs font-medium flex-1 line-clamp-2 leading-tight" title={item.description}>
-                                    {item.description}
-                                  </span>
-                                  {item.priceFor && (
-                                    <span className={cn(
-                                      "text-[9px] px-1 rounded font-bold uppercase",
-                                      item.posterSubType === 'offer' ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground"
-                                    )}>
-                                      {item.posterSubType === 'offer' ? 'OFERTA' : 'NORMAL'}
-                                    </span>
-                                  )}
-                                  <button
-                                    onClick={handleRemove}
-                                    className="shrink-0 text-muted-foreground hover:text-destructive transition-colors ml-1"
-                                    title="Remover"
-                                  >
-                                    <Trash2 className="h-3.5 w-3.5" />
-                                  </button>
-                                </div>
-                              );
-                            })}
+                            <p className="text-[9px] text-muted-foreground font-mono">
+                              {item.code} | {item.priceFor}
+                            </p>
                           </div>
-                        );
-                      })}
+                          
+                          <div className="flex items-center gap-2 shrink-0">
+                            {/* Controle de Quantidade */}
+                            <div className="flex items-center border rounded-md overflow-hidden bg-background h-7">
+                              <button 
+                                onClick={() => handleUpdateQuantity(index, -1)}
+                                className="px-2 h-full hover:bg-muted transition-colors border-r text-xs font-bold"
+                              >
+                                -
+                              </button>
+                              <div className="px-2 min-w-[20px] text-center text-[10px] font-black text-primary">
+                                {item.quantity || 1}
+                              </div>
+                              <button 
+                                onClick={() => handleUpdateQuantity(index, 1)}
+                                className="px-2 h-full hover:bg-muted transition-colors border-l text-xs font-bold"
+                              >
+                                +
+                              </button>
+                            </div>
+
+                            <button
+                              onClick={() => handleRemoveFromQueue(index)}
+                              className="p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-md transition-all"
+                              title="Remover"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 )}
@@ -725,19 +626,52 @@ export default function Home() {
 
           {/* ── Right: Single poster preview ── */}
           <div className="md:col-span-7 lg:col-span-8 flex flex-col p-4 gap-2 md:overflow-hidden bg-muted/20 order-1 md:order-2 border-b border-border md:border-b-0 h-[60vh] md:h-full">
-            <p className="text-xs text-muted-foreground text-center shrink-0">
-              Pré-visualização — {orientation === 'landscape' ? 'Paisagem' : 'Retrato'}
-            </p>
+            <div className="flex items-center justify-between shrink-0 mb-1">
+              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                Visualização
+              </p>
+              <div className="flex bg-background border rounded-md p-0.5">
+                <button 
+                  onClick={() => setPreviewMode('single')}
+                  className={cn(
+                    "px-3 py-1 text-[10px] font-bold rounded transition-all",
+                    previewMode === 'single' ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  Individual
+                </button>
+                <button 
+                  onClick={() => setPreviewMode('page')}
+                  disabled={queue.length === 0}
+                  className={cn(
+                    "px-3 py-1 text-[10px] font-bold rounded transition-all",
+                    previewMode === 'page' ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground",
+                    queue.length === 0 && "opacity-50 cursor-not-allowed"
+                  )}
+                >
+                  Página Inteira
+                </button>
+              </div>
+            </div>
 
             <div className="flex-1 min-h-0 relative border rounded border-border overflow-hidden">
             {/* Wrapper absoluto garante dimensões confiáveis para o ResizeObserver */}
               <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
-                <SinglePosterPreview
-                  data={currentPoster}
-                  posterType={posterType}
-                  isReady={isProductReady}
-                  settings={settings}
-                />
+                {previewMode === 'single' ? (
+                  <SinglePosterPreview
+                    data={currentPoster}
+                    posterType={posterType}
+                    isReady={isProductReady}
+                    settings={settings}
+                  />
+                ) : (
+                  <PagePreview
+                    items={expandedQueue}
+                    posterType={posterType}
+                    perPage={perPage}
+                    settings={settings}
+                  />
+                )}
               </div>
             </div>
 
@@ -749,6 +683,12 @@ export default function Home() {
           </div>
         </div>
       </main>
+      {/* Modal de Feedback de Importação */}
+      <ImportModal 
+        status={importStatus} 
+        count={importCount} 
+        onClose={() => setImportStatus('idle')} 
+      />
     </div>
   );
 }

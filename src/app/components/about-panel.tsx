@@ -30,8 +30,8 @@ export function AboutPanel({ open, onClose }: AboutPanelProps) {
               <Info className="h-4 w-4 text-white" />
             </div>
             <div>
-              <h2 className="text-white font-bold text-base">Sobre o Gerador de Cartazes</h2>
-              <p className="text-slate-400 text-xs">Ferramenta auxiliar não oficial</p>
+              <h2 className="text-white font-bold text-base">Sobre o RD CARTAZ</h2>
+              <p className="text-slate-400 text-xs">Sistema especializado Relíquias da Diversão</p>
             </div>
           </div>
           <button
@@ -75,9 +75,9 @@ export function AboutPanel({ open, onClose }: AboutPanelProps) {
               Origem e Propósito
             </p>
             <p className="text-slate-400 text-xs leading-relaxed">
-              Com a mudança no sistema oficial da empresa, a geração de cartazes ficou comprometida. Esta ferramenta
-              nasceu como <strong className="text-white">interface gráfica auxiliar para a Planilha de Relíquias da Diversão</strong>,
-              permitindo gerar cartazes de forma prática enquanto o sistema oficial não é normalizado.
+              Com a mudança no sistema oficial, a geração de cartazes ficou comprometida. Esta ferramenta
+              nasceu como uma <strong className="text-white">interface gráfica especializada para a Planilha de Relíquias da Diversão</strong>,
+              otimizada para gerar cartazes promocionais de alto impacto visual de forma rápida e segura.
             </p>
           </div>
 
@@ -100,12 +100,10 @@ export function AboutPanel({ open, onClose }: AboutPanelProps) {
             </p>
             <div className="grid grid-cols-2 gap-2 mt-3">
               {[
-                { label: 'Relíquias', desc: 'Réplica do modelo oficial' },
-                { label: 'Imperdíveis', desc: 'Réplica do modelo oficial' },
-                { label: 'Avarias', desc: 'Modelo adaptado para ponta de estoque com defeito' },
-                { label: 'Aéreo', desc: 'Modelo para cartazes de prateleira/aéreo' },
-                { label: 'Gôndola', desc: '16 etiquetas por folha A4' },
-                { label: 'Totem', desc: 'Cartaz A4 vertical de destaque' },
+                { label: 'Relíquias A4', desc: 'Modelo oficial (2 cartazes por folha)' },
+                { label: 'Ofertas Ativas', desc: 'Filtro automático que remove itens sem desconto' },
+                { label: 'Base de Dados', desc: 'Integração total com a Planilha Relíquias' },
+                { label: 'Design Premium', desc: 'Layout otimizado para máxima conversão' },
               ].map((m) => (
                 <div
                   key={m.label}
@@ -119,6 +117,36 @@ export function AboutPanel({ open, onClose }: AboutPanelProps) {
             </div>
           </div>
 
+          {/* Guia de Exportação PLENO */}
+          <div
+            className="rounded-xl p-4"
+            style={{ background: 'rgba(59,130,246,0.07)', border: '1px solid rgba(59,130,246,0.2)' }}
+          >
+            <p className="text-blue-300 font-semibold text-sm mb-3 flex items-center gap-2">
+              <ExternalLink className="h-4 w-4 text-blue-400" />
+              Como Exportar do PLENO
+            </p>
+            <div className="space-y-4">
+              <div>
+                <p className="text-blue-200 text-[11px] font-bold uppercase tracking-wider mb-1">Método 1: Alteração do Dia</p>
+                <p className="text-slate-400 text-xs leading-relaxed">
+                  No menu <strong className="text-white">Estoque &gt; Preços a serem alterados</strong>, marque a opção 
+                  <strong className="text-white"> "Somente com estoque"</strong> e gere o arquivo. 
+                  Após imprimir a lista, clique no botão <strong className="text-blue-400">CSV</strong> para baixar.
+                </p>
+              </div>
+              <div>
+                <p className="text-blue-200 text-[11px] font-bold uppercase tracking-wider mb-1">Método 2: Circular de Preços</p>
+                <p className="text-slate-400 text-xs leading-relaxed">
+                  No menu <strong className="text-white">Circular de Alteração de Preços</strong>, filtre pela data, 
+                  marque <strong className="text-white">"Com estoque"</strong> e filtre apenas 
+                  <strong className="text-white">"Promoções"</strong>. Carregue a lista e salve o arquivo como 
+                  <strong className="text-blue-400">CSV</strong>.
+                </p>
+              </div>
+            </div>
+          </div>
+
           {/* Banco de dados */}
           <div
             className="rounded-xl p-4"
@@ -126,13 +154,12 @@ export function AboutPanel({ open, onClose }: AboutPanelProps) {
           >
             <p className="text-green-300 font-semibold text-sm mb-1.5 flex items-center gap-2">
               <Database className="h-4 w-4 text-green-400" />
-              Banco de Dados
+              Banco de Dados (Relíquias)
             </p>
             <p className="text-slate-400 text-xs leading-relaxed">
-              O acervo de produtos utilizado é o <strong className="text-white">mesmo disponibilizado oficialmente</strong> pela
-              empresa na Planilha de Relíquias da Diversão, contendo{' '}
+              O acervo de produtos utilizado é o <strong className="text-white">mesmo disponibilizado oficialmente</strong> na
+              Planilha de Relíquias da Diversão, contendo{' '}
               <strong className="text-green-400 text-sm">141.131 produtos cadastrados</strong>.
-              Nenhuma informação foi alterada, removida ou adicionada ao banco de dados original.
             </p>
           </div>
 

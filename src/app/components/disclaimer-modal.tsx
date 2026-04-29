@@ -111,9 +111,9 @@ export function DisclaimerModal() {
                 <p className="text-blue-300 font-semibold text-sm mb-1">Sobre esta ferramenta</p>
                 <p className="text-gray-300 text-xs leading-relaxed">
                   Criada como <strong className="text-white">paliativo</strong> após mudanças no sistema oficial da empresa.
-                  Interface auxiliar à <strong className="text-white">Planilha de Relíquias da Diversão</strong> — com modelos
-                  de cartaz simulados via IA e ajustados para uso prático em loja. Layouts desenvolvidos com auxílio de IA
-                  para maximizar eficiência visual.
+                  Esta interface é especializada na <strong className="text-white">Planilha de Relíquias da Diversão</strong> e agora 
+                  <strong className="text-white"> filtra automaticamente apenas itens com oferta ativa</strong>, garantindo foco
+                  total nos produtos promocionais e maior agilidade na operação da loja.
                 </p>
               </div>
             </div>
