@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { X, AlertTriangle, Database, Sparkles, Info, ShieldAlert, ExternalLink } from 'lucide-react';
 
 interface AboutPanelProps {
@@ -8,6 +9,17 @@ interface AboutPanelProps {
 }
 
 export function AboutPanel({ open, onClose }: AboutPanelProps) {
+  const [productCount, setProductCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (open && productCount === null) {
+      fetch('/api/stats')
+        .then(res => res.json())
+        .then(data => setProductCount(data.count))
+        .catch(() => setProductCount(0));
+    }
+  }, [open, productCount]);
+
   if (!open) return null;
 
   return (
@@ -159,7 +171,9 @@ export function AboutPanel({ open, onClose }: AboutPanelProps) {
             <p className="text-slate-400 text-xs leading-relaxed">
               O acervo de produtos utilizado é o <strong className="text-white">mesmo disponibilizado oficialmente</strong> na
               Planilha de Relíquias da Diversão, contendo{' '}
-              <strong className="text-green-400 text-sm">141.131 produtos cadastrados</strong>.
+              <strong className="text-green-400 text-sm">
+                {productCount ? productCount.toLocaleString('pt-BR') : '...'} produtos cadastrados
+              </strong>.
             </p>
           </div>
 

@@ -48,8 +48,8 @@ function useCurrencyInput(initial: string, maxCents?: number) {
     const digits = value.replace(/\D/g, '');
     const next = digits ? parseInt(digits, 10) : 0;
     
-    // Limite de segurança (99.999,99)
-    if (next > 9999999) return;
+    // Limite de segurança (9.999,99 - 6 dígitos)
+    if (next > 999999) return;
     
     setCents(next);
   };
@@ -408,7 +408,7 @@ export function PosterForm({ data, setData, posterType, onLookupStatusChange, on
                 </Label>
                 <Input
                   value={manualEan}
-                  onChange={e => setManualEan(e.target.value.replace(/\D/g, ''))}
+                  onChange={e => setManualEan(e.target.value.replace(/\D/g, '').slice(0, 6))}
                   placeholder="Código de Barras"
                   className="h-10 font-mono border-blue-200"
                 />

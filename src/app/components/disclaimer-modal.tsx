@@ -5,6 +5,7 @@ import { AlertTriangle, X, ShieldAlert, Database, Info, Sparkles } from 'lucide-
 
 export function DisclaimerModal() {
   const [open, setOpen] = useState(false);
+  const [productCount, setProductCount] = useState<number | null>(null);
 
   // Abre automaticamente na primeira visita da sessão
   useEffect(() => {
@@ -13,6 +14,15 @@ export function DisclaimerModal() {
       setOpen(true);
     }
   }, []);
+
+  useEffect(() => {
+    if (open && productCount === null) {
+      fetch('/api/stats')
+        .then(res => res.json())
+        .then(data => setProductCount(data.count))
+        .catch(() => setProductCount(0));
+    }
+  }, [open, productCount]);
 
   const handleClose = () => {
     sessionStorage.setItem('disclaimer-seen', '1');
@@ -131,8 +141,10 @@ export function DisclaimerModal() {
                 <p className="text-gray-300 text-xs leading-relaxed">
                   O acervo utilizado é o <strong className="text-white">mesmo disponibilizado oficialmente</strong> na
                   Planilha de Relíquias da Diversão, com{' '}
-                  <strong className="text-green-400">141.131 produtos cadastrados</strong>.
-                  <span className="text-gray-400"> Nenhum dado foi alterado ou adicionado.</span>
+                  <strong className="text-green-400">
+                    {productCount ? productCount.toLocaleString('pt-BR') : '...'} produtos cadastrados
+                  </strong>.
+                  <span className="text-gray-400"> Dados sincronizados com o último relatório.</span>
                 </p>
               </div>
             </div>
