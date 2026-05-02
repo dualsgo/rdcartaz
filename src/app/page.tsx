@@ -3,13 +3,20 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { PosterForm } from '@/app/components/poster-form';
 import { PosterPreview } from '@/app/components/poster-preview';
+import { PosterPreviewEtiquetaOficial } from '@/app/components/poster-preview-etiqueta-oficial';
+
 import { DisclaimerModal } from '@/app/components/disclaimer-modal';
+
 import { AboutPanel } from '@/app/components/about-panel';
 import { DatabasePanel } from '@/app/components/database-panel';
 import { SettingsDialog } from '@/app/components/settings-dialog';
 import { ImportModal } from '@/app/components/import-modal';
+import { SecurityModal } from '@/app/components/security-modal';
 import type { PosterData, PosterSettings, PosterType } from '@/app/lib/types';
-import { parseProductCSV, parseProductExcel } from '@/app/lib/poster-utils';
+
+
+import { parseProductCSV, parseProductExcel, parsePrice } from '@/app/lib/poster-utils';
+
 import { Printer, Plus, Trash2, FileStack, PackageOpen, Info, Database, Upload, Edit3, LayoutGrid } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -20,17 +27,26 @@ import { cn } from '@/lib/utils';
 
 const PER_PAGE: Record<PosterType, number> = {
   reliquias: 4,
+  'etiqueta-oficial': 16,
 };
+
+
 
 // Dimensões do cartaz individual para o preview (px)
 const SINGLE_DIMS: Record<PosterType, { w: number; h: number }> = {
   reliquias:            { w: 491, h: 340 },
+  'etiqueta-oficial':   { w: 340, h: 128 }, // 90mm x 34mm
 };
+
+
 
 // Orientação de impressão por tipo de cartaz
 const POSTER_ORIENTATION: Record<PosterType, 'portrait' | 'landscape'> = {
   reliquias:            'landscape',
+  'etiqueta-oficial':   'portrait',
 };
+
+
 
 const initialPosterData = (): PosterData => ({
   description: 'DESCRIÇÃO DO PRODUTO',
@@ -81,7 +97,8 @@ function SinglePosterPreview({
       const cw = outer.clientWidth;
       const ch = outer.clientHeight;
       if (cw === 0 || ch === 0) return;
-      setScale(Math.min(cw / w, ch / h) * 0.88);
+      setScale(Math.min(cw / w, ch / h) * 0.96);
+
       setReady(true);
     };
 
@@ -130,6 +147,9 @@ function SinglePosterPreview({
           }}
         >
           {posterType === 'reliquias' && <PosterPreview {...data} isImperdiveis={false} settings={settings} />}
+          {posterType === 'etiqueta-oficial' && <PosterPreviewEtiquetaOficial {...data} settings={settings} />}
+
+
         </div>
       )}
     </div>
@@ -151,19 +171,23 @@ function PagePreview({
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0.4);
   const totalPages = Math.ceil(items.length / perPage);
+  const orientation = POSTER_ORIENTATION[posterType] || 'landscape';
+  const isPortrait = orientation === 'portrait';
+  const targetW = (isPortrait ? 210 : 297) * 3.78;
+  const targetH = (isPortrait ? 297 : 210) * 3.78;
 
   useEffect(() => {
     if (!containerRef.current) return;
     const observer = new ResizeObserver((entries) => {
-      const { width } = entries[0].contentRect;
-      // Base A4 landscape: 297mm. 1mm ~ 3.78px
-      const targetW = 297 * 3.78;
-      const newScale = (width / targetW) * 0.9;
-      setScale(Math.max(0.2, newScale));
+      const { width, height } = entries[0].contentRect;
+      const newScale = Math.min(width / targetW, height / targetH) * 0.95;
+      setScale(Math.max(0.1, newScale));
     });
     observer.observe(containerRef.current);
     return () => observer.disconnect();
-  }, []);
+  }, [targetW, targetH]);
+
+
 
   return (
     <div ref={containerRef} className="w-full h-full bg-muted/40 overflow-y-auto custom-scrollbar p-8">
@@ -178,12 +202,13 @@ function PagePreview({
             <div 
               className="bg-white shadow-2xl origin-top shrink-0"
               style={{ 
-                width: '297mm', 
-                height: '210mm',
+                width: isPortrait ? '210mm' : '297mm', 
+                height: isPortrait ? '297mm' : '210mm',
                 transform: `scale(${scale})`,
-                marginBottom: `calc(210mm * (${scale} - 1))` // Compensa o espaço vazio deixado pelo scale
+                marginBottom: `calc(${isPortrait ? '297mm' : '210mm'} * (${scale} - 1))` // Compensa o espaço vazio deixado pelo scale
               }}
             >
+
               <PageGrid 
                 items={items.slice(idx * perPage, (idx + 1) * perPage)} 
                 posterType={posterType} 
@@ -212,36 +237,75 @@ function PageGrid({
 }) {
   const empties = Array.from({ length: perPage - items.length });
 
+  if (posterType === 'etiqueta-oficial') {
+    return (
+      <div style={{ 
+        display: 'grid', 
+        gridTemplateColumns: '90mm 90mm', 
+        gridTemplateRows: 'repeat(8, 34.0mm)',
+        columnGap: '0', 
+        rowGap: '0',
+        justifyContent: 'center',
+        paddingTop: '14.2mm', 
+        paddingBottom: '10.8mm', 
+        paddingLeft: '16mm', 
+        paddingRight: '14mm', 
+        width: '100%', 
+        height: '100%', 
+        boxSizing: 'border-box', 
+        backgroundColor: 'white'
+      }}>
+        {items.map((d: PosterData, i: number) => (
+          <div 
+            key={i} 
+            style={{ 
+              width: '90mm', 
+              height: '34.0mm', 
+              overflow: 'hidden',
+              paddingTop: '1mm',
+              boxSizing: 'border-box'
+            }}
+          >
+            <PosterPreviewEtiquetaOficial {...d} settings={settings} />
+          </div>
+        ))}
+        {empties.map((_, i: number) => (
+          <div 
+            key={`e${i}`} 
+            style={{ 
+              width: '90mm', 
+              height: '34.0mm', 
+              paddingTop: '1mm',
+              boxSizing: 'border-box'
+            }}
+          />
+        ))}
+      </div>
+    );
+  }
 
-  // reliquias, ofertas-imperdiveis, avaria
+
   return (
     <div style={{
       display: 'grid',
-      // Divide a "área util" (após as margens do papel de 1.5cm vert e 1.2cm horiz)
-      // exatamente ao meio, criando 4 containers idênticos.
       gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr)',
       gridTemplateRows: 'minmax(0,1fr) minmax(0,1fr)',
       width: '100%',
       height: '100%',
-      padding: '1.5cm 1.2cm',  // Margens externas (Padrão A4 limpo)
+      padding: '1.5cm 1.2cm',
       boxSizing: 'border-box',
       backgroundColor: 'white'
     }}>
       {items.map((d: PosterData, i: number) => (
-        // Cada slot tem 100% da sua metade do papel (Aprox 13.x cm por 9cm)
         <div key={i} style={{
           width: '100%',
           height: '100%',
-          // O espaço em branco QUE SEPARA um painel do outro fisicamente:
-          // Como as margens encostam, o top de um cartaz respira pro limite
-          // e o bottom respira pro mesmo limite.
           paddingTop: '0.4cm',
           paddingBottom: '0.4cm',
           paddingLeft: '0.4cm',
           paddingRight: '0.4cm',
           boxSizing: 'border-box',
         }}>
-          {/* O Cartaz real, posicionado nos limites do seu padding interno */}
           <div style={{ width: '100%', height: '100%', overflow: 'hidden' }}>
             <PosterPreview {...(d as PosterData)} isImperdiveis={false} settings={settings} />
           </div>
@@ -251,6 +315,7 @@ function PageGrid({
     </div>
   );
 }
+
 
 /* ─────────────────────────── Home ───────────────────────────────────────── */
 export default function Home() {
@@ -264,7 +329,8 @@ export default function Home() {
   const [importStatus, setImportStatus] = useState<'idle' | 'processing' | 'success' | 'error'>('idle');
   const [importCount, setImportCount] = useState(0);
   const [previewMode, setPreviewMode] = useState<'single' | 'page'>('single');
-  const [activeTab, setActiveTab] = useState<'edit' | 'preview'>('edit');
+  const [activeTab, setActiveTab] = useState<'edit' | 'queue' | 'preview'>('edit');
+
   const [queueFilter, setQueueFilter] = useState<'all' | 'offer' | 'normal'>('all');
   const [settings, setSettings] = useState<PosterSettings>({
     maxInstallments: 6,
@@ -273,13 +339,48 @@ export default function Home() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Load settings
+  const [securityModal, setSecurityModal] = useState<{
+    isOpen: boolean;
+    type: 'error' | 'warning';
+    title: string;
+    message: string;
+    onConfirm?: () => void;
+  }>({
+    isOpen: false,
+    type: 'error',
+    title: '',
+    message: '',
+  });
+
+
+  // Load settings and queue
   useEffect(() => {
-    const saved = localStorage.getItem('poster-settings');
-    if (saved) {
-      try { setSettings(JSON.parse(saved)); } catch { /* ignore */ }
+    const savedSettings = localStorage.getItem('poster-settings');
+    if (savedSettings) {
+      try { setSettings(JSON.parse(savedSettings)); } catch { /* ignore */ }
+    }
+    const savedQueue = localStorage.getItem('poster-queue');
+    if (savedQueue) {
+      try { setQueue(JSON.parse(savedQueue)); } catch { /* ignore */ }
     }
   }, []);
+
+  // Monitora edição do formulário para voltar ao modo individual
+  // Ignora o reset inicial ou reset após adicionar
+  const lastResetRef = useRef<string>(JSON.stringify(initialPosterData()));
+  useEffect(() => {
+    const currentStr = JSON.stringify(currentPoster);
+    if (currentStr !== lastResetRef.current) {
+      setPreviewMode('single');
+    }
+  }, [currentPoster]);
+
+  // Save queue whenever it changes
+  useEffect(() => {
+    localStorage.setItem('poster-queue', JSON.stringify(queue));
+  }, [queue]);
+
+
 
   const saveSettings = (newSettings: PosterSettings) => {
     setSettings(newSettings);
@@ -289,12 +390,20 @@ export default function Home() {
   const perPage    = PER_PAGE[posterType as PosterType] || 4;
   
   const filteredQueue = useMemo(() => {
-    if (queueFilter === 'all') return queue;
-    return queue.filter(item => {
+    let result = queue;
+    
+    // Filtro automático: Relíquias só aceita Ofertas
+    if (posterType === 'reliquias') {
+      result = result.filter(item => item.posterSubType === 'offer');
+    }
+
+    if (queueFilter === 'all') return result;
+    return result.filter(item => {
       const isOfferType = item.posterSubType === 'offer';
       return queueFilter === 'offer' ? isOfferType : !isOfferType;
     });
-  }, [queue, queueFilter]);
+  }, [queue, queueFilter, posterType]);
+
 
   // Expande a fila considerando as quantidades de cada item para impressão
   const expandedQueue = useMemo(() => {
@@ -345,30 +454,90 @@ export default function Home() {
 
   const handlePosterTypeChange = (newType: PosterType) => {
     setPosterType(newType);
-    setQueue([]);
-    setCurrentPoster({
+    const resetData = {
       ...initialPosterData(),
-      posterSubType: ['reliquias', 'ofertas-imperdiveis', 'avaria', 'etiqueta-oficial'].includes(newType) ? 'offer' : 'normal',
-    });
+      posterSubType: ['reliquias', 'etiqueta-oficial'].includes(newType) ? 'offer' : 'normal',
+    };
+    lastResetRef.current = JSON.stringify(resetData);
+    setCurrentPoster(resetData);
     setIsProductReady(false);
     setFormKey((k: number) => k + 1);
   };
 
+
+
   const handleAddToQueue = () => {
     if (!isProductReady) return;
-    // Sempre adiciona como 1 item único no lote, a quantidade é editada na lista
+
+    const valDe = parsePrice(currentPoster.priceFrom);
+    const valPor = parsePrice(currentPoster.priceFor);
+
+    // 1. Bloqueio de Preço Zero
+    if (valPor <= 0) {
+      setSecurityModal({
+        isOpen: true,
+        type: 'error',
+        title: 'Preço Inválido',
+        message: 'O preço de venda não pode ser zero ou negativo. Por favor, verifique o valor digitado.',
+      });
+      return;
+    }
+
+    // 2. Bloqueio de Desconto de 100% (ou mais)
+    if (currentPoster.posterSubType === 'offer' && valDe > 0) {
+      const discount = (valDe - valPor) / valDe;
+      
+      if (discount >= 1) {
+        setSecurityModal({
+          isOpen: true,
+          type: 'error',
+          title: 'Desconto Inválido',
+          message: 'O sistema não permite cartazes com 100% ou mais de desconto. Verifique os preços DE e POR.',
+        });
+        return;
+      }
+
+      // 3. Alerta de Desconto Alto (> 80%)
+      if (discount > 0.8) {
+        setSecurityModal({
+          isOpen: true,
+          type: 'warning',
+          title: 'Desconto Muito Alto',
+          message: `Este produto está com um desconto de ${Math.round(discount * 100)}%. Você confirma que o preço final de R$ ${currentPoster.priceFor} está correto?`,
+          onConfirm: () => {
+            setSecurityModal(prev => ({ ...prev, isOpen: false }));
+            proceedAddToQueue();
+          }
+        });
+        return;
+      }
+    }
+
+    proceedAddToQueue();
+  };
+
+  const proceedAddToQueue = () => {
     setQueue((prev: PosterData[]) => [...prev, { ...currentPoster, quantity: 1 }]);
-    setCurrentPoster({
+    
+    // Reseta o formulário preservando algumas preferências do usuário
+    const resetData = {
       ...initialPosterData(),
       posterSubType: currentPoster.posterSubType,
       paymentOption: currentPoster.paymentOption,
       defectType: currentPoster.defectType,
       customDefectDiscount: currentPoster.customDefectDiscount,
       quantity: 1
-    });
+    };
+    
+    lastResetRef.current = JSON.stringify(resetData);
+    setCurrentPoster(resetData);
     setIsProductReady(false);
+    setPreviewMode('page'); // Muda automático para a visão da página ao adicionar
     setFormKey((k: number) => k + 1);
   };
+
+
+
 
   const handleUpdateQuantity = (index: number, delta: number) => {
     setQueue((prev: PosterData[]) => prev.map((item, i) => {
@@ -455,15 +624,24 @@ export default function Home() {
 
   const typeOptions = [
     { id: 'reliquias',             label: 'Relíquias'          },
+    { id: 'etiqueta-oficial',      label: 'Gôndola Oficial'    },
   ] as const;
 
+
+
   return (
-    <div className="min-h-screen flex flex-col bg-background text-foreground md:h-screen md:overflow-hidden print:w-full print:h-auto print:min-h-0 print:block">
+    <div className="flex flex-col h-[100dvh] w-full overflow-hidden bg-background text-foreground font-sans selection:bg-primary selection:text-white overscroll-none print:block print:h-auto print:min-h-0">
+
 
       {/* Modais */}
       <DisclaimerModal />
       <AboutPanel open={showAbout} onClose={() => setShowAbout(false)} />
       <DatabasePanel open={showDatabase} onClose={() => setShowDatabase(false)} />
+
+      <SecurityModal 
+        {...securityModal} 
+        onClose={() => setSecurityModal(prev => ({ ...prev, isOpen: false }))} 
+      />
 
       {/* ── Header ── */}
       <header className="no-print shrink-0 px-4 py-3 border-b bg-card">
@@ -478,11 +656,24 @@ export default function Home() {
             {/* Mobile select */}
 
             {/* Desktop button group */}
-            <div className="hidden md:flex bg-muted p-1 rounded-lg">
-               <span className="px-3 py-1.5 rounded-md text-[13px] font-semibold bg-background text-foreground shadow-sm">
-                 Modelo: Relíquias
-               </span>
+            <div className="flex bg-muted p-1 rounded-xl gap-1 shadow-inner">
+               {typeOptions.map(opt => (
+                 <button
+                   key={opt.id}
+                   onClick={() => handlePosterTypeChange(opt.id as PosterType)}
+                   className={cn(
+                     'px-4 py-2 rounded-lg text-[13px] font-bold transition-all duration-200 whitespace-nowrap',
+                     posterType === opt.id
+                       ? 'bg-background text-primary shadow-sm scale-[1.02]'
+                       : 'text-muted-foreground hover:bg-black/5'
+                   )}
+                 >
+                   {opt.label}
+                 </button>
+               ))}
             </div>
+
+
               <AboutPanel open={showAbout} onClose={() => setShowAbout(false)} />
               <button
                 onClick={() => setShowAbout(true)}
@@ -521,18 +712,19 @@ export default function Home() {
         {renderPrintContent()}
       </div>
 
-      {/* ── Main ── */}
-      <main className="no-print flex-1 flex flex-col min-h-0 md:overflow-hidden pb-[70px] md:pb-0">
-        <div className="flex-1 flex flex-col md:grid md:grid-cols-12 min-h-0">
+      {/* ── Main Area ── */}
+      <main className="no-print flex-1 flex flex-col min-h-0 overflow-hidden relative">
+        <div className="flex-1 flex flex-col md:grid md:grid-cols-12 min-h-0 h-full overflow-hidden">
 
-          {/* ── Left: Form + Add + Queue ── */}
+
+          {/* ── COLUMN 1: FORM (EDIT) ── */}
           <div className={cn(
-            "flex-none md:flex-auto md:col-span-5 lg:col-span-4 flex flex-col border-r border-border bg-muted/10 md:min-h-0 h-full overflow-x-hidden",
+            "md:col-span-3 flex flex-col border-r border-border bg-card md:min-h-0 h-full overflow-hidden",
             activeTab !== 'edit' && "hidden md:flex"
           )}>
-            <div className="flex-1 md:overflow-y-auto overflow-y-visible overflow-x-hidden px-4 pt-4 min-h-0 custom-scrollbar">
-              <div className="pb-12 space-y-3">
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-4">
 
+              <div className="space-y-4">
                 <PosterForm
                   key={`form-${formKey}`}
                   data={currentPoster}
@@ -542,126 +734,182 @@ export default function Home() {
                   onImportBatch={() => fileInputRef.current?.click()}
                 />
 
-                {/* ── Add to queue button ── */}
                 <Button
                   onClick={handleAddToQueue}
                   disabled={!isProductReady}
                   className={cn(
-                    'w-full h-12 text-base font-semibold gap-2 transition-all',
-                    isProductReady && 'ring-2 ring-primary/40 shadow-md'
+                    'w-full h-14 text-base font-black uppercase tracking-widest gap-2 transition-all shadow-lg',
+                    isProductReady 
+                      ? 'bg-primary hover:bg-primary/90 shadow-primary/20 scale-[1.01]' 
+                      : 'bg-muted text-muted-foreground'
                   )}
                 >
-                  <Plus className="h-5 w-5" />
+                  <Plus className="h-6 w-6" />
                   Adicionar ao Lote
                 </Button>
-
-                {/* ── Queue list ── */}
-                {queue.length > 0 && (
-                  <div className="rounded-lg border border-border bg-card overflow-hidden">
-                    <div className="flex items-center justify-between px-3 py-2 border-b bg-muted/30">
-                      <p className="text-sm font-semibold flex items-center gap-2">
-                        <FileStack className="h-4 w-4 text-primary" />
-                        {queue.length} cartaz{queue.length !== 1 ? 'es' : ''} &middot; {totalPages} página{totalPages !== 1 ? 's' : ''}
-                      </p>
-                      <button
-                        onClick={() => setQueue([])}
-                        className="text-xs text-destructive hover:underline font-medium"
-                      >
-                        Limpar tudo
-                      </button>
-                    </div>
-
-                    {/* Filter label (simplified) */}
-                    <div className="flex border-b bg-muted/10 px-3 py-1.5 items-center justify-center">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-primary">
-                        Somente Oferta Ativa
-                      </span>
-                    </div>
-
-                    <div className="divide-y divide-border/50">
-                      {queue.map((item: PosterData, index: number) => (
-                        <div key={index} className="flex items-center gap-3 px-3 py-2.5 hover:bg-muted/40 transition-colors">
-                          <div className="flex-1 min-w-0">
-                            <p className="text-[11px] font-bold text-gray-900 truncate uppercase leading-none mb-1">
-                              {item.description}
-                            </p>
-                            <p className="text-[9px] text-muted-foreground font-mono">
-                              {item.code} | {item.priceFor}
-                            </p>
-                          </div>
-                          
-                          <div className="flex items-center gap-2 shrink-0">
-                            {/* Controle de Quantidade */}
-                            <div className="flex items-center border rounded-md overflow-hidden bg-background h-7">
-                              <button 
-                                onClick={() => handleUpdateQuantity(index, -1)}
-                                className="px-2 h-full hover:bg-muted transition-colors border-r text-xs font-bold"
-                              >
-                                -
-                              </button>
-                              <div className="px-2 min-w-[20px] text-center text-[10px] font-black text-primary">
-                                {item.quantity || 1}
-                              </div>
-                              <button 
-                                onClick={() => handleUpdateQuantity(index, 1)}
-                                className="px-2 h-full hover:bg-muted transition-colors border-l text-xs font-bold"
-                              >
-                                +
-                              </button>
-                            </div>
-
-                            <button
-                              onClick={() => handleRemoveFromQueue(index)}
-                              className="p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-md transition-all"
-                              title="Remover"
-                            >
-                              <Trash2 className="h-3.5 w-3.5" />
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
 
               </div>
             </div>
           </div>
 
-          {/* ── Right: Single poster preview ── */}
+          {/* ── COLUMN 2: QUEUE (LOTE) ── */}
           <div className={cn(
-            "md:col-span-7 lg:col-span-8 flex flex-col p-4 gap-2 md:overflow-hidden bg-muted/20 border-b border-border md:border-b-0 h-full md:h-full",
+            "md:col-span-3 flex flex-col border-r border-border bg-muted/5 md:min-h-0 h-full overflow-hidden",
+            activeTab !== 'queue' && "hidden md:flex"
+          )}>
+
+            <div className="shrink-0 px-4 py-3 border-b bg-muted/20 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <FileStack className="h-4 w-4 text-primary" />
+                <span className="text-xs font-bold uppercase tracking-wider">Lote Atual</span>
+                <span className="bg-primary text-primary-foreground text-[10px] px-1.5 py-0.5 rounded-full font-bold">
+                  {filteredQueue.length}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                {queue.length > filteredQueue.length && (
+                  <span className="text-[9px] font-bold text-orange-600 bg-orange-50 px-1 rounded border border-orange-200" title="Itens 'Preço Normal' estão ocultos neste modelo">
+                    {queue.length - filteredQueue.length} OCULTOS
+                  </span>
+                )}
+                {queue.length > 0 && (
+                  <button
+                    onClick={() => setQueue([])}
+                    className="text-[10px] text-destructive hover:underline font-bold uppercase"
+                  >
+                    Limpar
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div className="flex-1 overflow-y-auto custom-scrollbar">
+              {filteredQueue.length === 0 ? (
+                <div className="h-full flex flex-col items-center justify-center p-8 text-center opacity-40">
+                  <PackageOpen className="h-10 w-10 mb-2" />
+                  <p className="text-xs font-medium uppercase tracking-tighter">
+                    {queue.length > 0 ? 'Nenhum item compatível' : 'O lote está vazio'}
+                  </p>
+                </div>
+              ) : (
+                <div className="pb-4">
+                  {(() => {
+                    let currentPos = 0;
+                    let lastPage = 0;
+                    
+                    return filteredQueue.map((item: PosterData, index: number) => {
+                      const realIndex = queue.indexOf(item);
+                      const startPage = Math.floor(currentPos / perPage) + 1;
+                      const endPage = Math.floor((currentPos + (item.quantity || 1) - 1) / perPage) + 1;
+                      const showHeader = startPage !== lastPage;
+                      lastPage = startPage;
+                      
+                      currentPos += (item.quantity || 1);
+                      
+                      return (
+                        <React.Fragment key={index}>
+                          {showHeader && (
+                            <div className="bg-muted/30 px-4 py-1.5 border-y border-border/50 sticky top-0 z-10 backdrop-blur-sm">
+                              <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest flex items-center gap-2">
+                                <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+                                Página {startPage}
+                              </p>
+                            </div>
+                          )}
+                          <div className="flex items-center gap-3 px-4 py-3 hover:bg-white transition-colors group border-b border-border/30 last:border-b-0">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-0.5">
+                                <p className="text-[11px] font-bold text-gray-900 truncate uppercase leading-none">
+                                  {item.description}
+                                </p>
+                                {startPage !== endPage && (
+                                  <span className="text-[8px] font-bold text-blue-600 bg-blue-50 px-1 rounded border border-blue-100 whitespace-nowrap">
+                                    PAG {startPage}-{endPage}
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-[9px] text-muted-foreground font-mono flex items-center gap-2">
+                                <span>{item.code}</span>
+                                <span className="w-1 h-1 bg-border rounded-full" />
+                                <span className={cn(item.posterSubType === 'offer' ? "text-orange-600 font-bold" : "text-blue-600 font-bold")}>
+                                  {item.posterSubType === 'offer' ? 'OFERTA' : 'NORMAL'}
+                                </span>
+                              </p>
+                            </div>
+                            
+                            <div className="flex flex-col items-end gap-1">
+                              <div className="flex items-center bg-background border rounded-md p-0.5">
+                                <button 
+                                  onClick={() => handleUpdateQuantity(realIndex, -1)}
+                                  className="w-5 h-5 flex items-center justify-center text-xs hover:bg-muted rounded transition-colors"
+                                >
+                                  -
+                                </button>
+                                <span className="w-6 text-center text-[10px] font-black">{item.quantity || 1}</span>
+                                <button 
+                                  onClick={() => handleUpdateQuantity(realIndex, 1)}
+                                  className="w-5 h-5 flex items-center justify-center text-xs hover:bg-muted rounded transition-colors"
+                                >
+                                  +
+                                </button>
+                              </div>
+                              <button
+                                onClick={() => handleRemoveFromQueue(realIndex)}
+                                className="p-1 text-muted-foreground hover:text-destructive transition-colors opacity-0 group-hover:opacity-100"
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </button>
+                            </div>
+                          </div>
+                        </React.Fragment>
+                      );
+                    });
+                  })()}
+                </div>
+              )}
+            </div>
+
+
+          </div>
+
+          {/* ── COLUMN 3: PREVIEW ── */}
+          <div className={cn(
+            "md:col-span-6 flex flex-col p-4 gap-2 md:overflow-hidden bg-muted/20 h-full",
             activeTab !== 'preview' && "hidden md:flex"
           )}>
             <div className="flex items-center justify-between shrink-0 mb-1">
-              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                Visualização
-              </p>
-              <div className="flex bg-background border rounded-md p-0.5">
+              <div className="flex items-center gap-2">
+                <LayoutGrid className="h-4 w-4 text-primary" />
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                  Visualização de Impressão
+                </p>
+              </div>
+              <div className="flex bg-muted p-1 rounded-xl shadow-inner">
                 <button 
                   onClick={() => setPreviewMode('single')}
                   className={cn(
-                    "px-3 py-1 text-[10px] font-bold rounded transition-all",
-                    previewMode === 'single' ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                    "px-5 py-2 text-[10px] font-black rounded-lg transition-all",
+                    previewMode === 'single' ? "bg-background text-primary shadow-sm scale-105" : "text-muted-foreground hover:bg-black/5"
                   )}
                 >
-                  Individual
+                  INDIVIDUAL
                 </button>
                 <button 
                   onClick={() => setPreviewMode('page')}
                   disabled={queue.length === 0}
                   className={cn(
-                    "px-3 py-1 text-[10px] font-bold rounded transition-all",
-                    previewMode === 'page' ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground",
-                    queue.length === 0 && "opacity-50 cursor-not-allowed"
+                    "px-5 py-2 text-[10px] font-black rounded-lg transition-all",
+                    previewMode === 'page' ? "bg-background text-primary shadow-sm scale-105" : "text-muted-foreground hover:bg-black/5",
+                    queue.length === 0 && "opacity-30 cursor-not-allowed"
                   )}
                 >
-                  Página
+                  PÁGINA COMPLETA
                 </button>
               </div>
+
             </div>
 
-            <div className="flex-1 min-h-0 relative border rounded border-border overflow-hidden bg-white/50">
+            <div className="flex-1 min-h-0 relative border rounded-xl border-border/50 overflow-hidden bg-white shadow-inner">
               <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
                 {previewMode === 'single' ? (
                   <SinglePosterPreview
@@ -681,49 +929,76 @@ export default function Home() {
               </div>
             </div>
 
-            <p className="text-xs text-muted-foreground text-center shrink-0">
-              {queue.length === 0
-                ? 'Preencha o formulário e clique em "Adicionar ao Lote".'
-                : `Lote: ${queue.length} cartaz${queue.length !== 1 ? 'es' : ''} → ${totalPages} página${totalPages !== 1 ? 's' : ''}`}
-            </p>
+            <div className="flex items-center justify-center gap-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 py-2">
+               {queue.length > 0 && (
+                 <>
+                   <span>Total: {queue.length} Itens</span>
+                   <span className="w-1 h-1 bg-border rounded-full" />
+                   <span>Impressão: {totalPages} {totalPages === 1 ? 'Página' : 'Páginas'}</span>
+                 </>
+               )}
+            </div>
           </div>
+
         </div>
       </main>
 
-      {/* ── Mobile Navigation Tabs ── */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 h-[70px] bg-background border-t border-border flex items-center px-6 gap-4 z-40 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+      <div className="md:hidden sticky bottom-0 left-0 right-0 h-[70px] bg-white border-t border-border z-[100] flex items-center justify-around px-2 shadow-[0_-4px_12px_rgba(0,0,0,0.05)] shrink-0">
+
         <button
           onClick={() => setActiveTab('edit')}
           className={cn(
-            "flex-1 flex flex-col items-center justify-center gap-1 transition-all",
-            activeTab === 'edit' ? "text-primary" : "text-muted-foreground"
+            "flex flex-col items-center justify-center gap-1 w-full h-full transition-all duration-200",
+            activeTab === 'edit' ? "text-primary translate-y-[-2px]" : "text-muted-foreground opacity-60"
           )}
         >
           <div className={cn(
-            "p-2 rounded-xl transition-all",
+            "p-1.5 rounded-xl transition-all",
             activeTab === 'edit' ? "bg-primary/10" : ""
           )}>
             <Edit3 className="h-5 w-5" />
           </div>
-          <span className="text-[10px] font-bold uppercase tracking-widest">Editar</span>
+          <span className="text-[10px] font-black uppercase tracking-tighter">Editar</span>
         </button>
-        
+
         <button
-          onClick={() => setActiveTab('preview')}
+          onClick={() => setActiveTab('queue')}
           className={cn(
-            "flex-1 flex flex-col items-center justify-center gap-1 transition-all",
-            activeTab === 'preview' ? "text-primary" : "text-muted-foreground"
+            "flex flex-col items-center justify-center gap-1 w-full h-full transition-all duration-200",
+            activeTab === 'queue' ? "text-primary translate-y-[-2px]" : "text-muted-foreground opacity-60"
           )}
         >
           <div className={cn(
-            "p-2 rounded-xl transition-all",
+            "p-1.5 rounded-xl transition-all relative",
+            activeTab === 'queue' ? "bg-primary/10" : ""
+          )}>
+            <FileStack className="h-5 w-5" />
+            {queue.length > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 bg-primary text-white text-[8px] w-4 h-4 rounded-full flex items-center justify-center font-bold ring-2 ring-white">
+                {queue.length}
+              </span>
+            )}
+          </div>
+          <span className="text-[10px] font-black uppercase tracking-tighter">Lote</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('preview')}
+          className={cn(
+            "flex flex-col items-center justify-center gap-1 w-full h-full transition-all duration-200",
+            activeTab === 'preview' ? "text-primary translate-y-[-2px]" : "text-muted-foreground opacity-60"
+          )}
+        >
+          <div className={cn(
+            "p-1.5 rounded-xl transition-all",
             activeTab === 'preview' ? "bg-primary/10" : ""
           )}>
             <LayoutGrid className="h-5 w-5" />
           </div>
-          <span className="text-[10px] font-bold uppercase tracking-widest">Prévia</span>
+          <span className="text-[10px] font-black uppercase tracking-tighter">Prévia</span>
         </button>
       </div>
+
       {/* Modal de Feedback de Importação */}
       <ImportModal 
         status={importStatus} 

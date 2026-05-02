@@ -5,7 +5,8 @@ import type { Dispatch, SetStateAction } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import type { PosterData } from '@/app/lib/types';
+import type { PosterData, PosterType } from '@/app/lib/types';
+
 import { cn } from '@/lib/utils';
 import { Loader2, CheckCircle2, XCircle, Search, RotateCcw, PlusCircle, Info, AlertTriangle, Camera } from 'lucide-react';
 import { BarcodeScanner } from './barcode-scanner';
@@ -65,7 +66,8 @@ type LookupStatus = 'idle' | 'loading' | 'found' | 'notfound';
 type PosterFormProps = {
   data: PosterData;
   setData: Dispatch<SetStateAction<PosterData>>;
-  posterType: 'reliquias';
+  posterType: PosterType;
+
   onLookupStatusChange?: (found: boolean) => void;
   onImportBatch?: () => void;
 };
@@ -116,11 +118,14 @@ export function PosterForm({ data, setData, posterType, onLookupStatusChange, on
   
   // Automatização inteligente do parcelamento (Desativada na versão Relíquias)
   useEffect(() => {
-    setData(prev => ({
-      ...prev,
-      paymentOption: 'normal'
-    }));
-  }, [setData]);
+    if (posterType === 'reliquias') {
+      setData(prev => ({
+        ...prev,
+        paymentOption: 'normal'
+      }));
+    }
+  }, [setData, posterType]);
+
 
 
 
@@ -275,10 +280,10 @@ export function PosterForm({ data, setData, posterType, onLookupStatusChange, on
             <Label htmlFor="search-code" className="font-bold text-gray-900 uppercase tracking-tight text-sm">
               1. Encontrar Produto
             </Label>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               <button
                 onClick={(e) => { e.preventDefault(); setShowScanner(true); }}
-                className="text-[11px] font-bold text-blue-600 hover:underline flex items-center gap-1.5 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100 transition-colors hover:bg-blue-100"
+                className="h-9 px-3 text-[10px] font-black text-white bg-blue-600 hover:bg-blue-700 rounded-lg flex items-center gap-1.5 shadow-sm transition-all active:scale-95"
               >
                 <Camera className="h-3.5 w-3.5" />
                 SCANNER
@@ -286,18 +291,10 @@ export function PosterForm({ data, setData, posterType, onLookupStatusChange, on
               {onImportBatch && (
                 <button 
                   onClick={(e) => { e.preventDefault(); onImportBatch(); }}
-                  className="text-[11px] font-bold text-primary hover:underline flex items-center gap-1.5 bg-primary/5 px-2 py-0.5 rounded-full border border-primary/10 transition-colors hover:bg-primary/10"
+                  className="h-9 px-3 text-[10px] font-black text-primary bg-primary/5 hover:bg-primary/10 border border-primary/20 rounded-lg flex items-center gap-1.5 transition-all active:scale-95"
                 >
                   <PlusCircle className="h-3.5 w-3.5" />
-                  IMPORTAR CSV
-                </button>
-              )}
-              {isManualMode && (
-                <button 
-                  onClick={() => { setIsManualMode(false); setLookupStatus('idle'); setSearchValue(''); }}
-                  className="text-[10px] text-red-600 font-bold hover:underline"
-                >
-                  Remover Manual
+                  IMPORTAR
                 </button>
               )}
             </div>
@@ -312,13 +309,15 @@ export function PosterForm({ data, setData, posterType, onLookupStatusChange, on
               onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
               placeholder="Digite o código SAP ou EAN..."
               className={cn(
-                'h-12 text-lg font-medium transition-all duration-200',
-                lookupStatus === 'found' && 'border-green-500 bg-green-50/10',
-                lookupStatus === 'notfound' && 'border-red-300 bg-red-50/10',
+                'h-14 text-lg font-bold transition-all duration-300 border-2',
+                lookupStatus === 'found' && 'border-green-500 bg-green-50/20 shadow-[0_0_0_1px_rgba(34,197,94,0.1)]',
+                lookupStatus === 'notfound' && 'border-red-300 bg-red-50/20',
+                lookupStatus === 'idle' && 'focus:border-primary shadow-sm'
               )}
               autoComplete="off"
               disabled={isManualMode}
             />
+
             <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none opacity-50">
               {!isManualMode && statusIcon}
               {isManualMode && <CheckCircle2 className="h-4 w-4 text-blue-500" />}
@@ -377,63 +376,60 @@ export function PosterForm({ data, setData, posterType, onLookupStatusChange, on
               </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="md:col-span-2 space-y-1.5">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="col-span-2 space-y-1.5">
                 <Label className="text-[10px] font-bold text-gray-500 uppercase flex items-center gap-1">
-                   Descrição Completa <span className="text-red-500">*</span>
+                   Descrição Completa <span className="text-red-500 font-black">*</span>
                 </Label>
                 <Input
                   value={manualDescription}
                   onChange={e => setManualDescription(e.target.value.toUpperCase())}
                   placeholder="EX: BONECA BARBIE SEREIA MATTEL"
-                  className="h-11 font-bold uppercase border-blue-200 focus:ring-blue-500"
+                  className="h-12 font-bold uppercase border-blue-200 focus:ring-blue-500 shadow-sm"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <Label className="text-[10px] font-bold text-gray-500 uppercase flex items-center gap-1">
-                  Cód. SAP <span className="text-muted-foreground font-normal">(ou EAN)</span>
-                </Label>
+                <Label className="text-[10px] font-bold text-gray-500 uppercase">Cód. SAP</Label>
                 <Input
                   value={manualCode}
                   onChange={e => setManualCode(e.target.value.replace(/\D/g, ''))}
-                  placeholder="Código SAP"
-                  className="h-10 font-mono border-blue-200"
+                  placeholder="000000"
+                  className="h-12 font-mono font-bold border-blue-200"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <Label className="text-[10px] font-bold text-gray-500 uppercase flex items-center gap-1">
-                  EAN <span className="text-muted-foreground font-normal">(ou SAP)</span>
-                </Label>
+                <Label className="text-[10px] font-bold text-gray-500 uppercase">EAN</Label>
                 <Input
                   value={manualEan}
-                  onChange={e => setManualEan(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                  placeholder="Código de Barras"
-                  className="h-10 font-mono border-blue-200"
+                  onChange={e => setManualEan(e.target.value.replace(/\D/g, ''))}
+                  placeholder="0000000000000"
+                  className="h-12 font-mono font-bold border-blue-200"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <Label className="text-[10px] font-bold text-gray-500 uppercase">Referência</Label>
+                <Label className="text-[10px] font-bold text-gray-500 uppercase tracking-tighter">Referência</Label>
                 <Input
                   value={manualReference}
                   onChange={e => setManualReference(e.target.value.toUpperCase())}
                   placeholder="Opcional"
-                  className="h-10 border-blue-200"
+                  className="h-12 border-blue-200"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <Label className="text-[10px] font-bold text-gray-500 uppercase">Fornecedor</Label>
+                <Label className="text-[10px] font-bold text-gray-500 uppercase tracking-tighter">Fornecedor</Label>
                 <Input
                   value={manualSupplier}
                   onChange={e => setManualSupplier(e.target.value.toUpperCase())}
                   placeholder="Opcional"
-                  className="h-10 uppercase border-blue-200"
+                  className="h-12 uppercase border-blue-200"
                 />
               </div>
             </div>
+
             
             <p className="text-[9px] text-blue-400 font-medium italic text-right">
               * Campos obrigatórios preenchidos liberam o botão "Adicionar ao Lote"
@@ -470,13 +466,61 @@ export function PosterForm({ data, setData, posterType, onLookupStatusChange, on
         disabled={!isEnabled}
       >
         <div className="bg-white border rounded-xl p-5 shadow-sm space-y-5">
-           <Label className="font-bold text-gray-900 uppercase tracking-tight text-sm block border-b pb-2">
-              2. Preços e Formato
-           </Label>
+           <div className="flex items-center justify-between border-b pb-2 flex-wrap gap-2">
+             <Label className="font-bold text-gray-900 uppercase tracking-tight text-sm">
+                2. Preços e Formato
+             </Label>
+             <div className="flex flex-wrap gap-3">
+               {posterType !== 'reliquias' && (
+                 <div className="flex bg-muted p-1 rounded-xl shadow-inner border border-border/50">
+                   <button
+                     onClick={() => setData(prev => ({ ...prev, posterSubType: 'normal' }))}
+                     className={cn(
+                       "px-4 py-2 text-[10px] font-black rounded-lg transition-all",
+                       data.posterSubType === 'normal' ? "bg-white text-primary shadow-sm scale-105" : "text-muted-foreground hover:bg-black/5"
+                     )}
+                   >
+                     PREÇO NORMAL
+                   </button>
+                   <button
+                     onClick={() => setData(prev => ({ ...prev, posterSubType: 'offer' }))}
+                     className={cn(
+                       "px-4 py-2 text-[10px] font-black rounded-lg transition-all",
+                       data.posterSubType === 'offer' ? "bg-white text-orange-600 shadow-sm scale-105" : "text-muted-foreground hover:bg-black/5"
+                     )}
+                   >
+                     OFERTA
+                   </button>
+                 </div>
+               )}
+               {posterType !== 'reliquias' && (
+                 <div className="flex bg-muted p-1 rounded-xl shadow-inner border border-border/50">
+                   <button
+                     onClick={() => setData(prev => ({ ...prev, paymentOption: 'normal' }))}
+                     className={cn(
+                       "px-4 py-2 text-[10px] font-black rounded-lg transition-all",
+                       data.paymentOption === 'normal' ? "bg-white text-primary shadow-sm scale-105" : "text-muted-foreground hover:bg-black/5"
+                     )}
+                   >
+                     À VISTA
+                   </button>
+                   <button
+                     onClick={() => setData(prev => ({ ...prev, paymentOption: 'installment' }))}
+                     className={cn(
+                       "px-4 py-2 text-[10px] font-black rounded-lg transition-all",
+                       data.paymentOption === 'installment' ? "bg-white text-blue-600 shadow-sm scale-105" : "text-muted-foreground hover:bg-black/5"
+                     )}
+                   >
+                     PARCELADO
+                   </button>
+                 </div>
+               )}
+             </div>
 
-
+           </div>
 
            <div className="grid grid-cols-2 gap-4">
+
               {(isOfferType) && (
                 <div className="space-y-1">
                   <Label className="text-[10px] font-bold text-gray-500 uppercase">Preço Anterior (DE)</Label>

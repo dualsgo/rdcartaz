@@ -14,6 +14,8 @@ export function BarcodeScanner({ onScan, onClose }: BarcodeScannerProps) {
   const scannerRef = useRef<Html5Qrcode | null>(null);
   const [isInitializing, setIsInitializing] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [cameras, setCameras] = useState<any[]>([]);
+  const [currentCameraIndex, setCurrentCameraIndex] = useState(0);
 
   useEffect(() => {
     const startScanner = async () => {
@@ -21,33 +23,48 @@ export function BarcodeScanner({ onScan, onClose }: BarcodeScannerProps) {
         const html5QrCode = new Html5Qrcode("reader");
         scannerRef.current = html5QrCode;
 
-        const config = {
-          fps: 15,
-          qrbox: { width: 280, height: 160 },
-          aspectRatio: 1.0,
-        };
+        const availableCameras = await Html5Qrcode.getCameras();
+        setCameras(availableCameras);
 
-        // Forçamos a câmera traseira (environment)
-        await html5QrCode.start(
-          { facingMode: "environment" },
-          config,
-          (decodedText) => {
-            // Sucesso
-            html5QrCode.stop().then(() => {
-              onScan(decodedText);
-            }).catch(() => onScan(decodedText));
-          },
-          () => {
-            // Erro de scan (ignorado)
-          }
-        );
+        if (availableCameras && availableCameras.length > 0) {
+          const defaultIndex = availableCameras.length > 1 ? availableCameras.length - 1 : 0;
+          setCurrentCameraIndex(defaultIndex);
+
+          const config = {
+            fps: 20,
+            qrbox: { width: 280, height: 160 },
+            aspectRatio: 1.7777777778, 
+          };
+
+          await html5QrCode.start(
+            availableCameras[defaultIndex].id,
+            config,
+            (decodedText) => {
+              html5QrCode.stop().then(() => {
+                onScan(decodedText);
+              }).catch(() => onScan(decodedText));
+            },
+            () => {}
+          );
+        } else {
+          await html5QrCode.start(
+            { facingMode: "environment" },
+            { fps: 20, qrbox: { width: 280, height: 160 }, aspectRatio: 1.0 },
+            (decodedText) => {
+              html5QrCode.stop().then(() => {
+                onScan(decodedText);
+              }).catch(() => onScan(decodedText));
+            },
+            () => {}
+          );
+        }
         
         setIsInitializing(false);
         setError(null);
       } catch (err: any) {
         console.error("Erro ao iniciar scanner:", err);
         setIsInitializing(false);
-        setError("Não foi possível acessar a câmera traseira. Verifique as permissões do navegador.");
+        setError("Não foi possível acessar a câmera. Verifique as permissões.");
       }
     };
 
@@ -60,12 +77,43 @@ export function BarcodeScanner({ onScan, onClose }: BarcodeScannerProps) {
     };
   }, [onScan]);
 
+  const handleSwitchCamera = async () => {
+    if (!scannerRef.current || cameras.length <= 1) return;
+
+    const nextIndex = (currentCameraIndex + 1) % cameras.length;
+    setIsInitializing(true);
+    
+    try {
+      await scannerRef.current.stop();
+      setCurrentCameraIndex(nextIndex);
+      
+      await scannerRef.current.start(
+        cameras[nextIndex].id,
+        {
+          fps: 20,
+          qrbox: { width: 280, height: 160 },
+          aspectRatio: 1.7777777778,
+        },
+        (decodedText) => {
+          scannerRef.current?.stop().then(() => {
+            onScan(decodedText);
+          }).catch(() => onScan(decodedText));
+        },
+        () => {}
+      );
+      setIsInitializing(false);
+    } catch (err) {
+      console.error("Erro ao trocar câmera:", err);
+      setError("Erro ao trocar de câmera.");
+      setIsInitializing(false);
+    }
+  };
+
   const handleRetry = () => {
     setIsInitializing(true);
     setError(null);
     if (scannerRef.current) {
       scannerRef.current.stop().then(() => {
-        // Reinicia o efeito
         window.location.reload(); // Forma bruta mas eficaz de resetar o hardware da câmera no browser
       }).catch(() => {
         window.location.reload();
@@ -83,12 +131,25 @@ export function BarcodeScanner({ onScan, onClose }: BarcodeScannerProps) {
             <Camera className="h-4 w-4 text-blue-400" />
             <h3 className="text-sm font-bold text-white uppercase tracking-widest">Scanner Ao Vivo</h3>
           </div>
-          <button 
-            onClick={onClose}
-            className="text-white/40 hover:text-white transition-colors p-1"
-          >
-            <X className="h-6 w-6" />
-          </button>
+          <div className="flex items-center gap-3">
+            {cameras.length > 1 && (
+              <button 
+                onClick={handleSwitchCamera}
+                disabled={isInitializing}
+                className="text-white/60 hover:text-white transition-colors p-1 flex items-center gap-1 bg-white/5 rounded-md px-2"
+              >
+                <RefreshCw className={cn("h-4 w-4", isInitializing && "animate-spin")} />
+                <span className="text-[10px] font-bold uppercase tracking-tighter">Trocar</span>
+              </button>
+            )}
+            <button 
+              onClick={onClose}
+              className="text-white/40 hover:text-white transition-colors p-1"
+            >
+              <X className="h-6 w-6" />
+            </button>
+          </div>
+
         </div>
 
         {/* Scanner Area */}

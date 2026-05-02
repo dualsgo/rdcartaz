@@ -22,4 +22,6 @@ export type PosterSettings = {
   minInstallmentAmount: number;
 };
 
-export type PosterType = 'reliquias';
+export type PosterType = 'reliquias' | 'etiqueta-oficial';
+
+
