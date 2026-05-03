@@ -816,7 +816,15 @@ export default function Home() {
                               </p>
                             </div>
                           )}
-                          <div className="flex items-center gap-3 px-4 py-3 hover:bg-white transition-colors group border-b border-border/30 last:border-b-0">
+                          <div className="flex items-center gap-3 px-4 py-3 hover:bg-white transition-colors group border-b border-border/30 last:border-b-0 relative">
+                            <button
+                              onClick={() => handleRemoveFromQueue(realIndex)}
+                              className="shrink-0 p-1.5 text-muted-foreground hover:text-destructive hover:bg-red-50 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                              title="Remover item"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 mb-0.5">
                                 <p className="text-[11px] font-bold text-gray-900 truncate uppercase leading-none">
@@ -837,27 +845,19 @@ export default function Home() {
                               </p>
                             </div>
                             
-                            <div className="flex flex-col items-end gap-1">
-                              <div className="flex items-center bg-background border rounded-md p-0.5">
-                                <button 
-                                  onClick={() => handleUpdateQuantity(realIndex, -1)}
-                                  className="w-5 h-5 flex items-center justify-center text-xs hover:bg-muted rounded transition-colors"
-                                >
-                                  -
-                                </button>
-                                <span className="w-6 text-center text-[10px] font-black">{item.quantity || 1}</span>
-                                <button 
-                                  onClick={() => handleUpdateQuantity(realIndex, 1)}
-                                  className="w-5 h-5 flex items-center justify-center text-xs hover:bg-muted rounded transition-colors"
-                                >
-                                  +
-                                </button>
-                              </div>
-                              <button
-                                onClick={() => handleRemoveFromQueue(realIndex)}
-                                className="p-1 text-muted-foreground hover:text-destructive transition-colors opacity-0 group-hover:opacity-100"
+                            <div className="shrink-0 flex items-center bg-background border rounded-md p-0.5">
+                              <button 
+                                onClick={() => handleUpdateQuantity(realIndex, -1)}
+                                className="w-6 h-6 flex items-center justify-center text-xs hover:bg-muted rounded transition-colors"
                               >
-                                <Trash2 className="h-3 w-3" />
+                                -
+                              </button>
+                              <span className="w-8 text-center text-[10px] font-black">{item.quantity || 1}</span>
+                              <button 
+                                onClick={() => handleUpdateQuantity(realIndex, 1)}
+                                className="w-6 h-6 flex items-center justify-center text-xs hover:bg-muted rounded transition-colors"
+                              >
+                                +
                               </button>
                             </div>
                           </div>
