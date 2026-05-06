@@ -19,30 +19,25 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 
-// The PosterType definition was moved to '@/app/lib/types'
-// type PosterType = 'reliquias' | 'ofertas-imperdiveis' | 'aereo' | 'avaria' | 'etiqueta' | 'totem' | 'leve-pague-a4' | 'leve-pague-a6' | 'combo-a4' | 'combo-a6';
-
 const PER_PAGE: Record<PosterType, number> = {
   reliquias: 4,
   'ofertas-imperdiveis': 4,
-  aereo: 4,           // 4 por página (cada um ocupa 4 espaços de gôndola 2x2)
+  aereo: 4,
   avaria: 4,
   etiqueta: 16,
   'etiqueta-oficial': 16,
   totem: 1,
 };
 
-// Dimensões do cartaz individual para o preview (px)
 const SINGLE_DIMS: Record<PosterType, { w: number; h: number }> = {
   reliquias:            { w: 491, h: 340 },
   'ofertas-imperdiveis':{ w: 491, h: 340 },
-  aereo:                { w: 760, h: 268 },  // proporcional a 190mm x 67mm (4px/mm)
+  aereo:                { w: 760, h: 268 },
   avaria:               { w: 491, h: 340 },
-  'etiqueta-oficial':   { w: 364, h: 136 }, // 91mm x 34.0mm (4px/mm)
-  totem:                { w: 794, h: 1123 }, // A4 a 96dpi (210×297mm em pixels de tela)
+  'etiqueta-oficial':   { w: 364, h: 136 },
+  totem:                { w: 794, h: 1123 },
 };
 
-// Orientação de impressão por tipo de cartaz
 const POSTER_ORIENTATION: Record<PosterType, 'portrait' | 'landscape'> = {
   reliquias:            'landscape',
   'ofertas-imperdiveis':'landscape',
@@ -69,8 +64,6 @@ const initialPosterData = (): PosterData => ({
   quantity: 1,
 });
 
-/* ─────────────────────────── SinglePosterPreview ─────────────────────────── */
-// Mostra um cartaz individual em fundo cinza (simulação de papel).
 function SinglePosterPreview({
   data,
   posterType,
@@ -86,12 +79,10 @@ function SinglePosterPreview({
   const [scale, setScale] = useState(1);
   const [ready, setReady] = useState(false);
   
-  // Safety check to prevent crash if dimensions are missing
   const dims = SINGLE_DIMS[posterType] || { w: 491, h: 340 };
   const { w, h } = dims;
 
   useEffect(() => {
-    // Recalcula escala quando o tipo muda ou dimensões mudam
     setReady(false);
 
     const outer = outerRef.current;
@@ -111,8 +102,6 @@ function SinglePosterPreview({
     return () => ro.disconnect();
   }, [posterType, w, h]);
 
-  // O outerRef SEMPRE existe no DOM para que o ResizeObserver funcione.
-  // O conteúdo interno muda conforme isReady.
   return (
     <div
       ref={outerRef}
@@ -161,7 +150,6 @@ function SinglePosterPreview({
   );
 }
 
-/* ─────────────────────────── renderPageGrid ──────────────────────────────── */
 function PageGrid({
   items,
   posterType,
@@ -290,35 +278,28 @@ function PageGrid({
       </div>
     );
   }
-  // reliquias, ofertas-imperdiveis, avaria
+  
   return (
     <div style={{
       display: 'grid',
-      // Divide a "área util" (após as margens do papel de 1.5cm vert e 1.2cm horiz)
-      // exatamente ao meio, criando 4 containers idênticos.
       gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr)',
       gridTemplateRows: 'minmax(0,1fr) minmax(0,1fr)',
       width: '100%',
       height: '100%',
-      padding: '1.5cm 1.2cm',  // Margens externas (Padrão A4 limpo)
+      padding: '1.5cm 1.2cm',
       boxSizing: 'border-box',
       backgroundColor: 'white'
     }}>
       {items.map((d: PosterData, i: number) => (
-        // Cada slot tem 100% da sua metade do papel (Aprox 13.x cm por 9cm)
         <div key={i} style={{
           width: '100%',
           height: '100%',
-          // O espaço em branco QUE SEPARA um painel do outro fisicamente:
-          // Como as margens encostam, o top de um cartaz respira pro limite
-          // e o bottom respira pro mesmo limite.
           paddingTop: '0.4cm',
           paddingBottom: '0.4cm',
           paddingLeft: '0.4cm',
           paddingRight: '0.4cm',
           boxSizing: 'border-box',
         }}>
-          {/* O Cartaz real, posicionado nos limites do seu padding interno */}
           <div style={{ width: '100%', height: '100%', overflow: 'hidden' }}>
             {posterType === 'reliquias' || posterType === 'ofertas-imperdiveis'
               ? <PosterPreview {...(d as PosterData)} isImperdiveis={posterType === 'ofertas-imperdiveis'} settings={settings} />
@@ -331,7 +312,6 @@ function PageGrid({
   );
 }
 
-/* ─────────────────────────── Home ───────────────────────────────────────── */
 export default function Home() {
   const [posterType, setPosterType] = useState<PosterType>('reliquias');
   const [queue, setQueue] = useState<PosterData[]>([]);
@@ -348,7 +328,6 @@ export default function Home() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Load settings
   useEffect(() => {
     const saved = localStorage.getItem('poster-settings');
     if (saved) {
@@ -373,7 +352,6 @@ export default function Home() {
 
   const totalPages = filteredQueue.length > 0 ? Math.ceil(filteredQueue.length / perPage) : 0;
 
-  // Update print CSS immediately when poster type changes
   useEffect(() => {
     const styleId = 'print-page-style';
     let style = document.getElementById(styleId) as HTMLStyleElement | null;
@@ -448,11 +426,10 @@ export default function Home() {
     if (isExcel) {
       reader.readAsArrayBuffer(file);
     } else {
-      reader.readAsText(file, 'ISO-8859-1'); // Comum em CSVs do Excel Brasil
+      reader.readAsText(file, 'ISO-8859-1'); 
     }
   };
 
-  /* Print content: one div per page, each with page-break */
   const renderPrintContent = () => {
     if (filteredQueue.length === 0) return null;
     const orientation = POSTER_ORIENTATION[posterType as PosterType];
@@ -463,8 +440,8 @@ export default function Home() {
           key={pageIdx}
           className="print-page bg-white"
           style={{
-            width:          orientation === 'landscape' ? '297mm'  : '210mm',
-            height:         orientation === 'landscape' ? '210mm'  : '297mm',
+            width:            orientation === 'landscape' ? '297mm'  : '210mm',
+            height:           orientation === 'landscape' ? '210mm'  : '297mm',
             pageBreakAfter: pageIdx < totalPages - 1    ? 'always' : 'auto',
             breakAfter:     pageIdx < totalPages - 1    ? 'page'   : 'auto',
           }}
@@ -478,23 +455,22 @@ export default function Home() {
   const orientation = POSTER_ORIENTATION[posterType as PosterType];
 
   const typeOptions = [
-    { id: 'reliquias',             label: 'Relíquias'          },
-    { id: 'ofertas-imperdiveis',   label: 'Imperdíveis'        },
-    { id: 'avaria',                label: 'Avarias'            },
-    { id: 'aereo',                 label: 'Aéreo'              },
+    { id: 'reliquias',             label: 'Relíquias'         },
+    { id: 'ofertas-imperdiveis',   label: 'Imperdíveis'       },
+    { id: 'avaria',                label: 'Avarias'           },
+    { id: 'aereo',                 label: 'Aéreo'             },
     { id: 'etiqueta-oficial',      label: 'Gôndola Oficial' },
-    { id: 'totem',                 label: 'Totem'              },
+    { id: 'totem',                 label: 'Totem'             },
   ] as const;
 
   return (
-    <div className="min-h-screen flex flex-col bg-background text-foreground md:h-screen md:overflow-hidden print:w-full print:h-auto print:min-h-0 print:block">
+    {/* Adicionada a classe print:overflow-visible na raiz do layout */}
+    <div className="min-h-screen flex flex-col bg-background text-foreground md:h-screen md:overflow-hidden print:w-full print:h-auto print:min-h-0 print:block print:overflow-visible">
 
-      {/* Modais */}
       <DisclaimerModal />
       <AboutPanel open={showAbout} onClose={() => setShowAbout(false)} />
       <DatabasePanel open={showDatabase} onClose={() => setShowDatabase(false)} />
 
-      {/* ── Header ── */}
       <header className="no-print shrink-0 px-4 py-3 border-b bg-card">
         <div className="flex justify-between items-center flex-wrap gap-4">
           <div className="flex items-center gap-3">
@@ -504,7 +480,6 @@ export default function Home() {
             <h1 className="font-headline text-2xl font-bold">GERADOR DE CARTAZES</h1>
           </div>
           <div className="flex items-center gap-4 w-full md:w-auto mt-2 md:mt-0 justify-between">
-            {/* Mobile select */}
             <div className="flex md:hidden flex-1 overflow-hidden">
               <Select value={posterType} onValueChange={v => handlePosterTypeChange(v as PosterType)}>
                 <SelectTrigger className="w-full h-9 font-semibold bg-background shadow-sm border-2">
@@ -515,7 +490,6 @@ export default function Home() {
                 </SelectContent>
               </Select>
             </div>
-            {/* Desktop button group */}
             <div className="hidden md:flex bg-muted p-1 rounded-lg flex-wrap gap-1">
               {typeOptions.map(opt => (
                 <button
@@ -578,16 +552,13 @@ export default function Home() {
         </div>
       </header>
 
-      {/* ── Print output (hidden on screen) ── */}
       <div className="print-container" style={{ display: 'none' }}>
         {renderPrintContent()}
       </div>
 
-      {/* ── Main ── */}
       <main className="no-print flex-1 flex flex-col min-h-0 md:overflow-hidden">
         <div className="flex-1 flex flex-col md:grid md:grid-cols-12 min-h-0">
 
-          {/* ── Left: Form + Add + Queue ── */}
           <div className="flex-none md:flex-auto md:col-span-5 lg:col-span-4 flex flex-col border-r border-border bg-muted/10 md:min-h-0 order-2 md:order-1 h-auto md:h-full overflow-x-hidden">
             <div className="flex-1 md:overflow-y-auto overflow-y-visible overflow-x-hidden px-4 pt-4 min-h-0 custom-scrollbar">
               <div className="pb-12 space-y-3">
@@ -600,7 +571,6 @@ export default function Home() {
                   onLookupStatusChange={setIsProductReady}
                 />
 
-                {/* ── Add to queue button ── */}
                 <Button
                   onClick={handleAddToQueue}
                   disabled={!isProductReady}
@@ -613,7 +583,6 @@ export default function Home() {
                   Adicionar ao Lote
                 </Button>
 
-                {/* ── Queue list ── */}
                 {queue.length > 0 && (
                   <div className="rounded-lg border border-border bg-card overflow-hidden">
                     <div className="flex items-center justify-between px-3 py-2 border-b bg-muted/30">
@@ -629,7 +598,6 @@ export default function Home() {
                       </button>
                     </div>
 
-                    {/* Filter Toggle */}
                     <div className="flex border-b divide-x divide-border/50">
                       {(['all', 'offer', 'normal'] as const).map((f) => (
                         <button
@@ -655,29 +623,9 @@ export default function Home() {
                             </p>
                             {pageItems.map((item: PosterData, itemIdx: number) => {
                               const globalIdxInFiltered = pageIdx * perPage + itemIdx;
-                              // Find original index in full queue for deletion
-                              // This is tricky if we have duplicates. 
-                              // For simplicity, let's just use the filtered list and update the whole queue.
-                              // Actually, if we delete from the filtered list, we should delete that specific instance.
                               
                               const handleRemove = () => {
-                                const newQueue = [...queue];
-                                // This finds the exact instance if we identify them by something.
-                                // Since they are plain objects, let's find the Nth occurrence that matches.
-                                let count = 0;
-                                const originalIdx = queue.findIndex(qItem => {
-                                  let matches = qItem === item; // Simple ref check if possible, but they are cloned.
-                                  // Since they are cloned, we check value equality + occurrence index
-                                  // BUT the filtered list is just a slice.
-                                  // Better: just find the index of this item in the filtered list and remove it from the total queue.
-                                  // Actually, since we want to remove the specific one clicked:
-                                  return false; // placeholder for logic below
-                                });
-                                // Revised logic: pass the item and remove it from queue by reference? No, they are clones.
-                                // Let's just filter the queue to remove exactly this instance.
                                 setQueue(prev => {
-                                  const idxToRemove = prev.indexOf(item); // Only works if we don't clone every turn.
-                                  // Let's just use indices in the filtered list to manage state.
                                   const updated = [...prev];
                                   const itemInPrev = filteredQueue[globalIdxInFiltered];
                                   const realIdx = prev.indexOf(itemInPrev);
@@ -723,14 +671,12 @@ export default function Home() {
             </div>
           </div>
 
-          {/* ── Right: Single poster preview ── */}
           <div className="md:col-span-7 lg:col-span-8 flex flex-col p-4 gap-2 md:overflow-hidden bg-muted/20 order-1 md:order-2 border-b border-border md:border-b-0 h-[60vh] md:h-full">
             <p className="text-xs text-muted-foreground text-center shrink-0">
               Pré-visualização — {orientation === 'landscape' ? 'Paisagem' : 'Retrato'}
             </p>
 
             <div className="flex-1 min-h-0 relative border rounded border-border overflow-hidden">
-            {/* Wrapper absoluto garante dimensões confiáveis para o ResizeObserver */}
               <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
                 <SinglePosterPreview
                   data={currentPoster}
