@@ -119,12 +119,44 @@ export function DisclaimerModal() {
               <Info className="h-4 w-4 text-blue-400 shrink-0 mt-0.5" />
               <div>
                 <p className="text-blue-300 font-semibold text-sm mb-1">Sobre esta ferramenta</p>
-                <p className="text-gray-300 text-xs leading-relaxed">
-                  Criada como <strong className="text-white">paliativo</strong> após mudanças no sistema oficial da empresa.
-                  Esta interface é especializada na <strong className="text-white">Planilha de Relíquias da Diversão</strong> e agora 
-                  <strong className="text-white"> filtra automaticamente apenas itens com oferta ativa</strong>, garantindo foco
-                  total nos produtos promocionais e maior agilidade na operação da loja.
+                <p className="text-gray-300 text-[11px] leading-relaxed">
+                  Desenvolvida como solução temporária após alterações no sistema oficial da empresa, esta interface foi criada para otimizar a consulta da <strong className="text-white">Planilha de Relíquias da Diversão</strong>. Diferente da versão original, ela exibe automaticamente apenas itens com oferta ativa, reduzindo ruído visual e tornando a operação mais rápida e objetiva no dia a dia da loja.
                 </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Projeto Original */}
+          <div
+            className="rounded-xl p-4 mb-4"
+            style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)' }}
+          >
+            <div className="flex gap-2.5 items-start">
+              <Sparkles className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
+              <div>
+                <p className="text-amber-300 font-semibold text-sm mb-1">Projeto original e contexto</p>
+                <p className="text-gray-300 text-[11px] leading-relaxed mb-3">
+                  Esta interface web utiliza o mesmo banco de dados da planilha original hospedada no Google Drive, mantendo sincronização com a base oficial da empresa.
+                </p>
+                
+                <p className="text-white font-bold text-[11px] mb-1">Planilha original (Google Drive)</p>
+                <a 
+                  href="https://docs.google.com/spreadsheets/d/1pzNpAQQGrRtt1UR5fPjZyZi72O6B2LbBEg9GupK9Z7E/edit?usp=sharing" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-blue-400 hover:text-blue-300 text-[10px] font-bold underline decoration-dotted mb-3"
+                >
+                  Acessar Planilha no Drive
+                </a>
+
+                <div className="space-y-1 text-[10px] text-gray-400 border-t border-white/5 pt-2">
+                  <p>Proprietário: <span className="text-gray-200">Danilo Conrado de Oliveira</span></p>
+                  <p>Criação: <span className="text-gray-200">23/09/2025</span></p>
+                  <p>Última modificação: <span className="text-gray-200">06/10/2025</span></p>
+                  <p className="text-amber-400/90 italic mt-2 leading-snug">
+                    <strong className="uppercase">Observação:</strong> por se tratar de um projeto iniciado em 2025, algumas informações ou funcionalidades podem estar desatualizadas em relação à operação atual.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -138,13 +170,16 @@ export function DisclaimerModal() {
               <Database className="h-4 w-4 text-green-400 shrink-0 mt-0.5" />
               <div>
                 <p className="text-green-300 font-semibold text-sm mb-1">Banco de dados</p>
-                <p className="text-gray-300 text-xs leading-relaxed">
-                  O acervo utilizado é o <strong className="text-white">mesmo disponibilizado oficialmente</strong> na
-                  Planilha de Relíquias da Diversão, com{' '}
-                  <strong className="text-green-400">
-                    {productCount ? productCount.toLocaleString('pt-BR') : '...'} produtos cadastrados
+                <p className="text-gray-300 text-[11px] leading-relaxed">
+                  O sistema utiliza a mesma base oficial da Planilha de Relíquias da Diversão, contendo atualmente{' '}
+                  <strong className="text-white">
+                    {productCount ? productCount.toLocaleString('pt-BR') : '141.989'} produtos cadastrados
                   </strong>.
-                  <span className="text-gray-400"> Dados sincronizados com o último relatório.</span>
+                  Os dados são sincronizados conforme o relatório mais recente disponível.
+                </p>
+                <p className="mt-3 text-[10px] text-red-400 font-bold uppercase tracking-tight flex items-center gap-1.5">
+                  <AlertTriangle className="h-3 w-3" />
+                  Se encontrar erros, por favor avise!
                 </p>
               </div>
             </div>
