@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode';
 import { X, Camera, RefreshCw, AlertCircle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 interface BarcodeScannerProps {
   onScan: (decodedText: string) => void;
@@ -33,7 +34,13 @@ export function BarcodeScanner({ onScan, onClose }: BarcodeScannerProps) {
           const config = {
             fps: 20,
             qrbox: { width: 280, height: 160 },
-            aspectRatio: 1.7777777778, 
+            aspectRatio: 1.0,
+            useBarCodeDetectorIfSupported: true,
+            formatsToSupport: [
+              Html5QrcodeSupportedFormats.EAN_13,
+              Html5QrcodeSupportedFormats.EAN_8,
+              Html5QrcodeSupportedFormats.CODE_128,
+            ]
           };
 
           await html5QrCode.start(
@@ -49,7 +56,17 @@ export function BarcodeScanner({ onScan, onClose }: BarcodeScannerProps) {
         } else {
           await html5QrCode.start(
             { facingMode: "environment" },
-            { fps: 20, qrbox: { width: 280, height: 160 }, aspectRatio: 1.0 },
+            { 
+              fps: 20, 
+              qrbox: { width: 280, height: 160 },
+              aspectRatio: 1.0,
+              useBarCodeDetectorIfSupported: true,
+              formatsToSupport: [
+                Html5QrcodeSupportedFormats.EAN_13,
+                Html5QrcodeSupportedFormats.EAN_8,
+                Html5QrcodeSupportedFormats.CODE_128,
+              ]
+            },
             (decodedText) => {
               html5QrCode.stop().then(() => {
                 onScan(decodedText);

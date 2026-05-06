@@ -223,7 +223,7 @@ export function PosterForm({ data, setData, posterType, onLookupStatusChange, on
     }
   }, [searchValue, setData, onLookupStatusChange]);
 
-  const handleScan = (code: string) => {
+  const handleScan = useCallback((code: string) => {
     if (code.length >= 10) {
       setManualEan(code);
       setManualCode('');
@@ -234,7 +234,7 @@ export function PosterForm({ data, setData, posterType, onLookupStatusChange, on
     setShowScanner(false);
     setSearchValue(code);
     setTimeout(() => handleLookup(code), 100);
-  };
+  }, [handleLookup]);
 
   const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') { e.preventDefault(); handleLookup(); }
@@ -283,7 +283,7 @@ export function PosterForm({ data, setData, posterType, onLookupStatusChange, on
             <div className="flex items-center gap-2">
               <button
                 onClick={(e) => { e.preventDefault(); setShowScanner(true); }}
-                className="h-10 flex-1 px-4 text-[10px] font-black text-white bg-blue-600 hover:bg-blue-700 rounded-lg flex items-center justify-center gap-2 shadow-sm transition-all active:scale-95"
+                className="h-10 flex-1 px-4 text-[10px] font-black text-white bg-blue-600 hover:bg-blue-700 rounded-lg flex items-center justify-center gap-2 shadow-sm transition-all active:scale-95 md:hidden"
               >
                 <Camera className="h-4 w-4" />
                 SCANNER
