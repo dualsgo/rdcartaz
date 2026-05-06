@@ -11,6 +11,7 @@ import { AboutPanel } from '@/app/components/about-panel';
 import { DatabasePanel } from '@/app/components/database-panel';
 import { SettingsDialog } from '@/app/components/settings-dialog';
 import { ImportModal } from '@/app/components/import-modal';
+import { AutomationModal } from '@/app/components/automation-modal';
 import { SecurityModal } from '@/app/components/security-modal';
 import type { PosterData, PosterSettings, PosterType } from '@/app/lib/types';
 
@@ -330,6 +331,7 @@ export default function Home() {
   const [importCount, setImportCount] = useState(0);
   const [previewMode, setPreviewMode] = useState<'single' | 'page'>('single');
   const [activeTab, setActiveTab] = useState<'edit' | 'queue' | 'preview'>('edit');
+  const [showAutomation, setShowAutomation] = useState(false);
 
   const [queueFilter, setQueueFilter] = useState<'all' | 'offer' | 'normal'>('all');
   const [settings, setSettings] = useState<PosterSettings>({
@@ -637,6 +639,11 @@ export default function Home() {
       <DisclaimerModal />
       <AboutPanel open={showAbout} onClose={() => setShowAbout(false)} />
       <DatabasePanel open={showDatabase} onClose={() => setShowDatabase(false)} />
+      <AutomationModal 
+        isOpen={showAutomation} 
+        onClose={() => setShowAutomation(false)} 
+        onSelectFile={() => fileInputRef.current?.click()} 
+      />
 
       <SecurityModal 
         {...securityModal} 
@@ -731,7 +738,7 @@ export default function Home() {
                   setData={setCurrentPoster}
                   posterType={posterType}
                   onLookupStatusChange={setIsProductReady}
-                  onImportBatch={() => fileInputRef.current?.click()}
+                  onImportBatch={() => setShowAutomation(true)}
                 />
 
                 <Button

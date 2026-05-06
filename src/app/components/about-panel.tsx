@@ -161,6 +161,26 @@ export function AboutPanel({ open, onClose }: AboutPanelProps) {
             </div>
           </div>
 
+          {/* Uso no Celular e Impressão */}
+          <div
+            className="rounded-xl p-4"
+            style={{ background: 'rgba(139,92,246,0.07)', border: '1px solid rgba(139,92,246,0.2)' }}
+          >
+            <p className="text-purple-300 font-semibold text-sm mb-2 flex items-center gap-2">
+              <span className="w-5 h-5 rounded-md bg-purple-500/20 flex items-center justify-center shrink-0">
+                <Info className="h-3 w-3 text-purple-400" />
+              </span>
+              Uso no Celular e Impressão
+            </p>
+            <p className="text-slate-400 text-xs leading-relaxed">
+              Esta ferramenta pode ser usada no celular para bipar produtos ou montar o lote no corredor. No entanto, <strong className="text-white">não há sincronização entre dispositivos</strong> (o que você faz no celular não aparece no computador automaticamente).
+              <br /><br />
+              <strong className="text-purple-300 uppercase text-[10px]">Por que não sincroniza?</strong> Para que o celular e o computador "conversassem", o sistema precisaria de um banco de dados na nuvem com login e senha. Como este projeto foca em <strong className="text-white">privacidade e agilidade local</strong>, os dados ficam salvos apenas no aparelho que você está usando.
+              <br /><br />
+              <strong className="text-purple-300 uppercase text-[10px]">Como imprimir:</strong> Ao finalizar o lote no celular, gere o arquivo <strong className="text-white">PDF</strong>, salve no dispositivo e envie para um computador que esteja conectado à impressora da loja.
+            </p>
+          </div>
+
           {/* Banco de dados */}
           <div
             className="rounded-xl p-4"

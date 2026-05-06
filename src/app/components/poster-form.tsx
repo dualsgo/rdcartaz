@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import type { PosterData, PosterType } from '@/app/lib/types';
 
 import { cn } from '@/lib/utils';
-import { Loader2, CheckCircle2, XCircle, Search, RotateCcw, PlusCircle, Info, AlertTriangle, Camera } from 'lucide-react';
+import { Loader2, CheckCircle2, XCircle, Search, RotateCcw, PlusCircle, Info, AlertTriangle, Camera, Sparkles } from 'lucide-react';
 import { BarcodeScanner } from './barcode-scanner';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
@@ -276,26 +276,37 @@ export function PosterForm({ data, setData, posterType, onLookupStatusChange, on
       {/* SEÇÃO 1: BUSCA E DADOS DO PRODUTO */}
       <div className="bg-white border rounded-xl p-5 shadow-sm space-y-4">
         <div className="space-y-1" ref={wrapperRef}>
-          <div className="flex items-center justify-between mb-1">
+          <div className="flex flex-col gap-2 mb-3">
             <Label htmlFor="search-code" className="font-bold text-gray-900 uppercase tracking-tight text-sm">
               1. Encontrar Produto
             </Label>
             <div className="flex items-center gap-2">
               <button
                 onClick={(e) => { e.preventDefault(); setShowScanner(true); }}
-                className="h-9 px-3 text-[10px] font-black text-white bg-blue-600 hover:bg-blue-700 rounded-lg flex items-center gap-1.5 shadow-sm transition-all active:scale-95"
+                className="h-10 flex-1 px-4 text-[10px] font-black text-white bg-blue-600 hover:bg-blue-700 rounded-lg flex items-center justify-center gap-2 shadow-sm transition-all active:scale-95"
               >
-                <Camera className="h-3.5 w-3.5" />
+                <Camera className="h-4 w-4" />
                 SCANNER
               </button>
               {onImportBatch && (
-                <button 
-                  onClick={(e) => { e.preventDefault(); onImportBatch(); }}
-                  className="h-9 px-3 text-[10px] font-black text-primary bg-primary/5 hover:bg-primary/10 border border-primary/20 rounded-lg flex items-center gap-1.5 transition-all active:scale-95"
-                >
-                  <PlusCircle className="h-3.5 w-3.5" />
-                  IMPORTAR
-                </button>
+                <div className="flex-1 relative group">
+                  <style>{`
+                    @keyframes pulse-soft {
+                      0%, 100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4); }
+                      50% { box-shadow: 0 0 0 8px rgba(99, 102, 241, 0); }
+                    }
+                    .btn-animate-pulse {
+                      animation: pulse-soft 2s infinite;
+                    }
+                  `}</style>
+                  <button 
+                    onClick={(e) => { e.preventDefault(); onImportBatch(); }}
+                    className="w-full h-10 px-4 text-[10px] font-black text-primary bg-primary/5 hover:bg-primary/10 border border-primary/20 hover:border-primary/40 rounded-lg flex items-center justify-center gap-2 transition-all active:scale-95 btn-animate-pulse group-hover:scale-[1.02] group-hover:shadow-md"
+                  >
+                    <Sparkles className="h-4 w-4 text-primary animate-pulse" />
+                    AUTOMATIZAR
+                  </button>
+                </div>
               )}
             </div>
           </div>
