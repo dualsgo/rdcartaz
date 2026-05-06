@@ -340,6 +340,17 @@ export default function Home() {
     minInstallmentAmount: 29.99,
   });
 
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      const ua = navigator.userAgent;
+      return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua) || 
+             (/Macintosh|MacIntel/i.test(ua) && navigator.maxTouchPoints > 1);
+    };
+    setIsMobile(checkMobile());
+  }, []);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [securityModal, setSecurityModal] = useState<{
@@ -609,24 +620,39 @@ export default function Home() {
   };
 
   const handlePrint = () => {
-    const now = new Date();
-    const day = String(now.getDate()).padStart(2, '0');
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const year = String(now.getFullYear()).slice(-2);
-    const dateStr = `${day}${month}${year}`;
-    const filename = `cartazes${dateStr}`;
+    const executePrint = () => {
+      const now = new Date();
+      const day = String(now.getDate()).padStart(2, '0');
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const year = String(now.getFullYear()).slice(-2);
+      const dateStr = `${day}${month}${year}`;
+      const filename = `cartazes${dateStr}`;
 
-    const originalTitle = document.title;
-    document.title = filename;
-    
-    // Pequena espera para o navegador registrar a mudança de título
-    setTimeout(() => {
-      window.print();
-      // Restaura o título após a abertura do diálogo de impressão
+      const originalTitle = document.title;
+      document.title = filename;
+      
+      // Pequena espera para o navegador registrar a mudança de título
       setTimeout(() => {
-        document.title = originalTitle;
-      }, 500);
-    }, 50);
+        window.print();
+        // Restaura o título após a abertura do diálogo de impressão
+        setTimeout(() => {
+          document.title = originalTitle;
+        }, 500);
+      }, 50);
+    };
+
+    const orientationLabel = orientation === 'landscape' ? 'PAISAGEM' : 'RETRATO';
+
+    setSecurityModal({
+      isOpen: true,
+      type: 'warning',
+      title: 'Confirme os ajustes de impressão',
+      message: `Para o cartaz sair no tamanho correto, você PRECISA CONFERIR se nas configurações de impressão/PDF a MARGEM e a ESCALA estão em "PADRÃO" (100%) e o FORMATO está em "${orientationLabel}".`,
+      onConfirm: () => {
+        setSecurityModal(prev => ({ ...prev, isOpen: false }));
+        executePrint();
+      }
+    });
   };
 
   /* Print content: one div per page, each with page-break */
@@ -746,7 +772,7 @@ export default function Home() {
                   Salvar PDF
                 </Button>
                 <Button
-                  onClick={() => window.print()}
+                  onClick={handlePrint}
                   disabled={queue.length === 0}
                   className="transition-transform active:scale-95 px-3"
                 >
