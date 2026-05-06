@@ -18,7 +18,7 @@ import type { PosterData, PosterSettings, PosterType } from '@/app/lib/types';
 
 import { parseProductCSV, parseProductExcel, parsePrice } from '@/app/lib/poster-utils';
 
-import { Printer, Plus, Trash2, FileStack, PackageOpen, Info, Database, Upload, Edit3, LayoutGrid } from 'lucide-react';
+import { Printer, Plus, Trash2, FileStack, PackageOpen, Info, Database, Upload, Edit3, LayoutGrid, FileDown, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
@@ -443,13 +443,17 @@ export default function Home() {
           width: ${o === 'landscape' ? '297mm' : '210mm'} !important;
           height: ${o === 'landscape' ? '210mm' : '297mm'} !important;
           overflow: hidden !important;
+          background: white !important;
         }
         .print-page {
           width: ${o === 'landscape' ? '297mm' : '210mm'} !important;
           height: ${o === 'landscape' ? '210mm' : '297mm'} !important;
           overflow: hidden !important;
           position: relative !important;
-          font-size: 16px !important; /* Base para em/rem no papel */
+          page-break-after: always !important;
+          break-after: page !important;
+          display: block !important;
+          background: white !important;
         }
       }
     `;
@@ -604,6 +608,27 @@ export default function Home() {
     }
   };
 
+  const handlePrint = () => {
+    const now = new Date();
+    const day = String(now.getDate()).padStart(2, '0');
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const year = String(now.getFullYear()).slice(-2);
+    const dateStr = `${day}${month}${year}`;
+    const filename = `cartazes${dateStr}`;
+
+    const originalTitle = document.title;
+    document.title = filename;
+    
+    // Pequena espera para o navegador registrar a mudança de título
+    setTimeout(() => {
+      window.print();
+      // Restaura o título após a abertura do diálogo de impressão
+      setTimeout(() => {
+        document.title = originalTitle;
+      }, 500);
+    }, 50);
+  };
+
   /* Print content: one div per page, each with page-break */
   const renderPrintContent = () => {
     if (expandedQueue.length === 0) return null;
@@ -710,15 +735,25 @@ export default function Home() {
                 accept=".csv, .xls, .xlsx"
                 className="hidden"
               />
-              <Button
-                onClick={() => window.print()}
-                disabled={queue.length === 0}
-                className="transition-transform active:scale-95 px-3 sm:px-4"
-              >
-                <Printer className="sm:mr-2 h-4 w-4" />
-                <span className="hidden sm:inline">Imprimir</span>
-                {queue.length > 0 ? ` (${totalPages}p)` : ''}
-              </Button>
+              <div className="hidden md:flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  onClick={handlePrint}
+                  disabled={queue.length === 0}
+                  className="transition-transform active:scale-95 px-3"
+                >
+                  <FileDown className="mr-1.5 h-4 w-4" />
+                  Salvar PDF
+                </Button>
+                <Button
+                  onClick={() => window.print()}
+                  disabled={queue.length === 0}
+                  className="transition-transform active:scale-95 px-3"
+                >
+                  <Printer className="mr-1.5 h-4 w-4" />
+                  Imprimir {queue.length > 0 ? `(${totalPages}p)` : ''}
+                </Button>
+              </div>
           </div>
         </div>
       </header>
@@ -965,6 +1000,29 @@ export default function Home() {
                  </>
                )}
             </div>
+             
+             {/* Mobile Save Button & Instructions */}
+             {queue.length > 0 && (
+               <div className="lg:hidden space-y-3 mt-2">
+                 <Button
+                   onClick={handlePrint}
+                   className="w-full h-14 bg-blue-600 hover:bg-blue-700 text-white font-black uppercase tracking-widest gap-2 shadow-lg active:scale-95 transition-all"
+                 >
+                   <FileDown className="h-6 w-6" />
+                   Salvar PDF para Imprimir
+                 </Button>
+                 
+                 <div className="p-4 bg-blue-50 rounded-xl border border-blue-100 space-y-2">
+                   <div className="flex items-center gap-2 text-blue-700">
+                     <Info className="h-4 w-4" />
+                     <span className="text-[10px] font-bold uppercase">Como imprimir do celular?</span>
+                   </div>
+                   <p className="text-[11px] text-blue-800 leading-relaxed">
+                     Ao clicar em <b>Salvar PDF</b>, o arquivo será baixado no seu celular. Para imprimir, envie este arquivo para o <b>WhatsApp</b> ou <b>E-mail</b> do computador que está conectado à impressora da loja.
+                   </p>
+                 </div>
+               </div>
+             )}
           </div>
 
         </div>

@@ -41,164 +41,140 @@ export function DisclaimerModal() {
         className="relative w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden"
         style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)', border: '1px solid rgba(255,165,0,0.3)' }}
       >
-        {/* Barra pulsante de atenção */}
-        <div
-          className="w-full h-2"
-          style={{
-            background: 'linear-gradient(90deg, #f59e0b, #ef4444, #f59e0b)',
-            backgroundSize: '200% 100%',
-            animation: 'shimmer 1.5s ease-in-out infinite',
-          }}
-        />
+        <div className="flex flex-col max-h-[90vh]">
+          {/* Barra pulsante de atenção */}
+          <div
+            className="w-full h-2 shrink-0"
+            style={{
+              background: 'linear-gradient(90deg, #f59e0b, #ef4444, #f59e0b)',
+              backgroundSize: '200% 100%',
+              animation: 'shimmer 1.5s ease-in-out infinite',
+            }}
+          />
 
-        <style>{`
-          @keyframes shimmer {
-            0%   { background-position: 200% center; }
-            100% { background-position: -200% center; }
-          }
-          @keyframes pulse-glow {
-            0%, 100% { box-shadow: 0 0 8px 2px rgba(245,158,11,0.4); }
-            50%       { box-shadow: 0 0 20px 6px rgba(239,68,68,0.6); }
-          }
-          @keyframes blink-icon {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50%       { opacity: 0.5; transform: scale(1.15); }
-          }
-          .blink-icon { animation: blink-icon 0.9s ease-in-out infinite; }
-          .pulse-border { animation: pulse-glow 1.5s ease-in-out infinite; }
-        `}</style>
+          {/* Botão fechar */}
+          <button
+            onClick={handleClose}
+            className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors z-20 rounded-full p-1 hover:bg-white/10"
+          >
+            <X className="h-5 w-5" />
+          </button>
 
-        {/* Botão fechar */}
-        <button
-          onClick={handleClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors z-10 rounded-full p-1 hover:bg-white/10"
-        >
-          <X className="h-5 w-5" />
-        </button>
+          <div className="p-6 pt-5 overflow-y-auto custom-scrollbar flex-1">
+            {/* Ícone de alerta piscante */}
+            <div className="flex items-center gap-3 mb-5">
+              <div
+                className="blink-icon pulse-border rounded-full p-2.5 shrink-0"
+                style={{ background: 'rgba(239,68,68,0.15)', border: '2px solid rgba(239,68,68,0.5)' }}
+              >
+                <AlertTriangle className="h-7 w-7 text-red-400" />
+              </div>
+              <div>
+                <h2 className="text-white font-bold text-lg leading-tight">ATENÇÃO — Leia antes de usar</h2>
+                <p className="text-amber-400 text-xs font-semibold tracking-wide uppercase mt-0.5">Ferramenta Não Oficial</p>
+              </div>
+            </div>
 
-        <div className="p-6 pt-5">
-          {/* Ícone de alerta piscante */}
-          <div className="flex items-center gap-3 mb-5">
+            {/* Aviso de preço */}
             <div
-              className="blink-icon pulse-border rounded-full p-2.5 shrink-0"
-              style={{ background: 'rgba(239,68,68,0.15)', border: '2px solid rgba(239,68,68,0.5)' }}
+              className="rounded-xl p-4 mb-4 pulse-border"
+              style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.4)' }}
             >
-              <AlertTriangle className="h-7 w-7 text-red-400" />
-            </div>
-            <div>
-              <h2 className="text-white font-bold text-lg leading-tight">ATENÇÃO — Leia antes de usar</h2>
-              <p className="text-amber-400 text-xs font-semibold tracking-wide uppercase mt-0.5">Ferramenta Não Oficial</p>
-            </div>
-          </div>
-
-          {/* Aviso de preço */}
-          <div
-            className="rounded-xl p-4 mb-4 pulse-border"
-            style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.4)' }}
-          >
-            <div className="flex gap-2.5 items-start">
-              <ShieldAlert className="h-5 w-5 text-red-400 shrink-0 mt-0.5 blink-icon" />
-              <div>
-                <p className="text-red-300 font-bold text-sm mb-1">⚠️ CONFIRA OS VALORES COM ATENÇÃO REDOBRADA</p>
-                <p className="text-red-200 text-xs leading-relaxed">
-                  Os preços e descontos são inseridos <strong>manualmente</strong>. Um erro de digitação pode gerar
-                  cartazes com valores incorretos, expondo a loja a vendas com
-                  <strong> preços abaixo do custo ou descontos indevidos</strong>. Sempre revise o cartaz
-                  antes de imprimir.
-                </p>
+              <div className="flex gap-2.5 items-start">
+                <ShieldAlert className="h-5 w-5 text-red-400 shrink-0 mt-0.5 blink-icon" />
+                <div>
+                  <p className="text-red-300 font-bold text-sm mb-1">⚠️ CONFIRA OS VALORES COM ATENÇÃO REDOBRADA</p>
+                  <p className="text-red-200 text-xs leading-relaxed">
+                    Os preços e descontos são inseridos <strong>manualmente</strong>. Um erro de digitação pode gerar
+                    cartazes com valores incorretos, expondo a loja a vendas com
+                    <strong> preços abaixo do custo ou descontos indevidos</strong>. Sempre revise o cartaz
+                    antes de imprimir.
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Sobre a ferramenta */}
-          <div
-            className="rounded-xl p-4 mb-4"
-            style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)' }}
-          >
-            <div className="flex gap-2.5 items-start">
-              <Info className="h-4 w-4 text-blue-400 shrink-0 mt-0.5" />
-              <div>
-                <p className="text-blue-300 font-semibold text-sm mb-1">Sobre esta ferramenta</p>
-                <p className="text-gray-300 text-[11px] leading-relaxed">
-                  Desenvolvida como solução temporária após alterações no sistema oficial da empresa, esta interface foi criada para otimizar a consulta da <strong className="text-white">Planilha de Relíquias da Diversão</strong>. Diferente da versão original, ela exibe automaticamente apenas itens com oferta ativa, reduzindo ruído visual e tornando a operação mais rápida e objetiva no dia a dia da loja.
-                </p>
-                <p className="text-gray-300 text-[11px] leading-relaxed mt-2">
-                  Você pode baixar o arquivo <strong className="text-white">CSV da Alteração de Preço</strong> ou a <strong className="text-white">Circular de Alteração de Preços</strong> (disponíveis no Pleno) e importá-los aqui para <strong className="text-blue-400">gerar automaticamente todos os cartazes</strong> do lote de uma só vez.
-                </p>
+            {/* Sobre a ferramenta */}
+            <div
+              className="rounded-xl p-4 mb-4"
+              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)' }}
+            >
+              <div className="flex gap-2.5 items-start">
+                <Info className="h-4 w-4 text-blue-400 shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-blue-300 font-semibold text-sm mb-1">Sobre esta ferramenta</p>
+                  <p className="text-gray-300 text-[11px] leading-relaxed">
+                    Desenvolvida como solução temporária após alterações no sistema oficial da empresa, esta interface foi criada para otimizar a consulta da <strong className="text-white">Planilha de Relíquias da Diversão</strong>. Diferente da versão original, ela exibe automaticamente apenas itens com oferta ativa, reduzindo ruído visual e tornando a operação mais rápida e objetiva no dia a dia da loja.
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Projeto Original */}
-          <div
-            className="rounded-xl p-4 mb-4"
-            style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)' }}
-          >
-            <div className="flex gap-2.5 items-start">
-              <Sparkles className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
-              <div>
-                <p className="text-amber-300 font-semibold text-sm mb-1">Projeto original e contexto</p>
-                <p className="text-gray-300 text-[11px] leading-relaxed mb-3">
-                  Esta interface web utiliza o mesmo banco de dados da planilha original hospedada no Google Drive, mantendo sincronização com a base oficial da empresa.
-                </p>
-                
-                <p className="text-white font-bold text-[11px] mb-1">Planilha original (Google Drive)</p>
-                <a 
-                  href="https://docs.google.com/spreadsheets/d/1pzNpAQQGrRtt1UR5fPjZyZi72O6B2LbBEg9GupK9Z7E/edit?usp=sharing" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-blue-400 hover:text-blue-300 text-[10px] font-bold underline decoration-dotted mb-3"
-                >
-                  Acessar Planilha no Drive
-                </a>
+            {/* Projeto Original */}
+            <div
+              className="rounded-xl p-4 mb-4"
+              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)' }}
+            >
+              <div className="flex gap-2.5 items-start">
+                <Sparkles className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-amber-300 font-semibold text-sm mb-1">Projeto original e contexto</p>
+                  <p className="text-gray-300 text-[11px] leading-relaxed mb-3">
+                    Esta interface web utiliza o mesmo banco de dados da planilha original hospedada no Google Drive, mantendo sincronização com a base oficial da empresa.
+                  </p>
+                  
+                  <p className="text-white font-bold text-[11px] mb-1">Planilha original (Google Drive)</p>
+                  <a 
+                    href="https://docs.google.com/spreadsheets/d/1pzNpAQQGrRtt1UR5fPjZyZi72O6B2LbBEg9GupK9Z7E/edit?usp=sharing" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-blue-400 hover:text-blue-300 text-[10px] font-bold underline decoration-dotted mb-3"
+                  >
+                    Acessar Planilha no Drive
+                  </a>
 
-                <div className="space-y-1 text-[10px] text-gray-400 border-t border-white/5 pt-2">
-                  <p>Proprietário: <span className="text-gray-200">Danilo Conrado de Oliveira</span></p>
-                  <p>Criação: <span className="text-gray-200">23/09/2025</span></p>
-                  <p>Última modificação: <span className="text-gray-200">06/10/2025</span></p>
-                  <p className="text-amber-400/90 italic mt-2 leading-snug">
-                    <strong className="uppercase">Observação:</strong> por se tratar de um projeto iniciado em 2025, algumas informações ou funcionalidades podem estar desatualizadas em relação à operação atual.
+                  <div className="space-y-1 text-[10px] text-gray-400 border-t border-white/5 pt-2">
+                    <p>Proprietário: <span className="text-gray-200">Danilo Conrado de Oliveira</span></p>
+                    <p>Criação: <span className="text-gray-200">23/09/2025</span></p>
+                    <p>Última modificação: <span className="text-gray-200">06/10/2025</span></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Banco de dados */}
+            <div
+              className="rounded-xl p-4 mb-2"
+              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)' }}
+            >
+              <div className="flex gap-2.5 items-start">
+                <Database className="h-4 w-4 text-green-400 shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-green-300 font-semibold text-sm mb-1">Banco de dados</p>
+                  <p className="text-gray-300 text-[11px] leading-relaxed">
+                    O sistema utiliza a mesma base oficial, contendoatualmente{' '}
+                    <strong className="text-white">
+                      {productCount ? productCount.toLocaleString('pt-BR') : '141.989'} produtos cadastrados
+                    </strong>.
                   </p>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Banco de dados */}
-          <div
-            className="rounded-xl p-4 mb-5"
-            style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)' }}
-          >
-            <div className="flex gap-2.5 items-start">
-              <Database className="h-4 w-4 text-green-400 shrink-0 mt-0.5" />
-              <div>
-                <p className="text-green-300 font-semibold text-sm mb-1">Banco de dados</p>
-                <p className="text-gray-300 text-[11px] leading-relaxed">
-                  O sistema utiliza a mesma base oficial da Planilha de Relíquias da Diversão, contendo atualmente{' '}
-                  <strong className="text-white">
-                    {productCount ? productCount.toLocaleString('pt-BR') : '141.989'} produtos cadastrados
-                  </strong>.
-                  Os dados são sincronizados conforme o relatório mais recente disponível.
-                </p>
-                <p className="mt-3 text-[10px] text-red-400 font-bold uppercase tracking-tight flex items-center gap-1.5">
-                  <AlertTriangle className="h-3 w-3" />
-                  Se encontrar erros, por favor avise!
-                </p>
-              </div>
-            </div>
+          <div className="p-6 pt-2 shrink-0">
+            <button
+              onClick={handleClose}
+              className="w-full py-4 rounded-xl font-bold text-sm tracking-wide transition-all active:scale-95 hover:brightness-110"
+              style={{
+                background: 'linear-gradient(135deg, #f59e0b, #ef4444)',
+                color: 'white',
+                boxShadow: '0 4px 15px rgba(239,68,68,0.3)',
+              }}
+            >
+              Entendido — Vou conferir os valores
+            </button>
           </div>
-
-          <button
-            onClick={handleClose}
-            className="w-full py-3 rounded-xl font-bold text-sm tracking-wide transition-all active:scale-95 hover:brightness-110"
-            style={{
-              background: 'linear-gradient(135deg, #f59e0b, #ef4444)',
-              color: 'white',
-              boxShadow: '0 4px 15px rgba(239,68,68,0.3)',
-            }}
-          >
-            Entendido — Vou conferir os valores com atenção
-          </button>
         </div>
       </div>
     </div>
