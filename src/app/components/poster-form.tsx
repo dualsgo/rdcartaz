@@ -95,6 +95,18 @@ export function PosterForm({ data, setData, posterType, onLookupStatusChange, on
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   const [regStatus, setRegStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const [isMobileDevice, setIsMobileDevice] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      const ua = navigator.userAgent;
+      const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
+      // iPad Pro (M1/M2) se comporta como Macintosh mas tem touch
+      const isIPad = /Macintosh/i.test(ua) && navigator.maxTouchPoints > 1;
+      return isMobileUA || isIPad;
+    };
+    setIsMobileDevice(checkMobile());
+  }, []);
 
   const [showWarning, setShowWarning] = useState(false);
   const [isManualMode, setIsManualMode] = useState(false);
@@ -281,13 +293,15 @@ export function PosterForm({ data, setData, posterType, onLookupStatusChange, on
               1. Encontrar Produto
             </Label>
             <div className="flex items-center gap-2">
-              <button
-                onClick={(e) => { e.preventDefault(); setShowScanner(true); }}
-                className="h-10 flex-1 px-4 text-[10px] font-black text-white bg-blue-600 hover:bg-blue-700 rounded-lg flex items-center justify-center gap-2 shadow-sm transition-all active:scale-95 md:hidden"
-              >
-                <Camera className="h-4 w-4" />
-                SCANNER
-              </button>
+              {isMobileDevice && (
+                <button
+                  onClick={(e) => { e.preventDefault(); setShowScanner(true); }}
+                  className="h-10 flex-1 px-4 text-[10px] font-black text-white bg-blue-600 hover:bg-blue-700 rounded-lg flex items-center justify-center gap-2 shadow-sm transition-all active:scale-95"
+                >
+                  <Camera className="h-4 w-4" />
+                  SCANNER
+                </button>
+              )}
               {onImportBatch && (
                 <div className="flex-1 relative group">
                   <style>{`
