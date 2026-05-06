@@ -332,6 +332,7 @@ export default function Home() {
   const [previewMode, setPreviewMode] = useState<'single' | 'page'>('single');
   const [activeTab, setActiveTab] = useState<'edit' | 'queue' | 'preview'>('edit');
   const [showAutomation, setShowAutomation] = useState(false);
+  const [showAddSuccess, setShowAddSuccess] = useState(false);
 
   const [queueFilter, setQueueFilter] = useState<'all' | 'offer' | 'normal'>('all');
   const [settings, setSettings] = useState<PosterSettings>({
@@ -536,6 +537,10 @@ export default function Home() {
     setIsProductReady(false);
     setPreviewMode('page'); // Muda automático para a visão da página ao adicionar
     setFormKey((k: number) => k + 1);
+
+    // Feedback de sucesso no botão
+    setShowAddSuccess(true);
+    setTimeout(() => setShowAddSuccess(false), 1500);
   };
 
 
@@ -657,7 +662,10 @@ export default function Home() {
             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
               <span className="text-primary-foreground font-bold text-sm">P%</span>
             </div>
-            <h1 className="font-headline text-2xl font-bold uppercase">RD CARTAZ - Cartazes Relíquias da Diversão</h1>
+            <h1 className="font-headline text-lg sm:text-2xl font-bold uppercase truncate max-w-[200px] sm:max-w-none">
+              <span className="sm:hidden">RD CARTAZ</span>
+              <span className="hidden sm:inline">RD CARTAZ - Cartazes Relíquias da Diversão</span>
+            </h1>
           </div>
           <div className="flex items-center gap-4 w-full md:w-auto mt-2 md:mt-0 justify-between">
             {/* Mobile select */}
@@ -705,10 +713,11 @@ export default function Home() {
               <Button
                 onClick={() => window.print()}
                 disabled={queue.length === 0}
-                className="transition-transform active:scale-95"
+                className="transition-transform active:scale-95 px-3 sm:px-4"
               >
-                <Printer className="mr-2 h-4 w-4" />
-                Imprimir{queue.length > 0 ? ` (${totalPages}p)` : ''}
+                <Printer className="sm:mr-2 h-4 w-4" />
+                <span className="hidden sm:inline">Imprimir</span>
+                {queue.length > 0 ? ` (${totalPages}p)` : ''}
               </Button>
           </div>
         </div>
@@ -721,13 +730,13 @@ export default function Home() {
 
       {/* ── Main Area ── */}
       <main className="no-print flex-1 flex flex-col min-h-0 overflow-hidden relative">
-        <div className="flex-1 flex flex-col md:grid md:grid-cols-12 min-h-0 h-full overflow-hidden">
+        <div className="flex-1 flex flex-col lg:grid lg:grid-cols-12 min-h-0 h-full overflow-hidden">
 
 
           {/* ── COLUMN 1: FORM (EDIT) ── */}
           <div className={cn(
-            "md:col-span-3 flex flex-col border-r border-border bg-card md:min-h-0 h-full overflow-hidden",
-            activeTab !== 'edit' && "hidden md:flex"
+            "lg:col-span-3 flex flex-col border-r border-border bg-card lg:min-h-0 h-full overflow-hidden",
+            activeTab !== 'edit' && "hidden lg:flex"
           )}>
             <div className="flex-1 overflow-y-auto custom-scrollbar p-4">
 
@@ -743,16 +752,27 @@ export default function Home() {
 
                 <Button
                   onClick={handleAddToQueue}
-                  disabled={!isProductReady}
+                  disabled={!isProductReady || showAddSuccess}
                   className={cn(
                     'w-full h-14 text-base font-black uppercase tracking-widest gap-2 transition-all shadow-lg',
-                    isProductReady 
-                      ? 'bg-primary hover:bg-primary/90 shadow-primary/20 scale-[1.01]' 
-                      : 'bg-muted text-muted-foreground'
+                    showAddSuccess 
+                      ? 'bg-green-600 hover:bg-green-600 scale-[1.02] shadow-green-200' 
+                      : isProductReady 
+                        ? 'bg-primary hover:bg-primary/90 shadow-primary/20 scale-[1.01]' 
+                        : 'bg-muted text-muted-foreground'
                   )}
                 >
-                  <Plus className="h-6 w-6" />
-                  Adicionar ao Lote
+                  {showAddSuccess ? (
+                    <>
+                      <CheckCircle2 className="h-6 w-6 animate-in zoom-in duration-300" />
+                      Adicionado!
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="h-6 w-6" />
+                      Adicionar ao Lote
+                    </>
+                  )}
                 </Button>
 
               </div>
@@ -761,8 +781,8 @@ export default function Home() {
 
           {/* ── COLUMN 2: QUEUE (LOTE) ── */}
           <div className={cn(
-            "md:col-span-3 flex flex-col border-r border-border bg-muted/5 md:min-h-0 h-full overflow-hidden",
-            activeTab !== 'queue' && "hidden md:flex"
+            "lg:col-span-3 flex flex-col border-r border-border bg-muted/5 lg:min-h-0 h-full overflow-hidden",
+            activeTab !== 'queue' && "hidden lg:flex"
           )}>
 
             <div className="shrink-0 px-4 py-3 border-b bg-muted/20 flex items-center justify-between">
@@ -881,8 +901,8 @@ export default function Home() {
 
           {/* ── COLUMN 3: PREVIEW ── */}
           <div className={cn(
-            "md:col-span-6 flex flex-col p-4 gap-2 md:overflow-hidden bg-muted/20 h-full",
-            activeTab !== 'preview' && "hidden md:flex"
+            "lg:col-span-6 flex flex-col p-2 sm:p-4 gap-2 lg:overflow-hidden bg-muted/20 h-full",
+            activeTab !== 'preview' && "hidden lg:flex"
           )}>
             <div className="flex items-center justify-between shrink-0 mb-1">
               <div className="flex items-center gap-2">
@@ -950,7 +970,7 @@ export default function Home() {
         </div>
       </main>
 
-      <div className="md:hidden sticky bottom-0 left-0 right-0 h-[70px] bg-white border-t border-border z-[100] flex items-center justify-around px-2 shadow-[0_-4px_12px_rgba(0,0,0,0.05)] shrink-0">
+      <div className="lg:hidden sticky bottom-0 left-0 right-0 h-[70px] bg-white border-t border-border z-[100] flex items-center justify-around px-2 shadow-[0_-4px_12px_rgba(0,0,0,0.05)] shrink-0">
 
         <button
           onClick={() => setActiveTab('edit')}
