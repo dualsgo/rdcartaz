@@ -148,12 +148,19 @@ function processProductRow(row: Record<string, any>, mapping: Record<string, num
   const valNovo  = parsePrice(txtNovo);
   const valPromo = parsePrice(txtPromo);
 
+  const cleanSupplier = (name: string) => {
+    if (!name) return '';
+    // Remove prefixo e números (CNPJ)
+    let clean = name.replace(/FORNECEDOR:/i, '').replace(/\d+/g, '').trim();
+    return clean.substring(0, 15).trim().toUpperCase();
+  };
+
   let poster: any = {
     description: mercadoria.toUpperCase(),
     code: sap,
     ean: ean,
     reference: ref,
-    supplier: supplier.replace('FORNECEDOR:', '').trim().toUpperCase(),
+    supplier: cleanSupplier(supplier),
     quantity: 1,
     paymentOption: 'installment',
   };
@@ -202,22 +209,34 @@ function processProductRow(row: Record<string, any>, mapping: Record<string, num
 /**
  * Cria um mapeamento de colunas baseado nos headers encontrados ou índices fixos
  */
+const normalize = (str: string) => 
+  String(str || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
 function createMapping(headers: string[]): Record<string, number> {
+  const hasHeaders = headers && headers.length > 0;
+  
+
   const findIdx = (terms: string[], defaultIdx: number) => {
-    const idx = headers.findIndex(h => terms.some(t => h.toLowerCase().includes(t)));
-    return idx !== -1 ? idx : defaultIdx;
+    const normTerms = terms.map(t => normalize(t));
+    const idx = headers.findIndex(h => {
+      const normH = normalize(h);
+      return normTerms.some(t => normH.includes(t));
+    });
+    
+    if (idx !== -1) return idx;
+    // Se temos headers mas não encontramos o termo, retornamos -1 para evitar pegar coluna errada
+    return hasHeaders ? -1 : defaultIdx;
   };
   
-  // Mapeamento baseado na descrição do usuário e imagem (lidando com encoding corrompido)
-  // Relatório Circular: C=2 (SAP), D=3 (EAN), E=4 (Ref), F=5 (Desc), H=7 (Ant), I=8 (Novo), J=9 (Promo)
+  // Mapeamento baseado na descrição do usuário e imagem
   return {
-    sap:        findIdx(['sap', 'interno', 'código', 'codigo', 'cod.'], 2),
+    sap:        findIdx(['sap', 'interno', 'código', 'codigo', 'cod.', 'cód.'], 2),
     ean:        findIdx(['ean', 'barras'], 3),
     mercadoria: findIdx(['mercadoria', 'descrição', 'descricao', 'produto', 'nome'], 5),
-    ref:        findIdx(['referencia', 'referência', 'ref', 'fornecedor'], 4),
-    precoAtual: findIdx(['anterior', 'atual', 'preÃ§o'], 7),
+    ref:        findIdx(['referencia', 'referência', 'ref', 'cod. forn', 'cód. forn', 'fornecedor', 'forn'], 4),
+    precoAtual: findIdx(['anterior', 'atual', 'preço', 'preÃ§o'], 7),
     novoPreco:  findIdx(['novo'], 8),
-    promocao:   findIdx(['promo', 'Ã§Ã£o', 'promoção'], 9),
+    promocao:   findIdx(['promo', 'ção', 'Ã§Ã£o', 'promoção'], 9),
     supplier:   findIdx(['fornecedor', 'forn'], -1),
   };
 }
@@ -305,8 +324,8 @@ export function parseProductExcel(buffer: ArrayBuffer): any[] {
 
     // 2. Detectar se é uma linha de header (procura palavras-chave em qualquer coluna)
     const isHeader = cols.some(c => {
-      const s = String(c || '').toLowerCase();
-      return s.includes('sap') || s.includes('código') || s.includes('interno') || s.includes('mercadoria') || s.includes('ean');
+      const s = normalize(String(c || ''));
+      return s.includes('sap') || s.includes('codigo') || s.includes('interno') || s.includes('mercadoria') || s.includes('ean') || s.includes('forn');
     });
 
     if (isHeader) {
@@ -358,23 +377,43 @@ export function parseDatabaseImportExcel(buffer: ArrayBuffer): any[] {
   if (data.length < 1) return [];
 
   const items: any[] = [];
+  let mapping = createMapping([]); // Default mapping
   
-  // O usuário informou:
-  // Col C (2) para codigo SAP
-  // Col D (3) para o EAN
-  // Col E (4) para referencia
-  // Col F (5) para descrição
   for (let i = 0; i < data.length; i++) {
-    const row = data[i];
-    if (!row || row.length < 6) continue;
+    const cols = data[i];
+    if (!cols || cols.length === 0) continue;
 
-    const description = String(row[5] || '').trim();
+    // Detectar se é uma linha de header
+    const isHeader = cols.some(c => {
+      const s = normalize(String(c || ''));
+      return s.includes('sap') || s.includes('codigo') || s.includes('interno') || s.includes('mercadoria') || s.includes('ean') || s.includes('forn');
+    });
+
+    if (isHeader) {
+      const headers = cols.map(h => String(h || '').trim());
+      mapping = createMapping(headers);
+      continue;
+    }
+
+    const getVal = (key: string) => {
+      const idx = mapping[key];
+      if (idx === undefined || idx === -1) return '';
+      return String(cols[idx] || '').trim();
+    };
+
+    const description = getVal('mercadoria');
     if (!description || description.toLowerCase().includes('mercadoria') || description.toLowerCase().includes('descrição')) continue;
 
+    const sap = getVal('sap');
+    const ean = getVal('ean');
+    
+    // Ignora se não tiver identificação mínima
+    if (!sap && !ean) continue;
+
     items.push({
-      code: String(row[2] || '').trim(),
-      ean: String(row[3] || '').trim(),
-      reference: String(row[4] || '').trim(),
+      code: sap,
+      ean: ean,
+      reference: getVal('ref'),
       description: description.toUpperCase(),
     });
   }

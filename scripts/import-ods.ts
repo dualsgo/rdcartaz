@@ -15,22 +15,6 @@ type Produto = {
     [key: string]: any;
 };
 
-/**
- * Cria um mapeamento dinâmico de colunas baseado nos nomes encontrados no cabeçalho.
- */
-function createMapping(headers: string[]): Record<string, string> {
-    const findHeader = (terms: string[]) => {
-        return headers.find(h => terms.some(t => String(h).toLowerCase().includes(t)));
-    };
-
-    return {
-        sap: findHeader(['sap', 'interno', 'código', 'codigo', 'cod.']) || 'SAP',
-        ean: findHeader(['ean', 'barras']) || 'EAN',
-        desc: findHeader(['descrição', 'descricao', 'mercadoria', 'produto', 'nome']) || 'DESCRIÇÃO',
-        ref: findHeader(['referencia', 'referência', 'ref']) || 'REFERÊNCIA',
-        fornec: findHeader(['fornecedor', 'forn']) || 'FORNECEDOR'
-    };
-}
 
 async function importData() {
     if (!fs.existsSync(INPUT_FILE)) {
@@ -43,17 +27,12 @@ async function importData() {
     const sheetName = workbook.SheetNames[0];
     const worksheet = workbook.Sheets[sheetName];
     
-    // Converte para JSON (array de objetos)
-    const rawData = XLSX.utils.sheet_to_json(worksheet) as any[];
-    if (rawData.length === 0) {
+    // Converte para matriz 2D para processamento manual
+    const data = XLSX.utils.sheet_to_json(worksheet, { header: 1, raw: false }) as any[][];
+    if (data.length === 0) {
         console.warn('⚠️ O arquivo está vazio.');
         return;
     }
-
-    // Pega as chaves do primeiro objeto para criar o mapeamento
-    const headers = Object.keys(rawData[0]);
-    const mapping = createMapping(headers);
-    console.log('📍 Mapeamento detectado:', mapping);
 
     console.log('📖 Lendo banco de dados JSON...');
     let baseDados: Produto[] = [];
@@ -67,7 +46,6 @@ async function importData() {
         }
     }
 
-    // Mapa para busca rápida (Primary Key: COD_PRODUTO)
     const databaseMap = new Map<string, Produto>();
     baseDados.forEach(p => {
         if (p.COD_PRODUTO) {
@@ -75,37 +53,86 @@ async function importData() {
         }
     });
 
+    let mapping: Record<string, number> = { sap: 2, ean: 3, desc: 5, ref: 4, fornec: -1 };
+    let currentSupplier = '';
     let updatedCount = 0;
     let addedCount = 0;
 
-    console.log(`🚀 Processando ${rawData.length} itens...`);
+    console.log(`🚀 Processando ${data.length} linhas...`);
 
-    rawData.forEach((row) => {
-        const sap = String(row[mapping.sap] || '').trim();
-        const ean = String(row[mapping.ean] || '').trim();
-        const ref = String(row[mapping.ref] || '').trim();
-        const desc = String(row[mapping.desc] || '').trim();
-        const fornec = String(row[mapping.fornec] || '').trim();
+    const normalize = (str: string) => String(str || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 
-        if (!sap && !ean) return; // Ignora linhas sem identificação
+    data.forEach((cols) => {
+        if (!cols || cols.length === 0) return;
+
+        const firstCol = String(cols[0] || '').trim();
+
+        // 1. Detectar linha de Fornecedor
+        if (firstCol.toUpperCase().includes('FORNECEDOR')) {
+            currentSupplier = firstCol.replace(/FORNECEDOR:/i, '').trim();
+            return;
+        }
+
+        // 2. Detectar linha de header
+        const isHeader = cols.some(c => {
+            const s = normalize(String(c || ''));
+            return s.includes('sap') || s.includes('codigo') || s.includes('interno') || s.includes('mercadoria') || s.includes('ean') || s.includes('forn');
+        });
+
+        if (isHeader) {
+            const headers = cols.map(h => String(h || '').trim());
+            
+            const findIdx = (terms: string[]) => {
+                const normTerms = terms.map(t => normalize(t));
+                return headers.findIndex(h => {
+                    const normH = normalize(h);
+                    return normTerms.some(t => normH.includes(t));
+                });
+            };
+            
+            mapping = {
+                sap: findIdx(['sap', 'interno', 'código', 'codigo', 'cod.', 'cód.']),
+                ean: findIdx(['ean', 'barras']),
+                desc: findIdx(['descrição', 'descricao', 'mercadoria', 'produto', 'nome']),
+                ref: findIdx(['referencia', 'referência', 'ref', 'cod. forn', 'cód. forn', 'fornecedor', 'forn']),
+                fornec: findIdx(['fornecedor', 'forn'])
+            };
+            return;
+        }
+
+        const getVal = (idx: number) => (idx !== -1 && cols[idx]) ? String(cols[idx]).trim() : '';
+        const cleanName = (name: string) => {
+            if (!name) return '';
+            // Remove números (CNPJ) e limita em 20 chars
+            let clean = name.replace(/\d+/g, '').trim();
+            return clean.substring(0, 20).trim().toUpperCase();
+        };
+
+        const sap = getVal(mapping.sap);
+        const ean = getVal(mapping.ean);
+        const desc = getVal(mapping.desc);
+        const ref = getVal(mapping.ref);
+        const rawFornec = getVal(mapping.fornec) || currentSupplier;
+        const fornec = cleanName(rawFornec);
+
+        if (!desc || desc.toLowerCase().includes('mercadoria') || desc.toLowerCase().includes('descrição')) return;
+        if (!sap && !ean) return;
 
         const produtoData = {
             COD_PRODUTO: sap,
             DESCRICAO: desc.toUpperCase(),
             REFERENCIA: ref,
-            NOME_FORNECEDOR_REGULAR: fornec.toUpperCase(),
+            NOME_FORNECEDOR_REGULAR: fornec,
             EAN_PRODUTO_UNITARIO: ean
         };
 
-        const key = sap || ean; // Usa SAP como chave primária, ou EAN se SAP faltar
+        const key = sap || ean;
 
         if (databaseMap.has(key)) {
-            // Atualiza apenas os campos mapeados, preservando outros campos existentes no JSON
             const existing = databaseMap.get(key)!;
             Object.assign(existing, produtoData);
             updatedCount++;
         } else {
-            // Adiciona novo item
             baseDados.push(produtoData);
             databaseMap.set(key, produtoData);
             addedCount++;
