@@ -122,6 +122,9 @@ export function DisclaimerModal() {
                 <p className="text-gray-300 text-[11px] leading-relaxed">
                   Desenvolvida como solução temporária após alterações no sistema oficial da empresa, esta interface foi criada para otimizar a consulta da <strong className="text-white">Planilha de Relíquias da Diversão</strong>. Diferente da versão original, ela exibe automaticamente apenas itens com oferta ativa, reduzindo ruído visual e tornando a operação mais rápida e objetiva no dia a dia da loja.
                 </p>
+                <p className="text-gray-300 text-[11px] leading-relaxed mt-2">
+                  Você pode baixar o arquivo <strong className="text-white">CSV da Alteração de Preço</strong> ou a <strong className="text-white">Circular de Alteração de Preços</strong> (disponíveis no Pleno) e importá-los aqui para <strong className="text-blue-400">gerar automaticamente todos os cartazes</strong> do lote de uma só vez.
+                </p>
               </div>
             </div>
           </div>

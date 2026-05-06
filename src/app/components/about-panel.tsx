@@ -136,24 +136,26 @@ export function AboutPanel({ open, onClose }: AboutPanelProps) {
           >
             <p className="text-blue-300 font-semibold text-sm mb-3 flex items-center gap-2">
               <ExternalLink className="h-4 w-4 text-blue-400" />
-              Como Exportar do PLENO
+              Automação via PLENO
+            </p>
+            <p className="text-slate-300 text-xs mb-4 leading-relaxed">
+              Você pode automatizar a criação de cartazes importando arquivos gerados pelo sistema PLENO. O RD CARTAZ processará a lista e adicionará apenas os itens promocionais ao lote.
             </p>
             <div className="space-y-4">
               <div>
-                <p className="text-blue-200 text-[11px] font-bold uppercase tracking-wider mb-1">Método 1: Alteração do Dia</p>
+                <p className="text-blue-200 text-[11px] font-bold uppercase tracking-wider mb-1">1. Alteração de Preço (Diário)</p>
                 <p className="text-slate-400 text-xs leading-relaxed">
-                  No menu <strong className="text-white">Estoque &gt; Preços a serem alterados</strong>, marque a opção 
-                  <strong className="text-white"> "Somente com estoque"</strong> e gere o arquivo. 
-                  Após imprimir a lista, clique no botão <strong className="text-blue-400">CSV</strong> para baixar.
+                  No menu <strong className="text-white">Estoque &gt; Preços a serem alterados</strong>, marque 
+                  <strong className="text-white"> "Somente com estoque"</strong> e gere a lista. 
+                  Clique no botão <strong className="text-blue-400">CSV</strong> para baixar o arquivo e importe-o no botão "Importar Lote" desta ferramenta.
                 </p>
               </div>
               <div>
-                <p className="text-blue-200 text-[11px] font-bold uppercase tracking-wider mb-1">Método 2: Circular de Preços</p>
+                <p className="text-blue-200 text-[11px] font-bold uppercase tracking-wider mb-1">2. Circular de Alteração</p>
                 <p className="text-slate-400 text-xs leading-relaxed">
-                  No menu <strong className="text-white">Circular de Alteração de Preços</strong>, filtre pela data, 
-                  marque <strong className="text-white">"Com estoque"</strong> e filtre apenas 
-                  <strong className="text-white">"Promoções"</strong>. Carregue a lista e salve o arquivo como 
-                  <strong className="text-blue-400">CSV</strong>.
+                  No menu <strong className="text-white">Circular de Alteração de Preços</strong>, filtre a data, 
+                  marque <strong className="text-white">"Com estoque"</strong> e <strong className="text-white">"Promoções"</strong>. 
+                  Salve como <strong className="text-blue-400">CSV</strong> e realize o upload aqui para criar os cartazes automaticamente.
                 </p>
               </div>
             </div>
