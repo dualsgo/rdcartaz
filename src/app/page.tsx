@@ -452,8 +452,6 @@ export default function Home() {
           margin: 0 !important;
           padding: 0 !important;
           width: ${o === 'landscape' ? '297mm' : '210mm'} !important;
-          height: ${o === 'landscape' ? '210mm' : '297mm'} !important;
-          overflow: hidden !important;
           background: white !important;
         }
         .print-page {
