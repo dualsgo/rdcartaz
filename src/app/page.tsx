@@ -332,6 +332,7 @@ export default function Home() {
   const [previewMode, setPreviewMode] = useState<'single' | 'page'>('single');
   const [activeTab, setActiveTab] = useState<'edit' | 'queue' | 'preview'>('edit');
   const [showAutomation, setShowAutomation] = useState(false);
+  const [importMode, setImportMode] = useState<'offer' | 'normal'>('offer');
   const [showAddSuccess, setShowAddSuccess] = useState(false);
 
   const [queueFilter, setQueueFilter] = useState<'all' | 'offer' | 'normal'>('all');
@@ -595,14 +596,28 @@ export default function Home() {
           imported = parseProductCSV(content);
         }
 
-        const onlyOffers = imported.filter((item: any) => item.posterSubType === 'offer');
+        // Filtra baseado no modo selecionado pelo usuário
+        let filtered: any[] = [];
+        if (importMode === 'offer') {
+          filtered = imported.filter((item: any) => item.posterSubType === 'offer');
+        } else {
+          // Para "etiquetas sem oferta", pegamos os que são 'normal' e têm 'novoPreco' (ou simplesmente os 'normal')
+          // Mas o usuário especificou que quer o preço da coluna 'novo preço'. 
+          // No parser, os 'normal' com 'novoPreco' já vêm com priceFor preenchido com esse valor.
+          filtered = imported.filter((item: any) => item.posterSubType === 'normal');
+        }
 
-        if (onlyOffers.length > 0) {
-          setQueue(prev => [...prev, ...onlyOffers]);
-          setQueueFilter('offer');
-          setImportCount(onlyOffers.length);
+        if (filtered.length > 0) {
+          setQueue(prev => [...prev, ...filtered]);
+          setQueueFilter(importMode === 'offer' ? 'offer' : 'normal');
+          setImportCount(filtered.length);
           setImportStatus('success');
           setPreviewMode('page'); // Muda para ver a página inteira após importar
+          
+          // Se importou etiquetas normais, já muda o tipo do cartaz para etiqueta oficial se estiver em relíquias
+          if (importMode === 'normal' && posterType === 'reliquias') {
+            setPosterType('etiqueta-oficial');
+          }
         } else {
           setImportStatus('error');
         }
@@ -696,7 +711,10 @@ export default function Home() {
       <AutomationModal 
         isOpen={showAutomation} 
         onClose={() => setShowAutomation(false)} 
-        onSelectFile={() => fileInputRef.current?.click()} 
+        onSelectFile={(mode) => {
+          setImportMode(mode);
+          fileInputRef.current?.click();
+        }} 
       />
 
       <SecurityModal 
@@ -1111,6 +1129,7 @@ export default function Home() {
       {/* Modal de Feedback de Importação */}
       <ImportModal 
         status={importStatus} 
+        mode={importMode}
         count={importCount} 
         onClose={() => setImportStatus('idle')} 
       />

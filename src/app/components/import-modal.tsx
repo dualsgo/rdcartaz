@@ -6,12 +6,17 @@ import { cn } from '@/lib/utils';
 
 interface ImportModalProps {
   status: 'idle' | 'processing' | 'success' | 'error';
+  mode: 'offer' | 'normal';
   count: number;
   onClose: () => void;
 }
 
-export function ImportModal({ status, count, onClose }: ImportModalProps) {
+export function ImportModal({ status, mode, count, onClose }: ImportModalProps) {
   if (status === 'idle') return null;
+
+  const isOffer = mode === 'offer';
+  const labelPlural = isOffer ? 'ofertas' : 'etiquetas';
+  const labelSingular = isOffer ? 'oferta' : 'etiqueta';
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300">
@@ -30,7 +35,7 @@ export function ImportModal({ status, count, onClose }: ImportModalProps) {
               </div>
               <h3 className="text-lg font-bold text-gray-900">Processando Arquivo</h3>
               <p className="text-sm text-muted-foreground mt-2">
-                Estamos analisando sua planilha e filtrando a melhor oferta...
+                Estamos analisando sua planilha e filtrando os dados...
               </p>
             </>
           )}
@@ -42,7 +47,7 @@ export function ImportModal({ status, count, onClose }: ImportModalProps) {
               </div>
               <h3 className="text-lg font-bold text-gray-900">Importação Concluída!</h3>
               <p className="text-sm text-muted-foreground mt-2">
-                Encontramos <span className="font-bold text-green-600">{count} oferta</span> ativa e elas já foram adicionadas ao seu lote.
+                Encontramos <span className="font-bold text-green-600">{count} {count === 1 ? labelSingular : labelPlural}</span> e {count === 1 ? 'ela já foi adicionada' : 'elas já foram adicionadas'} ao seu lote.
               </p>
               <Button 
                 onClick={onClose} 
@@ -60,7 +65,7 @@ export function ImportModal({ status, count, onClose }: ImportModalProps) {
               </div>
               <h3 className="text-lg font-bold text-gray-900">Ops! Nada encontrado</h3>
               <p className="text-sm text-muted-foreground mt-2">
-                Não localizamos nenhuma oferta válida neste arquivo. Verifique se as colunas e preços promocionais estão corretos.
+                Não localizamos nenhuma {labelSingular} válida neste arquivo. Verifique se as colunas e preços estão corretos.
               </p>
               <Button 
                 onClick={onClose} 

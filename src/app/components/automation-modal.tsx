@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 interface AutomationModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSelectFile: () => void;
+  onSelectFile: (mode: 'offer' | 'normal') => void;
 }
 
 export function AutomationModal({ isOpen, onClose, onSelectFile }: AutomationModalProps) {
@@ -24,8 +24,8 @@ export function AutomationModal({ isOpen, onClose, onSelectFile }: AutomationMod
               <FileSpreadsheet className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h2 className="text-xl font-bold">Automatizar criação de Cartazes</h2>
-              <p className="text-blue-100 text-xs">Importando a alteração de preço você pode gerar todos os cartazes de uma só vez</p>
+              <h2 className="text-xl font-bold">Automatizar Cartazes</h2>
+              <p className="text-blue-100 text-xs">Importe o relatório de alteração de preço para gerar os cartazes</p>
             </div>
           </div>
           <button 
@@ -42,7 +42,7 @@ export function AutomationModal({ isOpen, onClose, onSelectFile }: AutomationMod
             <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-100 text-blue-700 font-bold flex items-center justify-center text-sm">1</div>
             <div className="space-y-1.5">
               <p className="text-xs text-gray-600 leading-relaxed">
-                No <strong className="text-gray-900">PLENO</strong> faça o processo normal de impressão de alteração de preço com estoque. No rodapé, haverá dois botões <strong className="text-blue-600">PDF e CSV</strong>, clique em <strong className="text-blue-600">CSV</strong> e salve o relatório em uma pasta de fácil acesso. Você também pode gerar um arquivo CSV no menu de circular de alteração de preço.
+                No <strong className="text-gray-900">PLENO</strong> faça o processo de impressão de alteração de preço. No rodapé, clique em <strong className="text-blue-600">CSV</strong> e salve o arquivo.
               </p>
             </div>
           </div>
@@ -51,26 +51,47 @@ export function AutomationModal({ isOpen, onClose, onSelectFile }: AutomationMod
           <div className="flex gap-4">
             <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-100 text-blue-700 font-bold flex items-center justify-center text-sm">2</div>
             <div className="space-y-1.5">
-              <h4 className="font-bold text-gray-900 text-sm">Importe aqui no RD CARTAZ</h4>
+              <h4 className="font-bold text-gray-900 text-sm">Escolha o que deseja gerar:</h4>
               <p className="text-xs text-gray-600 leading-relaxed">
-                Clique no botão abaixo e selecione o arquivo que você acabou de baixar. O sistema vai filtrar automaticamente apenas os produtos que estão em oferta.
+                Você pode filtrar apenas os produtos em oferta ou gerar as etiquetas normais (brancas) com o novo preço.
               </p>
             </div>
           </div>
 
-          {/* Botão de ação principal */}
-          <div className="pt-2">
+          {/* Botões de ação */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
             <Button 
               onClick={() => {
                 onClose();
-                onSelectFile();
+                onSelectFile('offer');
               }}
-              className="w-full h-14 bg-blue-600 hover:bg-blue-700 text-white font-black uppercase tracking-widest text-base shadow-lg shadow-blue-200 gap-3 group"
+              className="h-16 bg-amber-500 hover:bg-amber-600 text-white font-black uppercase tracking-tight text-xs shadow-lg shadow-amber-100 flex flex-col items-center justify-center gap-1 group py-2"
             >
-              <Download className="h-5 w-5 group-hover:translate-y-0.5 transition-transform" />
-              Selecionar Arquivo CSV
+              <div className="flex items-center gap-2">
+                <Download className="h-4 w-4" />
+                <span>Gerar Ofertas</span>
+              </div>
+              <span className="text-[9px] opacity-80 normal-case font-medium">(Cartaz Amarelo)</span>
+            </Button>
+            
+            <Button 
+              onClick={() => {
+                onClose();
+                onSelectFile('normal');
+              }}
+              className="h-16 bg-slate-700 hover:bg-slate-800 text-white font-black uppercase tracking-tight text-xs shadow-lg shadow-slate-200 flex flex-col items-center justify-center gap-1 group py-2"
+            >
+              <div className="flex items-center gap-2">
+                <Download className="h-4 w-4" />
+                <span>Gerar Etiquetas</span>
+              </div>
+              <span className="text-[9px] opacity-80 normal-case font-medium">(Branco / S. Oferta)</span>
             </Button>
           </div>
+
+          <p className="text-[10px] text-center text-muted-foreground mt-4 italic">
+            * Para etiquetas sem oferta, o sistema usará o valor da coluna "Novo Preço".
+          </p>
         </div>
       </div>
     </div>
