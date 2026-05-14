@@ -4,52 +4,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { invalidateSuggestCache } from '../suggest-cache';
 
-type ProdutoEntry = {
-    description: string;
-    reference: string;
-    code?: string;
-    ean?: string;
-    supplier?: string;
-    priceFrom?: string;
-    priceFor?: string;
-};
-
-let produtosCache: Record<string, ProdutoEntry> | null = null;
-
-const DATA_FILE = path.join(process.cwd(), 'data', 'produtos.json');
-
-function loadProdutos(): Record<string, ProdutoEntry> {
-    if (produtosCache) return produtosCache;
-    if (!fs.existsSync(DATA_FILE)) {
-        console.warn('[api/produto] produtos.json não encontrado em', DATA_FILE);
-        produtosCache = {};
-        return produtosCache;
-    }
-    try {
-        const raw = fs.readFileSync(DATA_FILE, 'utf8');
-        produtosCache = JSON.parse(raw);
-        console.log(`[api/produto] ${Object.keys(produtosCache!).length} entradas carregadas.`);
-    } catch (err) {
-        console.error('[api/produto] Erro ao ler produtos.json:', err);
-        produtosCache = {};
-    }
-    return produtosCache!;
-}
-
-function saveProdutos(data: Record<string, ProdutoEntry>): void {
-    try {
-        const dir = path.dirname(DATA_FILE);
-        if (!fs.existsSync(dir)) {
-            fs.mkdirSync(dir, { recursive: true });
-        }
-        fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), 'utf8');
-        produtosCache = data;
-        invalidateSuggestCache();
-    } catch (err) {
-        console.error(`[api/produto] Erro ao salvar produtos.json em ${DATA_FILE}:`, err);
-        throw err;
-    }
-}
+import { loadProdutos, saveProdutos, ProdutoEntry } from './data-manager';
 
 function removeAliases(produtos: Record<string, ProdutoEntry>, keys: string[]): void {
     for (const k of keys) delete produtos[k];
@@ -69,21 +24,32 @@ export async function GET(request: NextRequest) {
         const seen = new Set<string>();
         const entries: { key: string; description: string; reference: string; ean?: string; code?: string; supplier?: string }[] = [];
 
-        for (const [key, val] of Object.entries(produtos)) {
+        // Otimização: for...in é mais leve que Object.entries
+        for (const key in produtos) {
             // Usa apenas chaves SAP (≤ 10 dígitos) como canônicas; ignora aliases EAN de 13
             if (key.length > 10) continue;
+            
+            const val = produtos[key];
             const canonical = key + '|' + val.description;
             if (seen.has(canonical)) continue;
             seen.add(canonical);
 
             if (search) {
-                const haystack = `${key} ${val.description} ${val.reference ?? ''} ${val.ean ?? ''} ${val.code ?? ''}`.toUpperCase();
-                if (!haystack.includes(search)) continue;
+                // Busca otimizada: evita criar strings gigantes desnecessariamente
+                const match = key.includes(search) || 
+                             val.description.toUpperCase().includes(search) || 
+                             (val.reference && val.reference.toUpperCase().includes(search)) ||
+                             (val.ean && val.ean.includes(search)) ||
+                             (val.code && val.code.includes(search));
+                
+                if (!match) continue;
             }
             entries.push({ key, description: val.description, reference: val.reference, ean: val.ean, code: val.code, supplier: val.supplier });
         }
 
+        // Ordenação pode ser lenta se entries for gigante, mas entries já está filtrada por busca ou reduzida por SAP keys
         entries.sort((a, b) => a.key.localeCompare(b.key, undefined, { numeric: true }));
+        
         const total = entries.length;
         const paged = entries.slice((page - 1) * limit, page * limit);
         return NextResponse.json({ total, page, limit, items: paged });
@@ -219,7 +185,9 @@ export async function DELETE(request: NextRequest) {
         const toRemove = new Set<string>([key]);
         if (existing.ean)  toRemove.add(existing.ean);
         if (existing.code) toRemove.add(existing.code);
-        for (const [k, v] of Object.entries(produtos)) {
+        
+        for (const k in produtos) {
+            const v = produtos[k];
             if (v.ean === key || v.code === key) toRemove.add(k);
         }
 

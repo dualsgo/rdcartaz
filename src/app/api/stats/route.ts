@@ -3,19 +3,19 @@ export const dynamic = 'force-dynamic';
 import * as fs from 'fs';
 import * as path from 'path';
 
-export async function GET() {
-    const DATA_FILE = path.join(process.cwd(), 'data', 'basedados.json');
-    
-    if (!fs.existsSync(DATA_FILE)) {
-        return NextResponse.json({ count: 0 });
-    }
+import { loadProdutos } from '../produto/data-manager';
 
+export async function GET() {
     try {
-        const raw = fs.readFileSync(DATA_FILE, 'utf8');
-        const data = JSON.parse(raw);
-        return NextResponse.json({ count: data.length });
+        const produtos = loadProdutos();
+        // Filtramos chaves SAP (≤ 10 dígitos) para ter o contador real de produtos únicos
+        let count = 0;
+        for (const k in produtos) {
+            if (k.length <= 10) count++;
+        }
+        return NextResponse.json({ count });
     } catch (err) {
-        console.error('[api/stats] Erro ao ler basedados.json:', err);
+        console.error('[api/stats] Erro:', err);
         return NextResponse.json({ count: 0, error: 'Internal error' }, { status: 500 });
     }
 }
