@@ -423,3 +423,93 @@ export function parseDatabaseImportExcel(buffer: ArrayBuffer): any[] {
 
 
 
+
+/**
+ * Analisa o relatório "Mercadoria Sem Giro" (HTML mascarado de XLS)
+ * Extrai dados completos incluindo preços para autopreenchimento
+ */
+export function parseReportSemGiro(buffer: ArrayBuffer): any[] {
+  let data: any[][] = [];
+
+  try {
+    const text = new TextDecoder("utf-8").decode(buffer);
+    if (text.toLowerCase().includes('<html') || text.toLowerCase().includes('<table')) {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(text, 'text/html');
+      const rows = Array.from(doc.querySelectorAll('tr'));
+      data = rows.map(tr => Array.from(tr.querySelectorAll('th, td')).map(td => (td.textContent || '').trim()));
+    }
+  } catch (e) {
+    console.error('Erro ao decodificar HTML:', e);
+  }
+
+  // Se não for HTML, tenta SheetJS
+  if (data.length === 0) {
+    const workbook = XLSX.read(buffer, { type: 'array' });
+    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+    data = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' }) as any[][];
+  }
+
+  const items: any[] = [];
+  
+  // O relatório tem headers nas primeiras linhas, os dados começam após os headers mesclados
+  // Geralmente a linha 4 (índice 3) é o cabeçalho real
+  let headerIdx = -1;
+  for(let i=0; i < Math.min(data.length, 10); i++) {
+    const rowStr = data[i].join(' ').toLowerCase();
+    if (rowStr.includes('cod. interno') || rowStr.includes('mercadoria')) {
+      headerIdx = i;
+      break;
+    }
+  }
+
+  if (headerIdx === -1) return [];
+
+  for (let i = headerIdx + 1; i < data.length; i++) {
+    const row = data[i];
+    if (!row || row.length < 3) continue;
+
+    const sap = String(row[0] || '').trim();
+    const ean = String(row[1] || '').trim();
+    const description = String(row[2] || '').trim();
+
+    if (!sap && !ean) continue;
+    if (!description || description.toLowerCase().includes('total')) continue;
+
+    // Colunas solicitadas:
+    // D(3): Cod. Fornecedor -> Referência
+    // E(4): Marca -> Supplier
+    // F(5): Estoque -> Dividir por 1000
+    // I(8): Preço Regular
+    // J(9): Preço Oferta
+
+    const reference = String(row[3] || '').trim();
+    const supplier = String(row[4] || '').trim();
+    
+    // Estoque: 1000 vira 1
+    const estoqueRaw = parseFloat(String(row[5] || '0').replace(',', '.')) || 0;
+    const estoque = estoqueRaw / 1000;
+
+    const valRegular = parsePrice(row[8]);
+    const valOferta = parsePrice(row[9]);
+
+    // Lógica de preços para o cartaz
+    const hasOffer = valOferta > 0;
+    const priceFrom = hasOffer ? formatCurrency(valRegular) : '';
+    const priceFor = hasOffer ? formatCurrency(valOferta) : formatCurrency(valRegular);
+
+    items.push({
+      code: sap,
+      ean: ean,
+      description: description.toUpperCase(),
+      reference: reference,
+      supplier: supplier.toUpperCase(),
+      priceFrom: priceFrom,
+      priceFor: priceFor,
+      isOffer: hasOffer,
+      stock: estoque
+    });
+  }
+
+  return items;
+}

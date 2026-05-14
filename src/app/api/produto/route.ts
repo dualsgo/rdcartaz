@@ -10,6 +10,8 @@ type ProdutoEntry = {
     code?: string;
     ean?: string;
     supplier?: string;
+    priceFrom?: string;
+    priceFor?: string;
 };
 
 let produtosCache: Record<string, ProdutoEntry> | null = null;
@@ -109,8 +111,9 @@ export async function POST(request: NextRequest) {
 
         const body = await request.json() as {
             key: string; description: string; reference?: string; ean?: string; code?: string; supplier?: string;
+            priceFrom?: string; priceFor?: string;
         };
-        const { key, description, reference, ean, code, supplier } = body;
+        const { key, description, reference, ean, code, supplier, priceFrom, priceFor } = body;
         if (!key || !description) {
             return NextResponse.json({ error: 'Campos "key" e "description" são obrigatórios.' }, { status: 400 });
         }
@@ -136,6 +139,8 @@ export async function POST(request: NextRequest) {
             ...(eanClean  ? { ean:  eanClean  } : {}),
             ...(codeClean ? { code: codeClean } : {}),
             ...(supplier  ? { supplier: String(supplier).trim().toUpperCase() } : {}),
+            ...(priceFrom ? { priceFrom: String(priceFrom).trim() } : {}),
+            ...(priceFor  ? { priceFor: String(priceFor).trim() } : {}),
         };
 
         produtos[keyClean] = entry;
@@ -155,8 +160,9 @@ export async function PATCH(request: NextRequest) {
     try {
         const body = await request.json() as {
             key: string; description?: string; reference?: string; ean?: string; code?: string; supplier?: string;
+            priceFrom?: string; priceFor?: string;
         };
-        const { key, description, reference, ean, code, supplier } = body;
+        const { key, description, reference, ean, code, supplier, priceFrom, priceFor } = body;
         if (!key) return NextResponse.json({ error: 'Campo "key" é obrigatório.' }, { status: 400 });
 
         const keyClean  = String(key).trim();
@@ -184,6 +190,8 @@ export async function PATCH(request: NextRequest) {
             ...(eanClean  !== undefined ? (eanClean  ? { ean:  eanClean  } : {}) : (existing.ean  ? { ean:  existing.ean  } : {})),
             ...(codeClean !== undefined ? (codeClean ? { code: codeClean } : {}) : (existing.code ? { code: existing.code } : {})),
             ...(supplier !== undefined ? (supplier ? { supplier: String(supplier).trim().toUpperCase() } : {}) : (existing.supplier ? { supplier: existing.supplier } : {})),
+            ...(priceFrom !== undefined ? { priceFrom: String(priceFrom).trim() } : (existing.priceFrom ? { priceFrom: existing.priceFrom } : {})),
+            ...(priceFor !== undefined ? { priceFor: String(priceFor).trim() } : (existing.priceFor ? { priceFor: existing.priceFor } : {})),
         };
 
         produtos[keyClean] = updated;
@@ -251,6 +259,8 @@ export async function PUT(request: NextRequest) {
                 ...(codeClean ? { code: codeClean } : {}),
                 ...(eanClean  ? { ean:  eanClean  } : {}),
                 ...(suppClean ? { supplier: suppClean } : {}),
+                ...(item.priceFrom ? { priceFrom: String(item.priceFrom).trim() } : {}),
+                ...(item.priceFor ? { priceFor: String(item.priceFor).trim() } : {}),
             };
 
             // Define a chave principal (prioridade para SAP se existir, senão EAN)

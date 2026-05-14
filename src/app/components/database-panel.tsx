@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
-import { parseDatabaseImportExcel } from '@/app/lib/poster-utils';
+import { parseDatabaseImportExcel, parseReportSemGiro } from '@/app/lib/poster-utils';
 
 type ProdutoItem = {
   key: string;
@@ -14,6 +14,8 @@ type ProdutoItem = {
   reference: string;
   ean?: string;
   code?: string;
+  priceFrom?: string;
+  priceFor?: string;
 };
 
 type ListResponse = {
@@ -29,7 +31,19 @@ const emptyForm = () => ({ description: '', ean: '', code: '', reference: '' });
 /* ══════════════════════════════════════════════════════════════
    DatabasePanel — painel deslizante de gerenciamento do banco
    ══════════════════════════════════════════════════════════════ */
-export function DatabasePanel({ open, onClose }: { open: boolean; onClose: () => void }) {
+export function DatabasePanel({ 
+  open, 
+  onClose, 
+  onImportSessionData,
+  onClearSessionData,
+  hasSessionData
+}: { 
+  open: boolean; 
+  onClose: () => void;
+  onImportSessionData?: (data: any[]) => void;
+  onClearSessionData?: () => void;
+  hasSessionData?: boolean;
+}) {
   const [search, setSearch]         = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [page, setPage]             = useState(1);
@@ -57,6 +71,7 @@ export function DatabasePanel({ open, onClose }: { open: boolean; onClose: () =>
   const [importStatus, setImportStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [importCount, setImportCount] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const priceReportInputRef = useRef<HTMLInputElement>(null);
 
   const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -221,6 +236,39 @@ export function DatabasePanel({ open, onClose }: { open: boolean; onClose: () =>
     }
   };
 
+  /* ── Importação de Relatório de Preços (Mercadoria Sem Giro) - SOMENTE SESSÃO ── */
+  const handlePriceReportImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setImportStatus('loading');
+    try {
+      const buffer = await file.arrayBuffer();
+      const items = parseReportSemGiro(buffer);
+      
+      if (items.length === 0) {
+        setImportStatus('error');
+        setTimeout(() => setImportStatus('idle'), 3000);
+        return;
+      }
+
+      // Em vez de PUT na API, enviamos para o estado de sessão no Home
+      if (onImportSessionData) {
+        onImportSessionData(items);
+      }
+
+      setImportCount(items.length);
+      setImportStatus('success');
+      setTimeout(() => setImportStatus('idle'), 4000);
+    } catch (err) {
+      console.error(err);
+      setImportStatus('error');
+      setTimeout(() => setImportStatus('idle'), 3000);
+    } finally {
+      if (priceReportInputRef.current) priceReportInputRef.current.value = '';
+    }
+  };
+
   const totalPages = data ? Math.max(1, Math.ceil(data.total / (data.limit || 50))) : 1;
 
   if (!open) return null;
@@ -250,11 +298,41 @@ export function DatabasePanel({ open, onClose }: { open: boolean; onClose: () =>
           <div className="flex items-center gap-2">
             <input
               type="file"
-              ref={fileInputRef}
-              onChange={handleBatchImport}
+              ref={priceReportInputRef}
+              onChange={handlePriceReportImport}
               accept=".xls,.xlsx"
               className="hidden"
             />
+            <button
+              onClick={() => priceReportInputRef.current?.click()}
+              disabled={importStatus === 'loading'}
+              className={cn(
+                'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold transition-all border',
+                importStatus === 'success' ? 'bg-green-500/10 text-green-600 border-green-200' :
+                importStatus === 'error'   ? 'bg-red-500/10 text-red-600 border-red-200' :
+                hasSessionData ? 'bg-blue-500/10 text-blue-600 border-blue-300' :
+                'bg-muted hover:bg-blue-500/10 hover:text-blue-600 border-border'
+              )}
+              title="Carregar relatório de estoque para atualizar preços temporariamente nesta sessão"
+            >
+              {importStatus === 'loading' ? <Loader2 className="h-4 w-4 animate-spin" /> :
+               importStatus === 'success' ? <Check className="h-4 w-4" /> :
+               importStatus === 'error'   ? <XCircle className="h-4 w-4" /> :
+               <Database className={cn("h-4 w-4", hasSessionData && "animate-pulse")} />}
+              {importStatus === 'loading' ? 'Lendo...' :
+               importStatus === 'success' ? `Sessão OK!` :
+               importStatus === 'error'   ? 'Erro' :
+               hasSessionData ? 'Preços Ativos' : 'Relatório de Preços'}
+            </button>
+            {hasSessionData && (
+              <button
+                onClick={onClearSessionData}
+                className="p-1.5 rounded-lg hover:bg-red-50 text-red-400 hover:text-red-600 border border-transparent hover:border-red-200 transition-all"
+                title="Limpar preços temporários"
+              >
+                <RotateCcw className="h-4 w-4" />
+              </button>
+            )}
             <button
               onClick={() => fileInputRef.current?.click()}
               disabled={importStatus === 'loading'}

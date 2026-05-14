@@ -342,6 +342,8 @@ export default function Home() {
   });
 
   const [isMobile, setIsMobile] = useState(false);
+  const [sessionProducts, setSessionProducts] = useState<Record<string, any>>({});
+  const hasSessionData = Object.keys(sessionProducts).length > 0;
 
   useEffect(() => {
     const checkMobile = () => {
@@ -400,6 +402,19 @@ export default function Home() {
   const saveSettings = (newSettings: PosterSettings) => {
     setSettings(newSettings);
     localStorage.setItem('poster-settings', JSON.stringify(newSettings));
+  };
+
+  const handleImportSessionData = (items: any[]) => {
+    const map: Record<string, any> = {};
+    items.forEach(item => {
+      if (item.code) map[item.code] = item;
+      if (item.ean) map[item.ean] = item;
+    });
+    setSessionProducts(map);
+  };
+
+  const handleClearSessionData = () => {
+    setSessionProducts({});
   };
 
   const perPage    = PER_PAGE[posterType as PosterType] || 4;
@@ -707,7 +722,13 @@ export default function Home() {
       {/* Modais */}
       <DisclaimerModal />
       <AboutPanel open={showAbout} onClose={() => setShowAbout(false)} />
-      <DatabasePanel open={showDatabase} onClose={() => setShowDatabase(false)} />
+      <DatabasePanel 
+        open={showDatabase} 
+        onClose={() => setShowDatabase(false)} 
+        onImportSessionData={handleImportSessionData}
+        onClearSessionData={handleClearSessionData}
+        hasSessionData={hasSessionData}
+      />
       <AutomationModal 
         isOpen={showAutomation} 
         onClose={() => setShowAutomation(false)} 
@@ -733,6 +754,12 @@ export default function Home() {
               <span className="sm:hidden">RD CARTAZ</span>
               <span className="hidden sm:inline">RD CARTAZ - Cartazes Relíquias da Diversão</span>
             </h1>
+            {hasSessionData && (
+              <div className="flex items-center gap-1.5 px-2 py-1 bg-blue-50 border border-blue-100 rounded-md animate-pulse">
+                <Database className="h-3 w-3 text-blue-500" />
+                <span className="text-[10px] font-black text-blue-600 uppercase tracking-tight">Preços da Sessão Ativos</span>
+              </div>
+            )}
           </div>
           <div className="flex items-center gap-4 w-full md:w-auto mt-2 md:mt-0 justify-between">
             {/* Mobile select */}
@@ -769,6 +796,9 @@ export default function Home() {
                 settings={settings} 
                 onSave={saveSettings} 
                 onOpenDatabase={() => setShowDatabase(true)} 
+                onImportSessionData={handleImportSessionData}
+                onClearSessionData={handleClearSessionData}
+                hasSessionData={hasSessionData}
               />
               <input
                 type="file"
@@ -825,6 +855,7 @@ export default function Home() {
                   posterType={posterType}
                   onLookupStatusChange={setIsProductReady}
                   onImportBatch={() => setShowAutomation(true)}
+                  sessionProducts={sessionProducts}
                 />
 
                 <Button

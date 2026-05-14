@@ -70,6 +70,7 @@ type PosterFormProps = {
 
   onLookupStatusChange?: (found: boolean) => void;
   onImportBatch?: () => void;
+  sessionProducts?: Record<string, any>;
 };
 
 function detectInputType(value: string): 'ean' | 'code' {
@@ -206,6 +207,32 @@ export function PosterForm({ data, setData, posterType, onLookupStatusChange, on
     setLookupStatus('loading');
     onLookupStatusChange?.(false);
 
+    // 1. Prioridade: Buscar nos dados temporários da sessão
+    if (sessionProducts && sessionProducts[query]) {
+      const produto = sessionProducts[query];
+      setData(prev => {
+        const hasPriceFrom = !!produto.priceFrom && produto.priceFrom !== '0,00';
+        return {
+          ...prev,
+          description: produto.description,
+          reference:   produto.reference,
+          code:  inputType === 'code' ? query : (produto.code ?? ''),
+          ean:   inputType === 'ean'  ? query : (produto.ean  ?? ''),
+          supplier: produto.supplier ?? '',
+          priceFrom: produto.priceFrom ?? '',
+          priceFor:  produto.priceFor  ?? '',
+          posterSubType: hasPriceFrom ? 'offer' : (produto.priceFor ? 'normal' : prev.posterSubType),
+        };
+      });
+      if (produto.priceFrom) priceFrom.setValue(produto.priceFrom);
+      if (produto.priceFor) priceFor.setValue(produto.priceFor);
+      
+      setLookupStatus('found');
+      onLookupStatusChange?.(true);
+      return;
+    }
+
+    // 2. Fallback: Buscar no Banco de Dados via API
     try {
       const res = await fetch(`/api/produto?q=${encodeURIComponent(query)}`);
       if (!res.ok) { 
@@ -217,16 +244,29 @@ export function PosterForm({ data, setData, posterType, onLookupStatusChange, on
 
       const produto = await res.json() as {
         description: string; reference: string; ean?: string; code?: string; supplier?: string;
+        priceFrom?: string; priceFor?: string;
       };
 
-      setData(prev => ({
-        ...prev,
-        description: produto.description,
-        reference:   produto.reference,
-        code:  inputType === 'code' ? query : (produto.code ?? ''),
-        ean:   inputType === 'ean'  ? query : (produto.ean  ?? ''),
-        supplier: produto.supplier ?? '',
-      }));
+      setData(prev => {
+        const hasPriceFrom = !!produto.priceFrom && produto.priceFrom !== '0,00';
+        return {
+          ...prev,
+          description: produto.description,
+          reference:   produto.reference,
+          code:  inputType === 'code' ? query : (produto.code ?? ''),
+          ean:   inputType === 'ean'  ? query : (produto.ean  ?? ''),
+          supplier: produto.supplier ?? '',
+          // Autopreenchimento de preços se existirem na base
+          priceFrom: produto.priceFrom ?? '',
+          priceFor:  produto.priceFor  ?? '',
+          posterSubType: hasPriceFrom ? 'offer' : (produto.priceFor ? 'normal' : prev.posterSubType),
+        };
+      });
+
+      // Atualiza os inputs de moeda explicitamente para refletir a mudança
+      if (produto.priceFrom) priceFrom.setValue(produto.priceFrom);
+      if (produto.priceFor) priceFor.setValue(produto.priceFor);
+
       setLookupStatus('found');
       onLookupStatusChange?.(true);
     } catch {
