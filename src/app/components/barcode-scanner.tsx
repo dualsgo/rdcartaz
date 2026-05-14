@@ -213,13 +213,16 @@ export function BarcodeScanner({ onScan, onClose }: BarcodeScannerProps) {
         </div>
 
         {/* Footer / Info */}
-        <div className="p-6 bg-black/60 text-center border-t border-white/5">
-          <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest mb-1">
-            Scanner de Código de Barras
+        <div className="p-4 bg-black/60 border-t border-white/5 flex flex-col items-center gap-3">
+          <p className="text-white/60 text-xs leading-relaxed text-center">
+            Escaneamento contínuo ativado. Os itens lidos vão direto para a fila.
           </p>
-          <p className="text-white/60 text-xs leading-relaxed">
-            Centralize o código na mira azul para leitura automática
-          </p>
+          <Button 
+            onClick={onClose} 
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-black uppercase tracking-widest h-12"
+          >
+            Finalizar e Ver Lote
+          </Button>
         </div>
       </div>
     </div>
