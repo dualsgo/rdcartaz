@@ -71,7 +71,43 @@ type PosterFormProps = {
   onLookupStatusChange?: (found: boolean) => void;
   onImportBatch?: () => void;
   sessionProducts?: Record<string, any>;
+  onAutoAdd?: (data: PosterData) => void;
 };
+
+function playBeep(type: 'success' | 'error') {
+  try {
+    const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+    if (!AudioContext) return;
+    const ctx = new AudioContext();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    
+    if (type === 'success') {
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(800, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(1200, ctx.currentTime + 0.1);
+      gain.gain.setValueAtTime(0, ctx.currentTime);
+      gain.gain.linearRampToValueAtTime(0.5, ctx.currentTime + 0.05);
+      gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.2);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.2);
+    } else {
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(300, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(150, ctx.currentTime + 0.2);
+      gain.gain.setValueAtTime(0, ctx.currentTime);
+      gain.gain.linearRampToValueAtTime(0.5, ctx.currentTime + 0.05);
+      gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.3);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.3);
+    }
+  } catch (e) {
+    console.error("Audio beep failed", e);
+  }
+}
 
 function detectInputType(value: string): 'ean' | 'code' {
   return value.replace(/\D/g, '').length >= 8 ? 'ean' : 'code';
@@ -85,7 +121,7 @@ const defectOptions = [
   { value: 'outro', label: 'Outro (descrever)', discount: null },
 ];
 
-export function PosterForm({ data, setData, posterType, onLookupStatusChange, onImportBatch, sessionProducts }: PosterFormProps) {
+export function PosterForm({ data, setData, posterType, onLookupStatusChange, onImportBatch, sessionProducts, onAutoAdd }: PosterFormProps) {
   const [lookupStatus, setLookupStatus] = useState<LookupStatus>('idle');
   const [showScanner, setShowScanner] = useState(false);
   const [searchValue, setSearchValue] = useState('');
@@ -129,15 +165,18 @@ export function PosterForm({ data, setData, posterType, onLookupStatusChange, on
     setData(prev => ({ ...prev, priceFrom: priceFrom.display }));
   }, [priceFrom.display, setData]);
   
-  // Automatização inteligente do parcelamento (Desativada na versão Relíquias)
+  // Automatização inteligente do parcelamento
   useEffect(() => {
     if (posterType === 'reliquias') {
-      setData(prev => ({
-        ...prev,
-        paymentOption: 'normal'
-      }));
+      setData(prev => ({ ...prev, paymentOption: 'normal' }));
+    } else if (posterType === 'etiqueta-oficial') {
+      if (priceFor.cents > 5999) {
+        setData(prev => ({ ...prev, paymentOption: 'installment' }));
+      } else {
+        setData(prev => ({ ...prev, paymentOption: 'normal' }));
+      }
     }
-  }, [setData, posterType]);
+  }, [setData, posterType, priceFor.cents]);
 
 
 
@@ -198,21 +237,30 @@ export function PosterForm({ data, setData, posterType, onLookupStatusChange, on
     fetchSuggestions(v);
   };
 
-  const handleLookup = useCallback(async (q = searchValue) => {
+  const handleLookup = useCallback(async (q = searchValue): Promise<PosterData | null> => {
     const query = q.trim();
-    if (query.length < 3) return;
+    if (query.length < 3) return null;
     setShowSuggestions(false);
     setSuggestions([]);
     const inputType = detectInputType(query);
     setLookupStatus('loading');
     onLookupStatusChange?.(false);
 
+    let foundData: PosterData | null = null;
+
     // 1. Prioridade: Buscar nos dados temporários da sessão
     if (sessionProducts && sessionProducts[query]) {
       const produto = sessionProducts[query];
       setData(prev => {
         const hasPriceFrom = !!produto.priceFrom && produto.priceFrom !== '0,00';
-        return {
+        let payOption = prev.paymentOption;
+        if (posterType === 'etiqueta-oficial') {
+          const cents = displayToCents(produto.priceFor ?? '');
+          if (cents > 5999) payOption = 'installment';
+          else payOption = 'normal';
+        }
+
+        foundData = {
           ...prev,
           description: produto.description,
           reference:   produto.reference,
@@ -222,14 +270,16 @@ export function PosterForm({ data, setData, posterType, onLookupStatusChange, on
           priceFrom: produto.priceFrom ?? '',
           priceFor:  produto.priceFor  ?? '',
           posterSubType: hasPriceFrom ? 'offer' : (produto.priceFor ? 'normal' : prev.posterSubType),
+          paymentOption: payOption,
         };
+        return foundData;
       });
       if (produto.priceFrom) priceFrom.setValue(produto.priceFrom);
       if (produto.priceFor) priceFor.setValue(produto.priceFor);
       
       setLookupStatus('found');
       onLookupStatusChange?.(true);
-      return;
+      return foundData;
     }
 
     // 2. Fallback: Buscar no Banco de Dados via API
@@ -239,7 +289,7 @@ export function PosterForm({ data, setData, posterType, onLookupStatusChange, on
         setLookupStatus('notfound'); 
         setShowWarning(true);
         onLookupStatusChange?.(false); 
-        return; 
+        return null; 
       }
 
       const produto = await res.json() as {
@@ -249,33 +299,42 @@ export function PosterForm({ data, setData, posterType, onLookupStatusChange, on
 
       setData(prev => {
         const hasPriceFrom = !!produto.priceFrom && produto.priceFrom !== '0,00';
-        return {
+        let payOption = prev.paymentOption;
+        if (posterType === 'etiqueta-oficial') {
+          const cents = displayToCents(produto.priceFor ?? '');
+          if (cents > 5999) payOption = 'installment';
+          else payOption = 'normal';
+        }
+
+        foundData = {
           ...prev,
           description: produto.description,
           reference:   produto.reference,
           code:  inputType === 'code' ? query : (produto.code ?? ''),
           ean:   inputType === 'ean'  ? query : (produto.ean  ?? ''),
           supplier: produto.supplier ?? '',
-          // Autopreenchimento de preços se existirem na base
           priceFrom: produto.priceFrom ?? '',
           priceFor:  produto.priceFor  ?? '',
           posterSubType: hasPriceFrom ? 'offer' : (produto.priceFor ? 'normal' : prev.posterSubType),
+          paymentOption: payOption,
         };
+        return foundData;
       });
 
-      // Atualiza os inputs de moeda explicitamente para refletir a mudança
       if (produto.priceFrom) priceFrom.setValue(produto.priceFrom);
       if (produto.priceFor) priceFor.setValue(produto.priceFor);
 
       setLookupStatus('found');
       onLookupStatusChange?.(true);
+      return foundData;
     } catch {
       setLookupStatus('notfound');
       onLookupStatusChange?.(false);
+      return null;
     }
-  }, [searchValue, setData, onLookupStatusChange]);
+  }, [searchValue, setData, onLookupStatusChange, sessionProducts, posterType, priceFrom, priceFor]);
 
-  const handleScan = useCallback((code: string) => {
+  const handleScan = useCallback(async (code: string) => {
     if (code.length >= 10) {
       setManualEan(code);
       setManualCode('');
@@ -283,10 +342,20 @@ export function PosterForm({ data, setData, posterType, onLookupStatusChange, on
       setManualCode(code);
       setManualEan('');
     }
-    setShowScanner(false);
+    // Para bipar em lote, não fechamos o scanner
     setSearchValue(code);
-    setTimeout(() => handleLookup(code), 100);
-  }, [handleLookup]);
+    
+    const foundData = await handleLookup(code);
+    if (foundData) {
+      playBeep('success');
+      if (onAutoAdd) {
+        onAutoAdd(foundData);
+      }
+    } else {
+      playBeep('error');
+      setShowScanner(false);
+    }
+  }, [handleLookup, onAutoAdd]);
 
   const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') { e.preventDefault(); handleLookup(); }

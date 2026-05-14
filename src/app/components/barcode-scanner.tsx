@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode';
 import { X, Camera, RefreshCw, AlertCircle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -17,6 +17,20 @@ export function BarcodeScanner({ onScan, onClose }: BarcodeScannerProps) {
   const [error, setError] = useState<string | null>(null);
   const [cameras, setCameras] = useState<any[]>([]);
   const [currentCameraIndex, setCurrentCameraIndex] = useState(0);
+  const lastScannedRef = useRef<{ text: string, time: number }>({ text: '', time: 0 });
+
+  const handleDecoded = useCallback((decodedText: string) => {
+    const now = Date.now();
+    const { text, time } = lastScannedRef.current;
+    
+    // Evita bipar o mesmo código múltiplas vezes em menos de 2 segundos
+    if (text === decodedText && now - time < 2000) {
+      return;
+    }
+    
+    lastScannedRef.current = { text: decodedText, time: now };
+    onScan(decodedText);
+  }, [onScan]);
 
   useEffect(() => {
     const startScanner = async () => {
@@ -47,9 +61,7 @@ export function BarcodeScanner({ onScan, onClose }: BarcodeScannerProps) {
             availableCameras[defaultIndex].id,
             config,
             (decodedText) => {
-              html5QrCode.stop().then(() => {
-                onScan(decodedText);
-              }).catch(() => onScan(decodedText));
+              handleDecoded(decodedText);
             },
             () => {}
           );
@@ -68,9 +80,7 @@ export function BarcodeScanner({ onScan, onClose }: BarcodeScannerProps) {
               ]
             },
             (decodedText) => {
-              html5QrCode.stop().then(() => {
-                onScan(decodedText);
-              }).catch(() => onScan(decodedText));
+              handleDecoded(decodedText);
             },
             () => {}
           );
@@ -112,9 +122,7 @@ export function BarcodeScanner({ onScan, onClose }: BarcodeScannerProps) {
           aspectRatio: 1.7777777778,
         },
         (decodedText) => {
-          scannerRef.current?.stop().then(() => {
-            onScan(decodedText);
-          }).catch(() => onScan(decodedText));
+          handleDecoded(decodedText);
         },
         () => {}
       );

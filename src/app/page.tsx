@@ -548,16 +548,17 @@ export default function Home() {
     proceedAddToQueue();
   };
 
-  const proceedAddToQueue = () => {
-    setQueue((prev: PosterData[]) => [...prev, { ...currentPoster, quantity: 1 }]);
+  const proceedAddToQueue = (dataToAdd?: PosterData) => {
+    const poster = dataToAdd || currentPoster;
+    setQueue((prev: PosterData[]) => [...prev, { ...poster, quantity: 1 }]);
     
     // Reseta o formulário preservando algumas preferências do usuário
     const resetData = {
       ...initialPosterData(),
-      posterSubType: currentPoster.posterSubType,
-      paymentOption: currentPoster.paymentOption,
-      defectType: currentPoster.defectType,
-      customDefectDiscount: currentPoster.customDefectDiscount,
+      posterSubType: poster.posterSubType,
+      paymentOption: poster.paymentOption,
+      defectType: poster.defectType,
+      customDefectDiscount: poster.customDefectDiscount,
       quantity: 1
     };
     
@@ -856,6 +857,7 @@ export default function Home() {
                   onLookupStatusChange={setIsProductReady}
                   onImportBatch={() => setShowAutomation(true)}
                   sessionProducts={sessionProducts}
+                  onAutoAdd={(data) => proceedAddToQueue(data)}
                 />
 
                 <Button
