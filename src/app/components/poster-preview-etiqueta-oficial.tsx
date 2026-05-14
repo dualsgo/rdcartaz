@@ -33,10 +33,24 @@ export function PosterPreviewEtiquetaOficial({
   const { maxInstallments, installmentValue } = calculateInstallments(valPor, settings);
   const hasInstallments = paymentOption === 'installment' && maxInstallments > 1;
 
-  let mainPriceSize = hasInstallments ? '27.6px' : '31.2px';
-  let dePriceSize = hasInstallments ? '27.6px' : '31.2px';
-  let labelSize = hasInstallments ? '11.5px' : '13px';
-  let unSize = hasInstallments ? '8.7px' : '9.9px';
+  const isRegular = !isOffer;
+  
+  // Tamanhos calculados
+  // Aumento de ~35% no preço para etiquetas regulares (31.2 -> 42.1)
+  // Aumento de ~17.5% na label (13 -> 15.3)
+  const mainPriceSize = isRegular 
+    ? (hasInstallments ? '36px' : '42.1px')
+    : (hasInstallments ? '27.6px' : '31.2px');
+    
+  const dePriceSize = hasInstallments ? '27.6px' : '31.2px';
+  
+  const labelSize = isRegular
+    ? (hasInstallments ? '13.5px' : '15.3px')
+    : (hasInstallments ? '11.5px' : '13px');
+    
+  const unSize = isRegular
+    ? (hasInstallments ? '10.5px' : '12px')
+    : (hasInstallments ? '8.7px' : '9.9px');
 
   return (
     <div className="w-full h-full bg-white text-black font-montserrat overflow-hidden relative flex box-border p-[2.1mm]">
@@ -54,7 +68,7 @@ export function PosterPreviewEtiquetaOficial({
           </div>
 
           {/* 2. ÁREA DE PREÇO: Centralizada no espaço restante */}
-          <div className="flex-1 flex flex-col justify-center overflow-hidden min-h-0 min-w-0">
+          <div className="flex-1 flex flex-col justify-center min-h-0 min-w-0">
             <div className="flex items-center w-full justify-start">
                  {isOffer && valDe > 0 ? (
                   <div className={cn("flex w-full", !hasInstallments ? "flex-row justify-center gap-4" : "flex-row justify-start items-center gap-2")}>
@@ -79,7 +93,7 @@ export function PosterPreviewEtiquetaOficial({
                             <span className="font-bold uppercase" style={{ fontSize: labelSize }}>Por:</span>
                              <span className="font-bold uppercase leading-none" style={{ fontSize: labelSize }}>R$</span>
                          </div>
-                          <div className="flex items-baseline leading-none flex-nowrap origin-left scale-x-[0.85]">
+                          <div className={cn("flex items-baseline leading-none flex-nowrap origin-left", isRegular ? "scale-x-[0.95]" : "scale-x-[0.85]")}>
                              <span className="font-bold tracking-normal leading-none" style={{ fontSize: mainPriceSize }}>{porInteger}</span>
                                 <div className="flex items-baseline leading-none">
                                    <span className="font-bold ml-0.5" style={{ fontSize: `calc(${mainPriceSize} * 0.7)` }}>,</span>
@@ -92,12 +106,14 @@ export function PosterPreviewEtiquetaOficial({
                       </div>
                    </div>
                ) : (
-                   <div className={cn("flex w-full overflow-hidden", !hasInstallments ? "flex-col items-center justify-center" : "items-start gap-1 justify-start")}>
-                        <div className={cn("flex items-baseline shrink-0", !hasInstallments ? "mb-1" : "mt-1 mr-1")}>
-                           <span className="font-bold uppercase leading-none tracking-normal mr-1" style={{ fontSize: labelSize }}>Preço à Vista:</span>
+                    <div className={cn("flex w-full", isRegular && "-mt-3", !hasInstallments ? "flex-row items-baseline justify-center gap-1" : "flex-row items-baseline justify-start gap-1")}>
+                         <div className={cn("flex items-baseline shrink-0", !hasInstallments ? "" : "mr-1")}>
+                           {hasInstallments && (
+                               <span className="font-bold uppercase leading-none tracking-normal mr-1" style={{ fontSize: labelSize }}>Preço à Vista:</span>
+                            )}
                            <span className="font-bold uppercase leading-none" style={{ fontSize: labelSize }}>R$</span>
                         </div>
-                        <div className="flex items-baseline leading-none flex-nowrap origin-left scale-x-[0.85]">
+                        <div className={cn("flex items-baseline leading-none flex-nowrap origin-left", isRegular ? "scale-x-[0.95]" : "scale-x-[0.85]")}>
                            <span className="font-bold tracking-normal" style={{ fontSize: mainPriceSize }}>{porInteger}</span>
                               <div className="flex items-baseline leading-none">
                                  <span className="font-bold ml-0.5" style={{ fontSize: `calc(${mainPriceSize} * 0.7)` }}>,</span>
