@@ -85,7 +85,7 @@ const defectOptions = [
   { value: 'outro', label: 'Outro (descrever)', discount: null },
 ];
 
-export function PosterForm({ data, setData, posterType, onLookupStatusChange, onImportBatch }: PosterFormProps) {
+export function PosterForm({ data, setData, posterType, onLookupStatusChange, onImportBatch, sessionProducts }: PosterFormProps) {
   const [lookupStatus, setLookupStatus] = useState<LookupStatus>('idle');
   const [showScanner, setShowScanner] = useState(false);
   const [searchValue, setSearchValue] = useState('');
