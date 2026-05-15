@@ -124,6 +124,7 @@ const defectOptions = [
 export function PosterForm({ data, setData, posterType, onLookupStatusChange, onImportBatch, sessionProducts, onAutoAdd }: PosterFormProps) {
   const [lookupStatus, setLookupStatus] = useState<LookupStatus>('idle');
   const [showScanner, setShowScanner] = useState(false);
+  const [sessionScanCount, setSessionScanCount] = useState(0);
   const [searchValue, setSearchValue] = useState('');
   const [suggestions, setSuggestions] = useState<{ key: string; description: string }[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -348,6 +349,7 @@ export function PosterForm({ data, setData, posterType, onLookupStatusChange, on
     const foundData = await handleLookup(code);
     if (foundData) {
       playBeep('success');
+      setSessionScanCount(prev => prev + 1);
       if (onAutoAdd) {
         onAutoAdd(foundData);
       }
@@ -404,7 +406,7 @@ export function PosterForm({ data, setData, posterType, onLookupStatusChange, on
             <div className="flex items-center gap-2">
               {isMobileDevice && (
                 <button
-                  onClick={(e) => { e.preventDefault(); setShowScanner(true); }}
+                  onClick={(e) => { e.preventDefault(); setSessionScanCount(0); setShowScanner(true); }}
                   className="h-10 flex-1 px-4 text-[10px] font-black text-white bg-blue-600 hover:bg-blue-700 rounded-lg flex items-center justify-center gap-2 shadow-sm transition-all active:scale-95"
                 >
                   <Camera className="h-4 w-4" />
@@ -689,7 +691,8 @@ export function PosterForm({ data, setData, posterType, onLookupStatusChange, on
       {showScanner && (
         <BarcodeScanner 
           onScan={handleScan} 
-          onClose={() => setShowScanner(false)} 
+          onClose={() => { setShowScanner(false); setSessionScanCount(0); }} 
+          scanCount={sessionScanCount}
         />
       )}
     </div>

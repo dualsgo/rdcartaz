@@ -2,16 +2,17 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode';
-import { X, Camera, RefreshCw, AlertCircle, Loader2 } from 'lucide-react';
+import { X, Camera, RefreshCw, AlertCircle, Loader2, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 interface BarcodeScannerProps {
   onScan: (decodedText: string) => void;
   onClose: () => void;
+  scanCount?: number;
 }
 
-export function BarcodeScanner({ onScan, onClose }: BarcodeScannerProps) {
+export function BarcodeScanner({ onScan, onClose, scanCount = 0 }: BarcodeScannerProps) {
   const scannerRef = useRef<Html5Qrcode | null>(null);
   const [isInitializing, setIsInitializing] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -214,9 +215,19 @@ export function BarcodeScanner({ onScan, onClose }: BarcodeScannerProps) {
 
         {/* Footer / Info */}
         <div className="p-4 bg-black/60 border-t border-white/5 flex flex-col items-center gap-3">
-          <p className="text-white/60 text-xs leading-relaxed text-center">
-            Escaneamento contínuo ativado. Os itens lidos vão direto para a fila.
-          </p>
+          {scanCount > 0 && (
+            <div className="flex items-center gap-2 bg-green-500/20 text-green-400 px-4 py-2 rounded-full border border-green-500/30 animate-in fade-in slide-in-from-bottom-2 duration-300">
+              <CheckCircle2 className="h-4 w-4" />
+              <span className="text-xs font-bold uppercase tracking-widest">{scanCount} {scanCount === 1 ? 'etiqueta lida' : 'etiquetas lidas'}</span>
+            </div>
+          )}
+          
+          {scanCount === 0 && (
+            <p className="text-white/60 text-xs leading-relaxed text-center">
+              Escaneamento contínuo ativado. Os itens lidos vão direto para a fila.
+            </p>
+          )}
+
           <Button 
             onClick={onClose} 
             className="w-full bg-blue-600 hover:bg-blue-700 text-white font-black uppercase tracking-widest h-12"
