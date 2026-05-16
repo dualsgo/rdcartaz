@@ -9,8 +9,8 @@ import type { PosterData, PosterType } from '@/app/lib/types';
 
 import { cn } from '@/lib/utils';
 import { Loader2, CheckCircle2, XCircle, Search, RotateCcw, PlusCircle, Info, AlertTriangle, Camera, Sparkles } from 'lucide-react';
-import { BarcodeScanner } from './barcode-scanner';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { BarcodeScanner, type ScanStatus } from './barcode-scanner';
 
 function centsToDisplay(cents: number): string {
   if (cents === 0) return '';
@@ -133,6 +133,7 @@ export function PosterForm({ data, setData, posterType, onLookupStatusChange, on
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   const [regStatus, setRegStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const [scanStatus, setScanStatus] = useState<ScanStatus>(null);
   const [isMobileDevice, setIsMobileDevice] = useState(false);
 
   useEffect(() => {
@@ -171,6 +172,7 @@ export function PosterForm({ data, setData, posterType, onLookupStatusChange, on
     if (posterType === 'reliquias') {
       setData(prev => ({ ...prev, paymentOption: 'normal' }));
     } else if (posterType === 'etiqueta-oficial') {
+      // Toda etiqueta com valor > 59.99 é parcelada automaticamente
       if (priceFor.cents > 5999) {
         setData(prev => ({ ...prev, paymentOption: 'installment' }));
       } else {
@@ -350,12 +352,22 @@ export function PosterForm({ data, setData, posterType, onLookupStatusChange, on
     if (foundData) {
       playBeep('success');
       setSessionScanCount(prev => prev + 1);
+      setScanStatus({
+        type: 'success',
+        message: foundData.description,
+        timestamp: Date.now()
+      });
       if (onAutoAdd) {
         onAutoAdd(foundData);
       }
     } else {
       playBeep('error');
-      setShowScanner(false);
+      setScanStatus({
+        type: 'error',
+        message: 'Produto não encontrado',
+        timestamp: Date.now()
+      });
+      // Não fechamos mais o scanner em caso de falha, conforme solicitado
     }
   }, [handleLookup, onAutoAdd]);
 
@@ -629,28 +641,7 @@ export function PosterForm({ data, setData, posterType, onLookupStatusChange, on
                    </button>
                  </div>
                )}
-               {posterType !== 'reliquias' && (
-                 <div className="flex bg-muted p-1 rounded-xl shadow-inner border border-border/50">
-                   <button
-                     onClick={() => setData(prev => ({ ...prev, paymentOption: 'normal' }))}
-                     className={cn(
-                       "px-4 py-2 text-[10px] font-black rounded-lg transition-all",
-                       data.paymentOption === 'normal' ? "bg-white text-primary shadow-sm scale-105" : "text-muted-foreground hover:bg-black/5"
-                     )}
-                   >
-                     À VISTA
-                   </button>
-                   <button
-                     onClick={() => setData(prev => ({ ...prev, paymentOption: 'installment' }))}
-                     className={cn(
-                       "px-4 py-2 text-[10px] font-black rounded-lg transition-all",
-                       data.paymentOption === 'installment' ? "bg-white text-blue-600 shadow-sm scale-105" : "text-muted-foreground hover:bg-black/5"
-                     )}
-                   >
-                     PARCELADO
-                   </button>
-                 </div>
-               )}
+               {/* Opção de pagamento removida - agora é automática */}
              </div>
 
            </div>
@@ -691,8 +682,9 @@ export function PosterForm({ data, setData, posterType, onLookupStatusChange, on
       {showScanner && (
         <BarcodeScanner 
           onScan={handleScan} 
-          onClose={() => { setShowScanner(false); setSessionScanCount(0); }} 
+          onClose={() => { setShowScanner(false); setSessionScanCount(0); setScanStatus(null); }} 
           scanCount={sessionScanCount}
+          scanStatus={scanStatus}
         />
       )}
     </div>

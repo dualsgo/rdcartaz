@@ -162,7 +162,6 @@ function processProductRow(row: Record<string, any>, mapping: Record<string, num
     reference: ref,
     supplier: cleanSupplier(supplier),
     quantity: 1,
-    paymentOption: 'installment',
   };
 
   /**
@@ -202,6 +201,10 @@ function processProductRow(row: Record<string, any>, mapping: Record<string, num
     poster.priceFor = formatCurrency(valAtual);
     poster.priceFrom = '';
   }
+
+  // Automatização do parcelamento: Toda etiqueta com valor > 59.99 é parcelada automaticamente
+  const finalPrice = parsePrice(poster.priceFor);
+  poster.paymentOption = finalPrice > 59.99 ? 'installment' : 'normal';
 
   return poster;
 }

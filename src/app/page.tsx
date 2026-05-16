@@ -475,10 +475,12 @@ export default function Home() {
           height: ${o === 'landscape' ? '210mm' : '297mm'} !important;
           overflow: hidden !important;
           position: relative !important;
-          page-break-after: always !important;
-          break-after: page !important;
           display: block !important;
           background: white !important;
+        }
+        .print-page:not(:last-child) {
+          page-break-after: always !important;
+          break-after: page !important;
         }
       }
     `;

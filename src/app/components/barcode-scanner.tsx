@@ -6,14 +6,32 @@ import { X, Camera, RefreshCw, AlertCircle, Loader2, CheckCircle2 } from 'lucide
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
+export type ScanStatus = {
+  type: 'success' | 'error';
+  message: string;
+  timestamp: number;
+} | null;
+
 interface BarcodeScannerProps {
   onScan: (decodedText: string) => void;
   onClose: () => void;
   scanCount?: number;
+  scanStatus?: ScanStatus;
 }
 
-export function BarcodeScanner({ onScan, onClose, scanCount = 0 }: BarcodeScannerProps) {
+export function BarcodeScanner({ onScan, onClose, scanCount = 0, scanStatus }: BarcodeScannerProps) {
   const scannerRef = useRef<Html5Qrcode | null>(null);
+  const [showFeedback, setShowFeedback] = useState(false);
+  const feedbackTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Efeito para mostrar feedback temporário
+  useEffect(() => {
+    if (scanStatus) {
+      setShowFeedback(true);
+      if (feedbackTimer.current) clearTimeout(feedbackTimer.current);
+      feedbackTimer.current = setTimeout(() => setShowFeedback(false), 2000);
+    }
+  }, [scanStatus]);
   const [isInitializing, setIsInitializing] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [cameras, setCameras] = useState<any[]>([]);
@@ -211,6 +229,28 @@ export function BarcodeScanner({ onScan, onClose, scanCount = 0 }: BarcodeScanne
               <div className="absolute top-1/2 left-0 w-full h-0.5 bg-blue-500/30 shadow-[0_0_15px_rgba(59,130,246,0.5)] animate-pulse"></div>
             </div>
           </div>
+
+          {/* Feedback de Leitura */}
+          {showFeedback && scanStatus && (
+            <div className={cn(
+              "absolute inset-0 z-20 flex flex-col items-center justify-center animate-in fade-in zoom-in duration-200",
+              scanStatus.type === 'success' ? "bg-green-500/40" : "bg-red-500/60"
+            )}>
+              <div className="bg-black/80 p-6 rounded-2xl flex flex-col items-center gap-3 border border-white/20 shadow-2xl">
+                {scanStatus.type === 'success' ? (
+                  <CheckCircle2 className="h-12 w-12 text-green-500" />
+                ) : (
+                  <AlertCircle className="h-12 w-12 text-red-500" />
+                )}
+                <span className="text-white font-black uppercase tracking-widest text-lg">
+                  {scanStatus.type === 'success' ? 'LIDO!' : 'FALHOU!'}
+                </span>
+                <span className="text-white/70 text-[10px] font-bold uppercase tracking-tight">
+                  {scanStatus.message}
+                </span>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Footer / Info */}
