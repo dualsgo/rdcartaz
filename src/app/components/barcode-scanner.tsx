@@ -13,7 +13,7 @@ export type ScanStatus = {
 } | null;
 
 interface BarcodeScannerProps {
-  onScan: (decodedText: string) => void;
+  onScan: (decodedText: string) => Promise<void> | void;
   onClose: () => void;
   scanCount?: number;
   scanStatus?: ScanStatus;
@@ -37,18 +37,38 @@ export function BarcodeScanner({ onScan, onClose, scanCount = 0, scanStatus }: B
   const [cameras, setCameras] = useState<any[]>([]);
   const [currentCameraIndex, setCurrentCameraIndex] = useState(0);
   const lastScannedRef = useRef<{ text: string, time: number }>({ text: '', time: 0 });
+  const isProcessingRef = useRef(false);
+  const [isLocked, setIsLocked] = useState(false);
 
-  const handleDecoded = useCallback((decodedText: string) => {
+  const handleDecoded = useCallback(async (decodedText: string) => {
     const now = Date.now();
+    
+    if (isProcessingRef.current) return;
+    
     const { text, time } = lastScannedRef.current;
     
-    // Evita bipar o mesmo código múltiplas vezes em menos de 2 segundos
-    if (text === decodedText && now - time < 2000) {
+    // 1. Bloqueio global: No mínimo 1.5 segundos entre QUALQUER leitura (mesmo que seja código diferente)
+    // Isso evita o colapso por "ruído" ou múltiplas detecções rápidas
+    if (now - time < 1500) return;
+
+    // 2. Bloqueio específico: Evita bipar o mesmo código múltiplas vezes em menos de 3 segundos
+    if (text === decodedText && now - time < 3000) {
       return;
     }
     
+    isProcessingRef.current = true;
+    setIsLocked(true);
     lastScannedRef.current = { text: decodedText, time: now };
-    onScan(decodedText);
+    
+    try {
+      await onScan(decodedText);
+    } finally {
+      // Mantém bloqueado por mais 1s após processar para o usuário respirar e ver o feedback
+      setTimeout(() => {
+        isProcessingRef.current = false;
+        setIsLocked(false);
+      }, 1000);
+    }
   }, [onScan]);
 
   useEffect(() => {
@@ -220,13 +240,27 @@ export function BarcodeScanner({ onScan, onClose, scanCount = 0, scanStatus }: B
           
           {/* Overlay decorativo (MIRA) */}
           <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-            <div className="w-[280px] h-[160px] border-2 border-white/20 rounded-lg relative">
-              <div className="absolute -top-1 -left-1 w-8 h-8 border-t-4 border-l-4 border-blue-500 rounded-tl-sm"></div>
-              <div className="absolute -top-1 -right-1 w-8 h-8 border-t-4 border-r-4 border-blue-500 rounded-tr-sm"></div>
-              <div className="absolute -bottom-1 -left-1 w-8 h-8 border-b-4 border-l-4 border-blue-500 rounded-bl-sm"></div>
-              <div className="absolute -bottom-1 -right-1 w-8 h-8 border-b-4 border-r-4 border-blue-500 rounded-br-sm"></div>
+            <div className={cn(
+              "w-[280px] h-[160px] border-2 rounded-lg relative transition-colors duration-300",
+              isLocked ? "border-white/10" : "border-white/20"
+            )}>
+              <div className={cn("absolute -top-1 -left-1 w-8 h-8 border-t-4 border-l-4 rounded-tl-sm transition-colors", isLocked ? "border-gray-600" : "border-blue-500")}></div>
+              <div className={cn("absolute -top-1 -right-1 w-8 h-8 border-t-4 border-r-4 rounded-tr-sm transition-colors", isLocked ? "border-gray-600" : "border-blue-500")}></div>
+              <div className={cn("absolute -bottom-1 -left-1 w-8 h-8 border-b-4 border-l-4 rounded-bl-sm transition-colors", isLocked ? "border-gray-600" : "border-blue-500")}></div>
+              <div className={cn("absolute -bottom-1 -right-1 w-8 h-8 border-b-4 border-r-4 rounded-br-sm transition-colors", isLocked ? "border-gray-600" : "border-blue-500")}></div>
               
-              <div className="absolute top-1/2 left-0 w-full h-0.5 bg-blue-500/30 shadow-[0_0_15px_rgba(59,130,246,0.5)] animate-pulse"></div>
+              {!isLocked && (
+                <div className="absolute top-1/2 left-0 w-full h-0.5 bg-blue-500/30 shadow-[0_0_15px_rgba(59,130,246,0.5)] animate-pulse"></div>
+              )}
+              {isLocked && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                   <div className="flex gap-1">
+                      <div className="w-1.5 h-1.5 bg-white/40 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                      <div className="w-1.5 h-1.5 bg-white/40 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                      <div className="w-1.5 h-1.5 bg-white/40 rounded-full animate-bounce"></div>
+                   </div>
+                </div>
+              )}
             </div>
           </div>
 
