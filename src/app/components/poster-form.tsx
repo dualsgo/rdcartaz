@@ -349,7 +349,9 @@ export function PosterForm({ data, setData, posterType, onLookupStatusChange, on
     setSearchValue(code);
     
     const foundData = await handleLookup(code);
-    if (foundData) {
+    const hasPrice = foundData && displayToCents(foundData.priceFor || '') > 0;
+
+    if (foundData && hasPrice) {
       playBeep('success');
       setSessionScanCount(prev => prev + 1);
       setScanStatus({
@@ -364,10 +366,9 @@ export function PosterForm({ data, setData, posterType, onLookupStatusChange, on
       playBeep('error');
       setScanStatus({
         type: 'error',
-        message: 'Produto não encontrado',
+        message: !foundData ? 'Produto não encontrado' : 'Produto sem preço cadastrado',
         timestamp: Date.now()
       });
-      // Não fechamos mais o scanner em caso de falha, conforme solicitado
     }
   }, [handleLookup, onAutoAdd]);
 

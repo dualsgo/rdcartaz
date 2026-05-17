@@ -29,7 +29,18 @@ export function BarcodeScanner({ onScan, onClose, scanCount = 0, scanStatus }: B
     if (scanStatus) {
       setShowFeedback(true);
       if (feedbackTimer.current) clearTimeout(feedbackTimer.current);
-      feedbackTimer.current = setTimeout(() => setShowFeedback(false), 2000);
+      
+      if (scanStatus.type === 'success') {
+        feedbackTimer.current = setTimeout(() => {
+          setShowFeedback(false);
+          try {
+            if (scannerRef.current) scannerRef.current.resume();
+          } catch(e) {}
+          isProcessingRef.current = false;
+          setIsLocked(false);
+        }, 1500);
+      }
+      // Se for erro, não esconde automaticamente. Espera o clique do usuário.
     }
   }, [scanStatus]);
   const [isInitializing, setIsInitializing] = useState(true);
@@ -61,13 +72,20 @@ export function BarcodeScanner({ onScan, onClose, scanCount = 0, scanStatus }: B
     lastScannedRef.current = { text: decodedText, time: now };
     
     try {
+      if (scannerRef.current) scannerRef.current.pause(true);
+    } catch(e) {
+      console.error("Erro ao pausar scanner:", e);
+    }
+    
+    try {
       await onScan(decodedText);
-    } finally {
-      // Mantém bloqueado por mais 1s após processar para o usuário respirar e ver o feedback
-      setTimeout(() => {
-        isProcessingRef.current = false;
-        setIsLocked(false);
-      }, 1000);
+    } catch (e) {
+      console.error(e);
+      try {
+        if (scannerRef.current) scannerRef.current.resume();
+      } catch(err) {}
+      isProcessingRef.current = false;
+      setIsLocked(false);
     }
   }, [onScan]);
 
@@ -268,9 +286,9 @@ export function BarcodeScanner({ onScan, onClose, scanCount = 0, scanStatus }: B
           {showFeedback && scanStatus && (
             <div className={cn(
               "absolute inset-0 z-20 flex flex-col items-center justify-center animate-in fade-in zoom-in duration-200",
-              scanStatus.type === 'success' ? "bg-green-500/40" : "bg-red-500/60"
+              scanStatus.type === 'success' ? "bg-green-500/40" : "bg-red-500/80 backdrop-blur-sm"
             )}>
-              <div className="bg-black/80 p-6 rounded-2xl flex flex-col items-center gap-3 border border-white/20 shadow-2xl">
+              <div className="bg-black/90 p-6 rounded-2xl flex flex-col items-center gap-4 border border-white/20 shadow-2xl max-w-[80%] text-center">
                 {scanStatus.type === 'success' ? (
                   <CheckCircle2 className="h-12 w-12 text-green-500" />
                 ) : (
@@ -279,9 +297,25 @@ export function BarcodeScanner({ onScan, onClose, scanCount = 0, scanStatus }: B
                 <span className="text-white font-black uppercase tracking-widest text-lg">
                   {scanStatus.type === 'success' ? 'LIDO!' : 'FALHOU!'}
                 </span>
-                <span className="text-white/70 text-[10px] font-bold uppercase tracking-tight">
+                <span className="text-white/90 text-sm font-bold uppercase tracking-tight">
                   {scanStatus.message}
                 </span>
+
+                {scanStatus.type === 'error' && (
+                  <Button 
+                    onClick={() => {
+                      setShowFeedback(false);
+                      try {
+                        if (scannerRef.current) scannerRef.current.resume();
+                      } catch(e) {}
+                      isProcessingRef.current = false;
+                      setIsLocked(false);
+                    }}
+                    className="mt-4 w-full bg-white text-red-600 hover:bg-gray-100 font-bold uppercase"
+                  >
+                    Continuar Lendo
+                  </Button>
+                )}
               </div>
             </div>
           )}
