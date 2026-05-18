@@ -680,7 +680,34 @@ export function PosterForm({ data, setData, posterType, onLookupStatusChange, on
       {showScanner && (
         <BarcodeScanner 
           onScan={handleScan} 
-          onClose={() => { setShowScanner(false); setSessionScanCount(0); setScanStatus(null); }} 
+          onClose={() => { 
+            setShowScanner(false); 
+            setSessionScanCount(0); 
+            setScanStatus(null);
+            // Reseta todos os estados do formulário após fechar o scanner
+            setSearchValue('');
+            priceFrom.reset();
+            priceFor.reset();
+            setIsManualMode(false);
+            setLookupStatus('idle');
+            setShowWarning(false);
+            setData({
+              description: 'DESCRIÇÃO DO PRODUTO',
+              priceFrom: '',
+              priceFor: '',
+              code: '',
+              ean: '',
+              reference: '',
+              paymentOption: 'installment',
+              posterSubType: 'offer',
+              defectType: 'embalagem_danificada',
+              customDefectReason: '',
+              customDefectDiscount: 20,
+              defectNote: '',
+              supplier: '',
+              quantity: 1,
+            });
+          }} 
           scanCount={sessionScanCount}
           scanStatus={scanStatus}
         />

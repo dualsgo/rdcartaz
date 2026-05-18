@@ -568,7 +568,11 @@ export default function Home() {
     setCurrentPoster(resetData);
     setIsProductReady(false);
     setPreviewMode('page'); // Muda automático para a visão da página ao adicionar
-    setFormKey((k: number) => k + 1);
+    
+    // Só remonta o formulário se não for adição automática via scanner (mantendo o scanner aberto em lote)
+    if (!dataToAdd) {
+      setFormKey((k: number) => k + 1);
+    }
 
     // Feedback de sucesso no botão
     setShowAddSuccess(true);
