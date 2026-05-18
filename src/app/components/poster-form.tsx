@@ -249,34 +249,32 @@ export function PosterForm({ data, setData, posterType, onLookupStatusChange, on
     setLookupStatus('loading');
     onLookupStatusChange?.(false);
 
-    let foundData: PosterData | null = null;
-
     // 1. Prioridade: Buscar nos dados temporários da sessão
     if (sessionProducts && sessionProducts[query]) {
       const produto = sessionProducts[query];
-      setData(prev => {
-        const hasPriceFrom = !!produto.priceFrom && produto.priceFrom !== '0,00';
-        let payOption = prev.paymentOption;
-        if (posterType === 'etiqueta-oficial') {
-          const cents = displayToCents(produto.priceFor ?? '');
-          if (cents > 5999) payOption = 'installment';
-          else payOption = 'normal';
-        }
+      const hasPriceFrom = !!produto.priceFrom && produto.priceFrom !== '0,00';
+      let payOption = data.paymentOption;
+      if (posterType === 'etiqueta-oficial') {
+        const cents = displayToCents(produto.priceFor ?? '');
+        if (cents > 5999) payOption = 'installment';
+        else payOption = 'normal';
+      }
 
-        foundData = {
-          ...prev,
-          description: produto.description,
-          reference:   produto.reference,
-          code:  inputType === 'code' ? query : (produto.code ?? ''),
-          ean:   inputType === 'ean'  ? query : (produto.ean  ?? ''),
-          supplier: produto.supplier ?? '',
-          priceFrom: produto.priceFrom ?? '',
-          priceFor:  produto.priceFor  ?? '',
-          posterSubType: hasPriceFrom ? 'offer' : (produto.priceFor ? 'normal' : prev.posterSubType),
-          paymentOption: payOption,
-        };
-        return foundData;
-      });
+      const foundData: PosterData = {
+        ...data,
+        description: produto.description,
+        reference:   produto.reference,
+        code:  inputType === 'code' ? query : (produto.code ?? ''),
+        ean:   inputType === 'ean'  ? query : (produto.ean  ?? ''),
+        supplier: produto.supplier ?? '',
+        priceFrom: produto.priceFrom ?? '',
+        priceFor:  produto.priceFor  ?? '',
+        posterSubType: hasPriceFrom ? 'offer' : (produto.priceFor ? 'normal' : data.posterSubType),
+        paymentOption: payOption,
+      };
+
+      setData(foundData);
+      
       if (produto.priceFrom) priceFrom.setValue(produto.priceFrom);
       if (produto.priceFor) priceFor.setValue(produto.priceFor);
       
@@ -300,29 +298,28 @@ export function PosterForm({ data, setData, posterType, onLookupStatusChange, on
         priceFrom?: string; priceFor?: string;
       };
 
-      setData(prev => {
-        const hasPriceFrom = !!produto.priceFrom && produto.priceFrom !== '0,00';
-        let payOption = prev.paymentOption;
-        if (posterType === 'etiqueta-oficial') {
-          const cents = displayToCents(produto.priceFor ?? '');
-          if (cents > 5999) payOption = 'installment';
-          else payOption = 'normal';
-        }
+      const hasPriceFrom = !!produto.priceFrom && produto.priceFrom !== '0,00';
+      let payOption = data.paymentOption;
+      if (posterType === 'etiqueta-oficial') {
+        const cents = displayToCents(produto.priceFor ?? '');
+        if (cents > 5999) payOption = 'installment';
+        else payOption = 'normal';
+      }
 
-        foundData = {
-          ...prev,
-          description: produto.description,
-          reference:   produto.reference,
-          code:  inputType === 'code' ? query : (produto.code ?? ''),
-          ean:   inputType === 'ean'  ? query : (produto.ean  ?? ''),
-          supplier: produto.supplier ?? '',
-          priceFrom: produto.priceFrom ?? '',
-          priceFor:  produto.priceFor  ?? '',
-          posterSubType: hasPriceFrom ? 'offer' : (produto.priceFor ? 'normal' : prev.posterSubType),
-          paymentOption: payOption,
-        };
-        return foundData;
-      });
+      const foundData: PosterData = {
+        ...data,
+        description: produto.description,
+        reference:   produto.reference,
+        code:  inputType === 'code' ? query : (produto.code ?? ''),
+        ean:   inputType === 'ean'  ? query : (produto.ean  ?? ''),
+        supplier: produto.supplier ?? '',
+        priceFrom: produto.priceFrom ?? '',
+        priceFor:  produto.priceFor  ?? '',
+        posterSubType: hasPriceFrom ? 'offer' : (produto.priceFor ? 'normal' : data.posterSubType),
+        paymentOption: payOption,
+      };
+
+      setData(foundData);
 
       if (produto.priceFrom) priceFrom.setValue(produto.priceFrom);
       if (produto.priceFor) priceFor.setValue(produto.priceFor);
@@ -335,7 +332,7 @@ export function PosterForm({ data, setData, posterType, onLookupStatusChange, on
       onLookupStatusChange?.(false);
       return null;
     }
-  }, [searchValue, setData, onLookupStatusChange, sessionProducts, posterType, priceFrom, priceFor]);
+  }, [searchValue, setData, onLookupStatusChange, sessionProducts, posterType, priceFrom, priceFor, data]);
 
   const handleScan = useCallback(async (code: string) => {
     if (code.length >= 10) {
