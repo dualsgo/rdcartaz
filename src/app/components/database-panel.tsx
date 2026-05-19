@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { Database, X, Search, Pencil, Trash2, Plus, Check, XCircle, Loader2, ChevronLeft, ChevronRight, AlertTriangle, Upload } from 'lucide-react';
+import { Database, X, Search, Pencil, Trash2, Plus, Check, XCircle, Loader2, ChevronLeft, ChevronRight, AlertTriangle, Upload, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';

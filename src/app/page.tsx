@@ -490,7 +490,7 @@ export default function Home() {
     setPosterType(newType);
     const resetData = {
       ...initialPosterData(),
-      posterSubType: ['reliquias', 'etiqueta-oficial'].includes(newType) ? 'offer' : 'normal',
+      posterSubType: (['reliquias', 'etiqueta-oficial'].includes(newType) ? 'offer' : 'normal') as 'offer' | 'normal',
     };
     lastResetRef.current = JSON.stringify(resetData);
     setCurrentPoster(resetData);
@@ -612,10 +612,10 @@ export default function Home() {
         
         if (isExcel) {
           const buffer = event.target?.result as ArrayBuffer;
-          imported = parseProductExcel(buffer);
+          imported = parseProductExcel(buffer, settings);
         } else {
           const content = event.target?.result as string;
-          imported = parseProductCSV(content);
+          imported = parseProductCSV(content, settings);
         }
 
         // Filtra baseado no modo selecionado pelo usuário
@@ -860,6 +860,7 @@ export default function Home() {
                   data={currentPoster}
                   setData={setCurrentPoster}
                   posterType={posterType}
+                  settings={settings}
                   onLookupStatusChange={setIsProductReady}
                   onImportBatch={() => setShowAutomation(true)}
                   sessionProducts={sessionProducts}

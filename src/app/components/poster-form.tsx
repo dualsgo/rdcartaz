@@ -5,7 +5,8 @@ import type { Dispatch, SetStateAction } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import type { PosterData, PosterType } from '@/app/lib/types';
+import type { PosterData, PosterType, PosterSettings } from '@/app/lib/types';
+import { calculateInstallments } from '@/app/lib/poster-utils';
 
 import { cn } from '@/lib/utils';
 import { Loader2, CheckCircle2, XCircle, Search, RotateCcw, PlusCircle, Info, AlertTriangle, Camera, Sparkles } from 'lucide-react';
@@ -67,6 +68,7 @@ type PosterFormProps = {
   data: PosterData;
   setData: Dispatch<SetStateAction<PosterData>>;
   posterType: PosterType;
+  settings: PosterSettings;
 
   onLookupStatusChange?: (found: boolean) => void;
   onImportBatch?: () => void;
@@ -121,7 +123,7 @@ const defectOptions = [
   { value: 'outro', label: 'Outro (descrever)', discount: null },
 ];
 
-export function PosterForm({ data, setData, posterType, onLookupStatusChange, onImportBatch, sessionProducts, onAutoAdd }: PosterFormProps) {
+export function PosterForm({ data, setData, posterType, settings, onLookupStatusChange, onImportBatch, sessionProducts, onAutoAdd }: PosterFormProps) {
   const [lookupStatus, setLookupStatus] = useState<LookupStatus>('idle');
   const [showScanner, setShowScanner] = useState(false);
   const [sessionScanCount, setSessionScanCount] = useState(0);
@@ -172,14 +174,15 @@ export function PosterForm({ data, setData, posterType, onLookupStatusChange, on
     if (posterType === 'reliquias') {
       setData(prev => ({ ...prev, paymentOption: 'normal' }));
     } else if (posterType === 'etiqueta-oficial') {
-      // Toda etiqueta com valor > 59.99 é parcelada automaticamente
-      if (priceFor.cents > 5999) {
+      const price = priceFor.cents / 100;
+      const { maxInstallments } = calculateInstallments(price, settings);
+      if (maxInstallments > 1 && price > 59.99) {
         setData(prev => ({ ...prev, paymentOption: 'installment' }));
       } else {
         setData(prev => ({ ...prev, paymentOption: 'normal' }));
       }
     }
-  }, [setData, posterType, priceFor.cents]);
+  }, [setData, posterType, priceFor.cents, settings]);
 
 
 
@@ -256,7 +259,8 @@ export function PosterForm({ data, setData, posterType, onLookupStatusChange, on
       let payOption = data.paymentOption;
       if (posterType === 'etiqueta-oficial') {
         const cents = displayToCents(produto.priceFor ?? '');
-        if (cents > 5999) payOption = 'installment';
+        const { maxInstallments } = calculateInstallments(cents / 100, settings);
+        if (maxInstallments > 1 && (cents / 100) > 59.99) payOption = 'installment';
         else payOption = 'normal';
       }
 
@@ -302,7 +306,8 @@ export function PosterForm({ data, setData, posterType, onLookupStatusChange, on
       let payOption = data.paymentOption;
       if (posterType === 'etiqueta-oficial') {
         const cents = displayToCents(produto.priceFor ?? '');
-        if (cents > 5999) payOption = 'installment';
+        const { maxInstallments } = calculateInstallments(cents / 100, settings);
+        if (maxInstallments > 1 && (cents / 100) > 59.99) payOption = 'installment';
         else payOption = 'normal';
       }
 

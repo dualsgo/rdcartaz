@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Settings, Database, RotateCcw, Check, Loader2, FileSpreadsheet } from 'lucide-react';
+import { Settings, Database, RotateCcw, Check, Loader2, FileSpreadsheet, CreditCard } from 'lucide-react';
 import type { PosterSettings } from '@/app/lib/types';
 import { parseReportSemGiro } from '@/app/lib/poster-utils';
 import { cn } from '@/lib/utils';
@@ -32,10 +32,15 @@ export function SettingsDialog({
   const [maxInstallments, setMaxInstallments] = useState(settings.maxInstallments.toString());
   const [minAmount, setMinAmount] = useState(settings.minInstallmentAmount.toString());
 
+  useEffect(() => {
+    setMaxInstallments(settings.maxInstallments.toString());
+    setMinAmount(settings.minInstallmentAmount.toString());
+  }, [settings]);
+
   const handleSave = () => {
     onSave({
-      maxInstallments: 1,
-      minInstallmentAmount: 1.0,
+      maxInstallments: parseInt(maxInstallments, 10) || 6,
+      minInstallmentAmount: parseFloat(minAmount) || 29.99,
     });
   };
 
@@ -76,13 +81,103 @@ export function SettingsDialog({
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Settings className="h-5 w-5" />
+          <DialogTitle className="flex items-center gap-2 text-xl font-bold tracking-tight">
+            <Settings className="h-5 w-5 text-primary" />
             Configurações do Sistema
           </DialogTitle>
         </DialogHeader>
-        <div className="grid gap-6 py-4">
-          {/* Seção 1: Preços Temporários (NOVO) */}
+        <div className="grid gap-5 py-4">
+          
+          {/* Seção de Parcelamento */}
+          <div className="p-4 bg-gradient-to-br from-amber-50/40 to-orange-50/20 rounded-xl border border-amber-200/60 shadow-sm space-y-4">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-orange-500/10 text-orange-600 flex items-center justify-center">
+                <CreditCard className="h-4 w-4" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-gray-900">Opções de Parcelamento</h3>
+                <p className="text-[0.65rem] text-muted-foreground uppercase font-bold tracking-wider">
+                  Regras de parcelamento automático
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="max-installments" className="text-[10px] font-black text-gray-500 uppercase tracking-tight">
+                  Qtd Máxima de Parcelas
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="max-installments"
+                    type="number"
+                    min="1"
+                    max="24"
+                    value={maxInstallments}
+                    onChange={(e) => setMaxInstallments(e.target.value)}
+                    className="h-10 font-bold focus-visible:ring-orange-500 border-amber-200"
+                  />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400">x</span>
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="min-amount" className="text-[10px] font-black text-gray-500 uppercase tracking-tight">
+                  Valor Mínimo da Parcela
+                </Label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400">R$</span>
+                  <Input
+                    id="min-amount"
+                    type="number"
+                    step="0.01"
+                    min="0.10"
+                    value={minAmount}
+                    onChange={(e) => setMinAmount(e.target.value)}
+                    className="h-10 pl-8 font-bold focus-visible:ring-orange-500 border-amber-200"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Simulação em tempo real */}
+            <div className="p-3 bg-white/80 rounded-lg border border-amber-100/60 text-[0.7rem] leading-relaxed text-gray-600 space-y-1">
+              <span className="font-bold text-orange-700 block uppercase text-[0.6rem] tracking-wider mb-1">
+                Demonstração da Regra Ativa:
+              </span>
+              <p>
+                Um produto de <b>R$ 100,00</b> será parcelado em:
+              </p>
+              {(() => {
+                const maxI = parseInt(maxInstallments, 10) || 6;
+                const minA = parseFloat(minAmount) || 29.99;
+                
+                // Calculando na hora
+                const possible = Math.floor(100 / (minA - 0.01));
+                const finalI = Math.min(possible, maxI);
+                
+                if (finalI > 1) {
+                  const val = Math.ceil((100 / finalI) * 100) / 100;
+                  return (
+                    <p className="text-gray-850 font-semibold">
+                      👉 <span className="text-orange-600 font-bold">{finalI}x</span> de <span className="font-bold text-gray-900">R$ {val.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span> sem juros.
+                    </p>
+                  );
+                } else {
+                  return (
+                    <p className="text-gray-500 italic">
+                      👉 Apenas à vista (o valor da parcela seria menor que R$ {minA.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}).
+                    </p>
+                  );
+                }
+              })()}
+              <p className="text-[0.6rem] text-muted-foreground mt-1.5 italic">
+                * Qualquer etiqueta com preço a partir de <b>R$ {(parseFloat(minAmount) * 2).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</b> terá parcelamento automático.
+              </p>
+            </div>
+          </div>
+
+          {/* Seção 2: Preços Temporários */}
           <div className={cn(
             "p-4 rounded-xl border transition-all duration-300",
             hasSessionData ? "bg-blue-50/50 border-blue-200" : "bg-muted/50 border-border"
@@ -97,7 +192,7 @@ export function SettingsDialog({
                 </div>
                 <div>
                   <h3 className="text-sm font-bold">Preços Temporários</h3>
-                  <p className="text-[0.65rem] text-muted-foreground uppercase font-bold tracking-tighter">
+                  <p className="text-[0.65rem] text-muted-foreground uppercase font-bold tracking-wider">
                     Relatório Sem Giro
                   </p>
                 </div>
@@ -141,6 +236,7 @@ export function SettingsDialog({
             </Button>
           </div>
 
+          {/* Seção 3: Banco de Dados */}
           <div className="p-4 bg-muted/50 rounded-xl border border-dashed border-border flex flex-col items-center gap-3 text-center">
             <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
               <Database className="h-5 w-5 text-primary" />
@@ -163,15 +259,10 @@ export function SettingsDialog({
             </DialogTrigger>
           </div>
 
-          <div className="px-1">
-            <p className="text-[0.7rem] text-muted-foreground italic">
-              * O parcelamento automático foi desativado temporariamente nesta versão.
-            </p>
-          </div>
         </div>
         <DialogFooter>
           <DialogTrigger asChild>
-            <Button onClick={handleSave} className="w-full">Fechar</Button>
+            <Button onClick={handleSave} className="w-full font-bold">Salvar e Fechar</Button>
           </DialogTrigger>
         </DialogFooter>
       </DialogContent>

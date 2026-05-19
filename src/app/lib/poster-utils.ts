@@ -123,7 +123,7 @@ export function truncateMultiLine(text: string, charsPerLine: number, maxLines: 
 /**
  * Lógica comum de processamento de uma linha de dados (seja vinda de CSV ou Excel)
  */
-function processProductRow(row: Record<string, any>, mapping: Record<string, number>, currentSupplier: string): any {
+function processProductRow(row: Record<string, any>, mapping: Record<string, number>, currentSupplier: string, settings?: PosterSettings): any {
   const getVal = (key: string) => {
     const colKey = mapping[key];
     if (colKey === undefined || colKey === -1) return undefined;
@@ -202,9 +202,14 @@ function processProductRow(row: Record<string, any>, mapping: Record<string, num
     poster.priceFrom = '';
   }
 
-  // Automatização do parcelamento: Toda etiqueta com valor > 59.99 é parcelada automaticamente
+  // Automatização do parcelamento
   const finalPrice = parsePrice(poster.priceFor);
-  poster.paymentOption = finalPrice > 59.99 ? 'installment' : 'normal';
+  if (settings) {
+    const { maxInstallments } = calculateInstallments(finalPrice, settings);
+    poster.paymentOption = (maxInstallments > 1 && finalPrice > 59.99) ? 'installment' : 'normal';
+  } else {
+    poster.paymentOption = finalPrice > 59.99 ? 'installment' : 'normal';
+  }
 
   return poster;
 }
@@ -247,7 +252,7 @@ function createMapping(headers: string[]): Record<string, number> {
 /**
  * Analisa um arquivo CSV
  */
-export function parseProductCSV(content: string): any[] {
+export function parseProductCSV(content: string, settings?: PosterSettings): any[] {
   const lines = content.split(/\r?\n/).filter(line => line.trim().length > 0);
   if (lines.length < 2) return [];
 
@@ -264,7 +269,7 @@ export function parseProductCSV(content: string): any[] {
     const rowObj: Record<number, string> = {};
     cols.forEach((val, idx) => { rowObj[idx] = val; });
     
-    const poster = processProductRow(rowObj, mapping, '');
+    const poster = processProductRow(rowObj, mapping, '', settings);
     if (poster) results.push(poster);
   }
   return results;
@@ -273,7 +278,7 @@ export function parseProductCSV(content: string): any[] {
 /**
  * Analisa um arquivo Excel (XLS/XLSX)
  */
-export function parseProductExcel(buffer: ArrayBuffer): any[] {
+export function parseProductExcel(buffer: ArrayBuffer, settings?: PosterSettings): any[] {
   let data: any[][] = [];
 
   // Muitos sistemas exportam relatórios em HTML com extensão .xls.
@@ -342,7 +347,7 @@ export function parseProductExcel(buffer: ArrayBuffer): any[] {
       const rowObj: Record<number, any> = {};
       cols.forEach((val, idx) => { rowObj[idx] = val; });
 
-      const poster = processProductRow(rowObj, mapping, currentSupplier);
+      const poster = processProductRow(rowObj, mapping, currentSupplier, settings);
       if (poster) results.push(poster);
     }
   }
