@@ -77,11 +77,11 @@ export function PosterPreviewAereo({
                 
                 <div className="flex items-start">
                   <span className="font-headline font-medium text-[11pt] leading-none mt-[1mm] mr-1">R$</span>
-                  <div className="flex items-end">
-                    <span className="font-headline font-medium leading-none tracking-normal inline-block origin-left scale-x-70" style={{ fontSize: `calc(${priceFontSize} * 0.9)` }}>
+                  <div className="flex items-end pb-[2.5mm]">
+                    <span className="font-headline font-medium leading-none tracking-normal inline-block origin-left scale-x-70 relative" style={{ fontSize: `calc(${priceFontSize} * 0.9)` }}>
                       {porInt},{porDec}
+                      <span className="absolute right-[2%] -bottom-[2.5mm] font-bold text-[6.5pt] uppercase leading-none origin-right text-right" style={{ transform: 'scaleX(1.43)' }}>un. à vista</span>
                     </span>
-                    <span className="font-bold text-[5pt] uppercase leading-none ml-1 mb-[1.5mm]">un. à vista</span>
                   </div>
                 </div>
               </div>
@@ -97,12 +97,12 @@ export function PosterPreviewAereo({
               <div className="flex items-start">
                 {/* R$ como expoente no topo ajustado */}
                 <span className="font-headline font-medium text-[22pt] leading-none mt-[2mm] mr-2">R$</span>
-                <div className="flex items-end">
-                  <span className="font-headline font-medium leading-none tracking-normal inline-block origin-left scale-x-70" style={{ fontSize: priceFontSize }}>
+                <div className="flex items-end pb-[3.5mm]">
+                  <span className="font-headline font-medium leading-none tracking-normal inline-block origin-left scale-x-70 relative" style={{ fontSize: priceFontSize }}>
                     {porInt},{porDec}
+                    {/* un. à vista embaixo do último centavo */}
+                    <span className="absolute right-0 -bottom-[3mm] font-bold text-[7.5pt] uppercase leading-none origin-right text-right" style={{ transform: 'scaleX(1.43)' }}>un. à vista</span>
                   </span>
-                  {/* un. à vista reduzido e mais baixo */}
-                  <span className="font-bold text-[10pt] uppercase leading-none ml-2 mb-[4mm]">un. à vista</span>
                 </div>
               </div>
             </div>
