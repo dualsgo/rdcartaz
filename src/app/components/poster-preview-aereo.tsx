@@ -13,6 +13,8 @@ export function PosterPreviewAereo({
   supplier,
   paymentOption,
   posterSubType,
+  offerValidityStart,
+  offerValidity,
   settings,
 }: PosterData & { settings: PosterSettings }) {
   const valDe  = parsePrice(priceFrom);
@@ -45,7 +47,7 @@ export function PosterPreviewAereo({
       <div className="flex-1 flex flex-col justify-between p-[5mm] overflow-hidden relative">
         
         {/* 1. TOPO: DESCRIÇÃO */}
-        <div className="w-full h-[16mm] flex items-center justify-center shrink-0">
+        <div className="w-full h-[12mm] flex items-start justify-center shrink-0">
           <h2 className="font-headline font-medium text-[15.5pt] leading-[1.1] uppercase text-center overflow-hidden max-h-[2.2em]">
             {displayDescription}
           </h2>
@@ -117,13 +119,10 @@ export function PosterPreviewAereo({
           )}
         </div>
 
-        {/* 3. BASE: METADADOS E FORNECEDOR EM LINHA ÚNICA */}
-        <div className="w-full pt-1 flex items-center justify-center gap-x-4 flex-nowrap text-[7.5pt] font-headline font-bold uppercase overflow-hidden whitespace-nowrap">
-            <span className="truncate max-w-[25%]">{supplier || 'N/A'}</span>
-            <span className="opacity-30">|</span>
-            <span className="shrink-0">SAP: {code || 'N/A'}</span>
-            <span className="shrink-0">EAN: {ean || 'N/A'}</span>
-            <span className="shrink-0">REF: {reference || 'N/A'}</span>
+        {/* 3. BASE: METADADOS (APENAS SAP E EAN) */}
+        <div className="w-full pt-1 flex items-center justify-center gap-x-12 flex-nowrap text-[11pt] font-headline uppercase overflow-hidden whitespace-nowrap">
+            <span className="shrink-0">SAP: <b className="font-black">{code || '-'}</b></span>
+            <span className="shrink-0">EAN: <b className="font-black">{ean || '-'}</b></span>
         </div>
       </div>
 
@@ -135,6 +134,13 @@ export function PosterPreviewAereo({
               Oferta
             </span>
           </div>
+        </div>
+      )}
+
+      {/* VALIDADE (Absoluta para não quebrar layout serrilhado) */}
+      {(isOffer && (offerValidityStart || offerValidity)) && (
+        <div className="absolute bottom-[0.5mm] right-[30mm] text-[4.5pt] font-headline uppercase text-black/60 pointer-events-none whitespace-nowrap bg-white/80 px-1 rounded">
+          Válido {offerValidityStart ? `de ${offerValidityStart} ` : ''}{offerValidity ? `até ${offerValidity}` : 'enquanto durarem os estoques'}
         </div>
       )}
     </div>
