@@ -9,6 +9,7 @@ import { Settings, Database, RotateCcw, Check, Loader2, FileSpreadsheet, CreditC
 import type { PosterSettings } from '@/app/lib/types';
 import { parseReportSemGiro } from '@/app/lib/poster-utils';
 import { cn } from '@/lib/utils';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface SettingsDialogProps {
   settings: PosterSettings;
@@ -39,18 +40,14 @@ export function SettingsDialog({
 
   const handleSave = () => {
     let parsedMax = parseInt(maxInstallments, 10) || 6;
-    let parsedMin = parseFloat(minAmount) || 29.99;
-    
-    if (parsedMax < 6) parsedMax = 6;
-    if (parsedMax > 10) parsedMax = 10;
-    if (parsedMin < 29.99) parsedMin = 29.99;
+    if (parsedMax !== 10) parsedMax = 6;
 
     setMaxInstallments(parsedMax.toString());
-    setMinAmount(parsedMin.toString());
+    setMinAmount("29.99");
 
     onSave({
       maxInstallments: parsedMax,
-      minInstallmentAmount: parsedMin,
+      minInstallmentAmount: 29.99,
     });
   };
 
@@ -118,16 +115,15 @@ export function SettingsDialog({
                   Qtd Máxima de Parcelas
                 </Label>
                 <div className="relative">
-                  <Input
-                    id="max-installments"
-                    type="number"
-                    min="6"
-                    max="10"
-                    value={maxInstallments}
-                    onChange={(e) => setMaxInstallments(e.target.value)}
-                    className="h-10 font-bold focus-visible:ring-orange-500 border-amber-200"
-                  />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400">x</span>
+                  <Select value={maxInstallments} onValueChange={setMaxInstallments}>
+                    <SelectTrigger className="h-10 font-bold focus:ring-orange-500 border-amber-200">
+                      <SelectValue placeholder="Selecione" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="6" className="font-bold">6x (Padrão)</SelectItem>
+                      <SelectItem value="10" className="font-bold">10x</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 
@@ -139,12 +135,10 @@ export function SettingsDialog({
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400">R$</span>
                   <Input
                     id="min-amount"
-                    type="number"
-                    step="0.01"
-                    min="29.99"
-                    value={minAmount}
-                    onChange={(e) => setMinAmount(e.target.value)}
-                    className="h-10 pl-8 font-bold focus-visible:ring-orange-500 border-amber-200"
+                    type="text"
+                    value="29,99"
+                    disabled
+                    className="h-10 pl-8 font-bold border-amber-200 bg-amber-50/50 text-gray-500 cursor-not-allowed opacity-70"
                   />
                 </div>
               </div>

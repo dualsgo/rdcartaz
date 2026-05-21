@@ -52,7 +52,7 @@ export function PosterPreviewAereo({
         </div>
 
         {/* 2. MEIO: ÁREA DE PREÇOS */}
-        <div className="flex-1 flex flex-col items-center justify-center relative min-h-0 w-full">
+        <div className="flex-1 flex flex-col items-center justify-start pt-[2mm] relative min-h-0 w-full">
           
           {isOffer && hasDiscount ? (
             <div className="flex flex-row items-center justify-center w-full gap-x-10 relative">
@@ -106,13 +106,13 @@ export function PosterPreviewAereo({
             </div>
           )}
 
-          {/* Parcelamento estilo CAPSULA (Pill) - Ajustado para linha única com fontes menores */}
+          {/* Parcelamento estilo CAPSULA (Pill) - Ajustado para ocupar mais espaço */}
           {showInstallment && (
-             <div className="mt-2 border-[0.4mm] border-black rounded-[3mm] px-2 py-0.5 flex items-center justify-center gap-x-1 w-full whitespace-nowrap overflow-hidden">
-                <span className="font-headline font-medium text-[9pt] uppercase">ou</span>
-                <span className="font-headline font-medium text-[12.5pt] uppercase">{maxInstallments}x sem juros</span>
-                <span className="font-headline font-medium text-[9pt] uppercase">de</span>
-                <span className="font-headline font-medium text-[15pt] uppercase">R$ {formatCurrency(installmentValue)}</span>
+             <div className="mt-auto mb-[2mm] border-[0.5mm] border-black rounded-[3.5mm] px-2 py-1.5 flex items-center justify-center gap-x-1.5 w-full whitespace-nowrap overflow-hidden">
+                <span className="font-headline font-medium text-[11pt] uppercase">ou</span>
+                <span className="font-headline font-medium text-[15pt] uppercase">{maxInstallments}x sem juros</span>
+                <span className="font-headline font-medium text-[11pt] uppercase">de</span>
+                <span className="font-headline font-medium text-[18pt] uppercase">R$ {formatCurrency(installmentValue)}</span>
              </div>
           )}
         </div>
