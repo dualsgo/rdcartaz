@@ -169,6 +169,13 @@ export function PosterForm({ data, setData, posterType, settings, onLookupStatus
     setData(prev => ({ ...prev, priceFrom: priceFrom.display }));
   }, [priceFrom.display, setData]);
   
+  // Força o tipo 'oferta' para modelos que não possuem 'preço normal'
+  useEffect(() => {
+    if (['reliquias', 'totem'].includes(posterType)) {
+      setData(prev => ({ ...prev, posterSubType: 'offer' }));
+    }
+  }, [posterType, setData]);
+  
   // Automatização inteligente do parcelamento
   useEffect(() => {
     if (posterType === 'reliquias') {
@@ -622,7 +629,7 @@ export function PosterForm({ data, setData, posterType, settings, onLookupStatus
                 2. Preços e Formato
              </Label>
              <div className="flex flex-wrap gap-3">
-               {posterType !== 'reliquias' && (
+               {!['reliquias', 'totem'].includes(posterType) && (
                  <div className="flex bg-muted p-1 rounded-xl shadow-inner border border-border/50">
                    <button
                      onClick={() => setData(prev => ({ ...prev, posterSubType: 'normal' }))}

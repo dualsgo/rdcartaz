@@ -2,7 +2,7 @@
 
 Esta é uma interface web desenvolvida para a planilha **RD Cartaz**, utilizada como uma solução paliativa e eficiente para a geração e impressão de cartazes promocionais. O objetivo é oferecer uma alternativa mais ágil e visual ao uso direto de planilhas.
 
-Atualmente suporta o modelo principal da loja **Ri Happy**: **Relíquias de Diversão** (folha A4 paisagem, 2×2).
+Atualmente suporta os modelos da loja **Ri Happy**: **Relíquias de Diversão**, **Aéreo**, **Gôndola Oficial** e **Totem**.
 
 ---
 
@@ -13,21 +13,31 @@ Atualmente suporta o modelo principal da loja **Ri Happy**: **Relíquias de Dive
 - Cada cartaz editado individualmente nas abas 1–4
 - Exibição do desconto percentual em destaque (bloco preto)
 - Preço DE (riscado) + POR em tipografia grande
-- Suporte a parcelamento em até 6×
-- Campos: Descrição, Preço DE, Preço POR, EAN/SAP, Referência
+- Apenas opções de Oferta.
 
 ### Modelo Aéreo
-- **2 cartazes** por folha A4 retrato
-- Design de alto impacto visual para leitura à distância (produtos em prateleiras altas)
-- Coluna esquerda: cabeçalho OFERTAS/RI HAPPY + descrição + preço DE
-- Coluna direita: fundo preto contrastante com desconto % e preço POR em tamanho gigante
-- Modos: **Oferta** (com campo DE e cálculo de desconto) e **Preço Normal**
+- **4 cartazes** por folha A4 retrato (empilhados em uma coluna)
+- Design achatado e de alto impacto para encaixe em prateleiras ou testeiras
+- Lado esquerdo com preço DE e lado direito com bloco de desconto em destaque
+- Suporta preço normal e oferta.
+
+### Modelo Totem
+- **1 cartaz** por folha A4 retrato (tamanho total da folha)
+- Ideal para pilhas de produtos e displays grandes de chão
+- Preço gigante com alto impacto visual
+- Suporta apenas modo Oferta.
+
+### Parcelamento Inteligente e Seguro
+- Cálculo automático de parcelamento caso o produto atinja o valor mínimo
+- O usuário pode configurar nas configurações (ícone de engrenagem) as regras, limitadas de forma segura:
+  - **Máximo de parcelas:** travado em opções pré-definidas (6x ou 10x).
+  - **Parcela mínima:** Piso de R$ 29,99 garantido pelo sistema.
 
 ### Geral
-- **Pré-visualização em tempo real** — muda ao trocar de aba
-- **Impressão fiel** via `window.print()` com `@media print` dedicado
-- Layout sem barra de rolagem — interface preenche 100% da viewport
-- Orientação de página ajustada automaticamente conforme o modelo
+- **Pré-visualização em tempo real** — muda ao trocar de modelo ou preencher os dados
+- **Importação de Preços** — carregue o relatório Excel de "Mercadorias sem giro" para autopreencher os valores ao bipar
+- **Impressão fiel** via `window.print()` com `@media print` dedicado, perfeitamente ajustado às margens do papel
+- Layout responsivo para Desktop e Tablets
 
 ---
 
@@ -37,62 +47,31 @@ Atualmente suporta o modelo principal da loja **Ri Happy**: **Relíquias de Dive
 # Instalar dependências
 npm install
 
-# Iniciar servidor de desenvolvimento (porta 9002)
+# Iniciar servidor de desenvolvimento
 npm run dev
 ```
-
-Acesse: [http://localhost:9002](http://localhost:9002)
 
 ```bash
 # Build de produção
 npm run build
 npm start
-
-# Checagem de tipos
-npm run typecheck
-
-# Lint
-npm run lint
 ```
 
 ---
 
-## 🗂️ Estrutura do Projeto
+## 🖨️ Dicas de Impressão
 
-```
-src/
-├── app/
-│   ├── components/
-│   │   ├── poster-form.tsx          # Formulário de edição do cartaz
-│   │   ├── poster-preview.tsx       # Pré-visualização — Relíquias (A4 paisagem)
-│   │   ├── poster-preview-aereo.tsx # Pré-visualização — Aéreo (A4 retrato)
-│   │   ├── ofertas-header.tsx       # SVG decorativo "OFERTAS"
-│   │   └── ri-happy-header.tsx      # SVG decorativo "RI HAPPY"
-│   ├── lib/
-│   │   └── types.ts                 # Tipo PosterData
-│   ├── globals.css                  # Estilos globais + @media print
-│   ├── layout.tsx                   # Layout raiz (fontes, metadata)
-│   └── page.tsx                     # Página principal — lógica e layout
-├── components/
-│   └── ui/                          # Componentes shadcn/ui
-├── hooks/
-│   └── useScaleFactor.ts            # Hook de escala via ResizeObserver
-└── lib/
-    └── utils.ts                     # Utilitário cn()
-```
-
----
-
-## 🖨️ Impressão
-
-Ao clicar em **Imprimir**:
+Para o cartaz sair no tamanho correto e evitar páginas em branco, você **PRECISA CONFERIR** se nas configurações de impressão do seu navegador (Chrome/Edge):
+- A **Margem** está definida como "Padrão" ou "Nenhuma"
+- A **Escala** está em 100% (Padrão)
+- O **Formato** da página respeita a orientação avisada pelo sistema (Retrato ou Paisagem)
+- A opção de **Imprimir gráficos de fundo (Background graphics)** está ATIVADA (para que as cores dos blocos de oferta sejam impressas corretamente).
 
 | Modelo | Orientação | Layout |
 |--------|-----------|--------|
 | Relíquias de Diversão | A4 Paisagem | Grade 2×2 (4 cartazes) |
-| Aéreo | A4 Retrato | 2 cartazes centralizados |
-
-O container de impressão fica **oculto na tela** e é exibido apenas via `@media print`, garantindo fidelidade total ao layout impresso.
+| Aéreo | A4 Retrato | 4 cartazes (empilhados) |
+| Totem | A4 Retrato | 1 cartaz (preenche a folha inteira) |
 
 ---
 
@@ -100,29 +79,11 @@ O container de impressão fica **oculto na tela** e é exibido apenas via `@medi
 
 | Tecnologia | Versão |
 |-----------|--------|
-| [Next.js](https://nextjs.org/) | 15.x (Turbopack) |
+| [Next.js](https://nextjs.org/) | 15.x |
 | [React](https://react.dev/) | 19.x |
 | [TypeScript](https://www.typescriptlang.org/) | 5.x |
 | [Tailwind CSS](https://tailwindcss.com/) | 3.x |
 | [shadcn/ui](https://ui.shadcn.com/) | — |
-| [Radix UI](https://www.radix-ui.com/) | — |
-| [Lucide React](https://lucide.dev/) | — |
-
----
-
-## 📋 Tipo de Dados
-
-```typescript
-type PosterData = {
-  description: string;           // Descrição do produto
-  priceFrom: string;             // Preço DE (ex: "49,99")
-  priceFor: string;              // Preço POR (ex: "29,99")
-  code: string;                  // EAN ou código SAP
-  reference: string;             // Referência do produto
-  paymentOption: 'normal' | 'installment'; // Forma de pagamento
-  posterSubType: 'offer' | 'normal';       // Tipo do cartaz aéreo
-};
-```
 
 ---
 

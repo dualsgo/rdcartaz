@@ -300,7 +300,7 @@ function PageGrid({
                 boxSizing: 'border-box'
               }}
             >
-              <div style={{ width: '174mm', height: '64mm', backgroundColor: '#f9f9f9' }} />
+              <div style={{ width: '174mm', height: '64mm', backgroundColor: 'transparent' }} />
             </div>
           );
         })}
