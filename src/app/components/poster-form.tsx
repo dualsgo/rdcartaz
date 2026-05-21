@@ -173,7 +173,7 @@ export function PosterForm({ data, setData, posterType, settings, onLookupStatus
   useEffect(() => {
     if (posterType === 'reliquias') {
       setData(prev => ({ ...prev, paymentOption: 'normal' }));
-    } else if (posterType === 'etiqueta-oficial') {
+    } else if (['etiqueta-oficial', 'aereo', 'totem'].includes(posterType)) {
       const price = priceFor.cents / 100;
       const { maxInstallments } = calculateInstallments(price, settings);
       if (maxInstallments > 1 && price > 59.99) {

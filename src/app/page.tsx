@@ -4,6 +4,8 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { PosterForm } from '@/app/components/poster-form';
 import { PosterPreview } from '@/app/components/poster-preview';
 import { PosterPreviewEtiquetaOficial } from '@/app/components/poster-preview-etiqueta-oficial';
+import { PosterPreviewAereo } from '@/app/components/poster-preview-aereo';
+import { PosterPreviewTotem } from '@/app/components/poster-preview-totem';
 
 import { DisclaimerModal } from '@/app/components/disclaimer-modal';
 
@@ -29,6 +31,8 @@ import { cn } from '@/lib/utils';
 const PER_PAGE: Record<PosterType, number> = {
   reliquias: 4,
   'etiqueta-oficial': 16,
+  aereo: 4,
+  totem: 1,
 };
 
 
@@ -37,6 +41,8 @@ const PER_PAGE: Record<PosterType, number> = {
 const SINGLE_DIMS: Record<PosterType, { w: number; h: number }> = {
   reliquias:            { w: 491, h: 340 },
   'etiqueta-oficial':   { w: 340, h: 128 }, // 90mm x 34mm
+  aereo:                { w: 695, h: 256 },  // 184mm x 67.75mm @ 96dpi
+  totem:                { w: 794, h: 1123 }, // A4 @ 96dpi
 };
 
 
@@ -45,6 +51,8 @@ const SINGLE_DIMS: Record<PosterType, { w: number; h: number }> = {
 const POSTER_ORIENTATION: Record<PosterType, 'portrait' | 'landscape'> = {
   reliquias:            'landscape',
   'etiqueta-oficial':   'portrait',
+  aereo:                'portrait',
+  totem:                'portrait',
 };
 
 
@@ -149,6 +157,8 @@ function SinglePosterPreview({
         >
           {posterType === 'reliquias' && <PosterPreview {...data} isImperdiveis={false} settings={settings} />}
           {posterType === 'etiqueta-oficial' && <PosterPreviewEtiquetaOficial {...data} settings={settings} />}
+          {posterType === 'aereo' && <PosterPreviewAereo {...data} settings={settings} />}
+          {posterType === 'totem' && <PosterPreviewTotem {...data} settings={settings} />}
 
 
         </div>
@@ -237,6 +247,74 @@ function PageGrid({
   settings: PosterSettings;
 }) {
   const empties = Array.from({ length: perPage - items.length });
+
+  if (posterType === 'aereo') {
+    return (
+      <div style={{ 
+        display: 'grid', 
+        gridTemplateColumns: '184mm', 
+        gridTemplateRows: 'repeat(4, 67.75mm)', 
+        gap: '0', 
+        justifyContent: 'center',
+        paddingTop: '15mm', 
+        paddingBottom: '11mm', 
+        paddingLeft: '13mm', 
+        paddingRight: '13mm', 
+        width: '100%', 
+        height: '100%', 
+        boxSizing: 'border-box', 
+        backgroundColor: 'white',
+      }}>
+        {items.map((d: PosterData, i: number) => {
+          return (
+            <div 
+              key={i} 
+              style={{ 
+                width: '184mm', 
+                height: '67.75mm', 
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                overflow: 'hidden',
+                paddingTop: '1mm',
+                boxSizing: 'border-box'
+              }}
+            >
+              <div style={{ width: '174mm', height: '64mm' }}>
+                <PosterPreviewAereo {...d} settings={settings} />
+              </div>
+            </div>
+          );
+        })}
+        {empties.map((_, i: number) => {
+          return (
+            <div 
+              key={`e${i}`} 
+              style={{ 
+                width: '184mm', 
+                height: '67.75mm',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                paddingTop: '1mm',
+                boxSizing: 'border-box'
+              }}
+            >
+              <div style={{ width: '174mm', height: '64mm', backgroundColor: '#f9f9f9' }} />
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
+  if (posterType === 'totem') {
+    return (
+      <div style={{ width: '100%', height: '100%', backgroundColor: 'white', paddingTop: '0.3cm' }}>
+        <PosterPreviewTotem {...items[0]} settings={settings} />
+      </div>
+    );
+  }
 
   if (posterType === 'etiqueta-oficial') {
     return (
@@ -490,7 +568,7 @@ export default function Home() {
     setPosterType(newType);
     const resetData = {
       ...initialPosterData(),
-      posterSubType: (['reliquias', 'etiqueta-oficial'].includes(newType) ? 'offer' : 'normal') as 'offer' | 'normal',
+      posterSubType: (['reliquias', 'etiqueta-oficial', 'aereo', 'totem'].includes(newType) ? 'offer' : 'normal') as 'offer' | 'normal',
     };
     lastResetRef.current = JSON.stringify(resetData);
     setCurrentPoster(resetData);
@@ -717,7 +795,9 @@ export default function Home() {
 
   const typeOptions = [
     { id: 'reliquias',             label: 'Relíquias'          },
+    { id: 'aereo',                 label: 'Aéreo'              },
     { id: 'etiqueta-oficial',      label: 'Gôndola Oficial'    },
+    { id: 'totem',                 label: 'Totem'              },
   ] as const;
 
 

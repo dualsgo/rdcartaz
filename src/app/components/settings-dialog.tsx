@@ -38,9 +38,19 @@ export function SettingsDialog({
   }, [settings]);
 
   const handleSave = () => {
+    let parsedMax = parseInt(maxInstallments, 10) || 6;
+    let parsedMin = parseFloat(minAmount) || 29.99;
+    
+    if (parsedMax < 6) parsedMax = 6;
+    if (parsedMax > 10) parsedMax = 10;
+    if (parsedMin < 29.99) parsedMin = 29.99;
+
+    setMaxInstallments(parsedMax.toString());
+    setMinAmount(parsedMin.toString());
+
     onSave({
-      maxInstallments: parseInt(maxInstallments, 10) || 6,
-      minInstallmentAmount: parseFloat(minAmount) || 29.99,
+      maxInstallments: parsedMax,
+      minInstallmentAmount: parsedMin,
     });
   };
 
@@ -111,8 +121,8 @@ export function SettingsDialog({
                   <Input
                     id="max-installments"
                     type="number"
-                    min="1"
-                    max="24"
+                    min="6"
+                    max="10"
                     value={maxInstallments}
                     onChange={(e) => setMaxInstallments(e.target.value)}
                     className="h-10 font-bold focus-visible:ring-orange-500 border-amber-200"
@@ -131,7 +141,7 @@ export function SettingsDialog({
                     id="min-amount"
                     type="number"
                     step="0.01"
-                    min="0.10"
+                    min="29.99"
                     value={minAmount}
                     onChange={(e) => setMinAmount(e.target.value)}
                     className="h-10 pl-8 font-bold focus-visible:ring-orange-500 border-amber-200"

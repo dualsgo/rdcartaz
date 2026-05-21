@@ -6,14 +6,15 @@ export function calculateInstallments(price: number, settings: PosterSettings) {
   
   // O usuário quer "parcela mínima de X". 
   // O sistema atual usa 29.99 (R$ 30,00 na prática).
-  const minAmount = settings.minInstallmentAmount;
+  const minAmount = Math.max(settings.minInstallmentAmount, 29.99);
   
   // Quantas parcelas cabem se cada uma for pelo menos minAmount?
   // Ex: 100 / 30 = 3.33 -> 3 parcelas.
   const possibleInstallments = Math.floor(price / (minAmount - 0.01));
   
   // Mas não podemos passar do limite configurado (ex: 6x ou 10x)
-  const maxInstallments = Math.min(possibleInstallments, settings.maxInstallments);
+  const safeMaxConfigured = Math.max(6, Math.min(10, settings.maxInstallments));
+  const maxInstallments = Math.min(possibleInstallments, safeMaxConfigured);
   
   if (maxInstallments <= 1) return { maxInstallments: 0, installmentValue: 0 };
   
