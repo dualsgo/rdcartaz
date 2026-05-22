@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { PosterForm } from '@/app/components/poster-form';
 import { PosterPreview } from '@/app/components/poster-preview';
 import { PosterPreviewEtiquetaOficial } from '@/app/components/poster-preview-etiqueta-oficial';
+import { PosterPreviewVitrine } from '@/app/components/poster-preview-vitrine';
 import { PosterPreviewAereo } from '@/app/components/poster-preview-aereo';
 import { PosterPreviewTotem } from '@/app/components/poster-preview-totem';
 
@@ -31,6 +32,7 @@ import { cn } from '@/lib/utils';
 const PER_PAGE: Record<PosterType, number> = {
   reliquias: 4,
   'etiqueta-oficial': 16,
+  vitrine: 16,
   aereo: 4,
   totem: 1,
 };
@@ -41,6 +43,7 @@ const PER_PAGE: Record<PosterType, number> = {
 const SINGLE_DIMS: Record<PosterType, { w: number; h: number }> = {
   reliquias:            { w: 491, h: 340 },
   'etiqueta-oficial':   { w: 340, h: 128 }, // 90mm x 34mm
+  vitrine:              { w: 340, h: 128 }, // 90mm x 34mm
   aereo:                { w: 695, h: 256 },  // 184mm x 67.75mm @ 96dpi
   totem:                { w: 794, h: 1123 }, // A4 @ 96dpi
 };
@@ -51,6 +54,7 @@ const SINGLE_DIMS: Record<PosterType, { w: number; h: number }> = {
 const POSTER_ORIENTATION: Record<PosterType, 'portrait' | 'landscape'> = {
   reliquias:            'landscape',
   'etiqueta-oficial':   'portrait',
+  vitrine:              'portrait',
   aereo:                'portrait',
   totem:                'portrait',
 };
@@ -157,6 +161,7 @@ function SinglePosterPreview({
         >
           {posterType === 'reliquias' && <PosterPreview {...data} isImperdiveis={false} settings={settings} />}
           {posterType === 'etiqueta-oficial' && <PosterPreviewEtiquetaOficial {...data} settings={settings} />}
+          {posterType === 'vitrine' && <PosterPreviewVitrine {...data} settings={settings} />}
           {posterType === 'aereo' && <PosterPreviewAereo {...data} settings={settings} />}
           {posterType === 'totem' && <PosterPreviewTotem {...data} settings={settings} />}
 
@@ -337,7 +342,7 @@ function PageGrid({
     );
   }
 
-  if (posterType === 'etiqueta-oficial') {
+  if (posterType === 'etiqueta-oficial' || posterType === 'vitrine') {
     return (
       <div 
         className={cn("w-full h-full relative", pageBgClass)}
@@ -360,7 +365,11 @@ function PageGrid({
             className="relative overflow-hidden pt-[1mm] box-border print:border-none"
             style={{ width: '90mm', height: '34.0mm' }}
           >
-            {d && <PosterPreviewEtiquetaOficial {...d} settings={settings} />}
+            {d && (
+              posterType === 'vitrine' 
+                ? <PosterPreviewVitrine {...d} settings={settings} /> 
+                : <PosterPreviewEtiquetaOficial {...d} settings={settings} />
+            )}
           </div>
         ))}
         {renderPerforations()}
@@ -798,6 +807,7 @@ export default function Home() {
     { id: 'reliquias',             label: 'Relíquias'          },
     { id: 'aereo',                 label: 'Aéreo'              },
     { id: 'etiqueta-oficial',      label: 'Gôndola Oficial'    },
+    { id: 'vitrine',               label: 'Vitrine'            },
     { id: 'totem',                 label: 'Totem'              },
   ] as const;
 
