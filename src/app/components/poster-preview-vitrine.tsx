@@ -25,6 +25,15 @@ export function PosterPreviewVitrine({
 
   const displayDescription = truncateDescription(description, 35); // Limite um pouco maior pois ganhamos espaço horizontal
 
+  let displaySupplier = supplier || '';
+  if (displaySupplier) {
+    displaySupplier = displaySupplier.split(' ').slice(0, 3).join(' ');
+    if (displaySupplier.length > 25) {
+      displaySupplier = displaySupplier.substring(0, 25);
+    }
+    displaySupplier = displaySupplier.trim();
+  }
+
   const [porInteger, porDecimal] = formatCurrency(valPor).split(',');
   const [deInteger, deDecimal] = formatCurrency(valDe).split(',');
 
@@ -144,17 +153,37 @@ export function PosterPreviewVitrine({
         )}
 
         {/* 4. RODAPÉ LINEAR: REF | FORNECEDOR | SAP | EAN */}
-        <div className="shrink-0 mt-auto overflow-hidden h-[4.5mm] flex justify-center items-center w-full">
-           <div className="text-[7.2px] font-medium uppercase text-black/80 flex items-center justify-center gap-1.5 whitespace-nowrap px-1">
-             {reference && <span className="shrink-0">REF: <b className="font-bold">{reference}</b></span>}
-             {reference && supplier && <span className="text-black/30">|</span>}
-             {supplier && <span className="truncate max-w-[35mm]">{supplier}</span>}
-             {supplier && code && <span className="text-black/30">|</span>}
-             {code && <span className="shrink-0">SAP: <b className="font-bold">{code}</b></span>}
-             {code && ean && <span className="text-black/30">|</span>}
-             {ean && <span className="shrink-0">EAN: <b className="font-bold">{ean}</b></span>}
-           </div>
-        </div>
+         <div className="shrink-0 mt-auto overflow-hidden h-[4.5mm] flex justify-center items-center w-full px-1">
+            <div className="text-[7.2px] font-medium uppercase text-black/80 grid grid-cols-[20fr_auto_40fr_auto_20fr_auto_20fr] w-full items-center">
+              <div className="overflow-hidden whitespace-nowrap text-clip text-left">
+                 {reference && <span>REF: <b className="font-bold">{reference}</b></span>}
+              </div>
+              
+              <div className="text-black/30 text-center px-[0.5mm]">
+                 {reference && displaySupplier ? '|' : ''}
+              </div>
+
+              <div className="overflow-hidden whitespace-nowrap text-clip text-center">
+                 {displaySupplier && <span>{displaySupplier}</span>}
+              </div>
+              
+              <div className="text-black/30 text-center px-[0.5mm]">
+                 {displaySupplier && code ? '|' : ''}
+              </div>
+
+              <div className="overflow-hidden whitespace-nowrap text-clip text-center">
+                 {code && <span>SAP: <b className="font-bold">{code}</b></span>}
+              </div>
+              
+              <div className="text-black/30 text-center px-[0.5mm]">
+                 {code && ean ? '|' : ''}
+              </div>
+
+              <div className="overflow-hidden whitespace-nowrap text-clip text-right">
+                 {ean && <span>EAN: <b className="font-bold">{ean}</b></span>}
+              </div>
+            </div>
+         </div>
 
       </div>
     </div>
