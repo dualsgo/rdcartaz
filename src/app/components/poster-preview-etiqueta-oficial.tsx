@@ -53,7 +53,7 @@ export function PosterPreviewEtiquetaOficial({
     : (hasInstallments ? '8.7px' : '9.9px');
 
   return (
-    <div className="w-full h-full bg-white text-black font-montserrat overflow-hidden relative flex box-border p-[2.1mm]">
+    <div className={cn("w-full h-full text-black font-montserrat overflow-hidden relative flex box-border p-[2.1mm]", isOffer ? 'bg-[#FFF200] print:!bg-white' : 'bg-white')}>
       {/* Container de compressão (95% para segurança) */}
       <div className="w-full h-full flex flex-row" style={{ transform: 'scale(0.95)', transformOrigin: 'center' }}>
         

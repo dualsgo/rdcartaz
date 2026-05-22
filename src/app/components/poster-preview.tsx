@@ -19,11 +19,13 @@ export function PosterPreview({
   reference,
   supplier,
   paymentOption,
+  posterSubType,
   offerValidityStart,
   offerValidity,
   isImperdiveis,
   settings,
 }: PosterData & { isImperdiveis?: boolean; settings: PosterSettings }) {
+  const isOffer = posterSubType === 'offer';
   const valDe  = parsePrice(priceFrom);
   const valPor = parsePrice(priceFor);
 
@@ -48,7 +50,7 @@ export function PosterPreview({
   else if (porInteger.length === 4) priceFontSize = '2.4rem';
 
   return (
-    <div className="w-full h-full overflow-hidden bg-white text-black font-body relative" style={{ fontSize: '16px' }}>
+    <div className={`w-full h-full overflow-hidden text-black font-body relative ${isOffer ? 'bg-[#FFF200] print:!bg-white' : 'bg-white'}`} style={{ fontSize: '16px' }}>
       {/* Layout: duas colunas, cada uma com grid de 3 linhas fixas */}
       <div className="flex flex-col h-full w-full">
         {/* PARTE SUPERIOR: Duas Colunas (75% da altura) */}

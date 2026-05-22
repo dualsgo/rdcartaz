@@ -246,11 +246,57 @@ function PageGrid({
   perPage: number;
   settings: PosterSettings;
 }) {
-  const empties = Array.from({ length: perPage - items.length });
+  const isOfferPage = items.some(item => item.posterSubType === 'offer');
+  const pageBgClass = isOfferPage ? 'bg-[#FFF200] print:!bg-white' : 'bg-white';
+  const allSlots = Array.from({ length: perPage }).map((_, i) => items[i] || null);
+  const isPortrait = posterType !== 'reliquias';
+
+  // Overlay das perfurações físicas do papel (sempre 16 gôndolas de ponta a ponta + margens)
+  const renderPerforations = () => {
+    if (isPortrait) {
+      return (
+        <div className="absolute inset-0 pointer-events-none print:hidden z-50">
+          {/* Margens (bordas destacáveis) */}
+          <div className="absolute top-0 bottom-0 left-[16mm] border-l border-dashed border-black/40" />
+          <div className="absolute top-0 bottom-0 right-[14mm] border-r border-dashed border-black/40" />
+          <div className="absolute left-0 right-0 top-[14.2mm] border-t border-dashed border-black/40" />
+          <div className="absolute left-0 right-0 bottom-[10.8mm] border-b border-dashed border-black/40" />
+          
+          {/* Linha vertical central */}
+          <div className="absolute top-0 bottom-0 left-[106mm] border-l border-dashed border-black/40" />
+          
+          {/* 7 Linhas horizontais centrais */}
+          {[1, 2, 3, 4, 5, 6, 7].map(i => (
+            <div key={i} className="absolute left-0 right-0 border-t border-dashed border-black/40" style={{ top: `${14.2 + 34 * i}mm` }} />
+          ))}
+        </div>
+      );
+    } else {
+      return (
+        <div className="absolute inset-0 pointer-events-none print:hidden z-50">
+          {/* Margens (bordas destacáveis rotacionadas) */}
+          <div className="absolute left-0 right-0 top-[16mm] border-t border-dashed border-black/40" />
+          <div className="absolute left-0 right-0 bottom-[14mm] border-b border-dashed border-black/40" />
+          <div className="absolute top-0 bottom-0 left-[14.2mm] border-l border-dashed border-black/40" />
+          <div className="absolute top-0 bottom-0 right-[10.8mm] border-r border-dashed border-black/40" />
+
+          {/* Linha horizontal central */}
+          <div className="absolute left-0 right-0 top-[106mm] border-t border-dashed border-black/40" />
+          
+          {/* 7 Linhas verticais centrais */}
+          {[1, 2, 3, 4, 5, 6, 7].map(i => (
+            <div key={i} className="absolute top-0 bottom-0 border-l border-dashed border-black/40" style={{ left: `${14.2 + 34 * i}mm` }} />
+          ))}
+        </div>
+      );
+    }
+  };
 
   if (posterType === 'aereo') {
     return (
-      <div style={{ 
+      <div 
+        className={cn("w-full h-full relative", pageBgClass)}
+        style={{ 
         display: 'grid', 
         gridTemplateColumns: '184mm', 
         gridTemplateRows: 'repeat(4, 67.75mm)', 
@@ -260,65 +306,42 @@ function PageGrid({
         paddingBottom: '11mm', 
         paddingLeft: '13mm', 
         paddingRight: '13mm', 
-        width: '100%', 
-        height: '100%', 
         boxSizing: 'border-box', 
-        backgroundColor: 'white',
       }}>
-        {items.map((d: PosterData, i: number) => {
-          return (
-            <div 
-              key={i} 
-              style={{ 
-                width: '184mm', 
-                height: '67.75mm', 
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                overflow: 'hidden',
-                paddingTop: '1mm',
-                boxSizing: 'border-box'
-              }}
-            >
+        {allSlots.map((d, i) => (
+          <div 
+            key={i} 
+            className="relative flex items-center justify-center pt-[1mm] box-border overflow-hidden print:border-none"
+            style={{ width: '184mm', height: '67.75mm' }}
+          >
+            {d ? (
               <div style={{ width: '174mm', height: '64mm' }}>
                 <PosterPreviewAereo {...d} settings={settings} />
               </div>
-            </div>
-          );
-        })}
-        {empties.map((_, i: number) => {
-          return (
-            <div 
-              key={`e${i}`} 
-              style={{ 
-                width: '184mm', 
-                height: '67.75mm',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                paddingTop: '1mm',
-                boxSizing: 'border-box'
-              }}
-            >
+            ) : (
               <div style={{ width: '174mm', height: '64mm', backgroundColor: 'transparent' }} />
-            </div>
-          );
-        })}
+            )}
+          </div>
+        ))}
+        {renderPerforations()}
       </div>
     );
   }
 
   if (posterType === 'totem') {
     return (
-      <div style={{ width: '100%', height: '100%', backgroundColor: 'white', paddingTop: '0.3cm' }}>
-        <PosterPreviewTotem {...items[0]} settings={settings} />
+      <div className={cn("w-full h-full pt-[0.3cm] relative", pageBgClass)}>
+        {items[0] && <PosterPreviewTotem {...items[0]} settings={settings} />}
+        {renderPerforations()}
       </div>
     );
   }
 
   if (posterType === 'etiqueta-oficial') {
     return (
-      <div style={{ 
+      <div 
+        className={cn("w-full h-full relative", pageBgClass)}
+        style={{ 
         display: 'grid', 
         gridTemplateColumns: '90mm 90mm', 
         gridTemplateRows: 'repeat(8, 34.0mm)',
@@ -329,68 +352,46 @@ function PageGrid({
         paddingBottom: '10.8mm', 
         paddingLeft: '16mm', 
         paddingRight: '14mm', 
-        width: '100%', 
-        height: '100%', 
         boxSizing: 'border-box', 
-        backgroundColor: 'white'
       }}>
-        {items.map((d: PosterData, i: number) => (
+        {allSlots.map((d, i) => (
           <div 
             key={i} 
-            style={{ 
-              width: '90mm', 
-              height: '34.0mm', 
-              overflow: 'hidden',
-              paddingTop: '1mm',
-              boxSizing: 'border-box'
-            }}
+            className="relative overflow-hidden pt-[1mm] box-border print:border-none"
+            style={{ width: '90mm', height: '34.0mm' }}
           >
-            <PosterPreviewEtiquetaOficial {...d} settings={settings} />
+            {d && <PosterPreviewEtiquetaOficial {...d} settings={settings} />}
           </div>
         ))}
-        {empties.map((_, i: number) => (
-          <div 
-            key={`e${i}`} 
-            style={{ 
-              width: '90mm', 
-              height: '34.0mm', 
-              paddingTop: '1mm',
-              boxSizing: 'border-box'
-            }}
-          />
-        ))}
+        {renderPerforations()}
       </div>
     );
   }
 
 
   return (
-    <div style={{
+    <div 
+      className={cn("w-full h-full relative", pageBgClass)}
+      style={{
       display: 'grid',
       gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr)',
       gridTemplateRows: 'minmax(0,1fr) minmax(0,1fr)',
-      width: '100%',
-      height: '100%',
       padding: '1.5cm 1.2cm',
       boxSizing: 'border-box',
-      backgroundColor: 'white'
     }}>
-      {items.map((d: PosterData, i: number) => (
-        <div key={i} style={{
-          width: '100%',
-          height: '100%',
-          paddingTop: '0.4cm',
-          paddingBottom: '0.4cm',
-          paddingLeft: '0.4cm',
-          paddingRight: '0.4cm',
-          boxSizing: 'border-box',
-        }}>
-          <div style={{ width: '100%', height: '100%', overflow: 'hidden' }}>
-            <PosterPreview {...(d as PosterData)} isImperdiveis={false} settings={settings} />
-          </div>
+      {allSlots.map((d, i) => (
+        <div 
+          key={i} 
+          className="w-full h-full p-[0.4cm] box-border print:border-none"
+        >
+          {d && (
+            <div style={{ width: '100%', height: '100%', overflow: 'hidden' }}>
+              <PosterPreview {...d} isImperdiveis={false} settings={settings} />
+            </div>
+          )}
         </div>
       ))}
-      {empties.map((_, i: number) => <div key={`e${i}`} />)}
+      {renderPerforations()}
     </div>
   );
 }

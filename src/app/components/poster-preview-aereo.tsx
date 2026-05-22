@@ -42,7 +42,7 @@ export function PosterPreviewAereo({
   const discount = hasDiscount ? Math.round(((valDe - valPor) / valDe) * 100) : 0;
 
   return (
-    <div className="w-full h-full bg-white text-black font-body overflow-hidden relative flex flex-row box-border">
+    <div className={cn("w-full h-full text-black font-body overflow-hidden relative flex flex-row box-border", isOffer ? 'bg-[#FFF200] print:!bg-white' : 'bg-white')}>
       {/* ── CONTEÚDO PRINCIPAL (COMPRIMIDO À ESQUERDA) ── */}
       <div className="flex-1 flex flex-col justify-between p-[5mm] overflow-hidden relative">
         

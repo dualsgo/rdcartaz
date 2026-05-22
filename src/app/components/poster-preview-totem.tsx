@@ -14,8 +14,10 @@ export function PosterPreviewTotem({
   paymentOption,
   offerValidityStart,
   offerValidity,
+  posterSubType,
   settings,
 }: PosterData & { settings: PosterSettings }) {
+  const isOffer = posterSubType === 'offer';
   const valDe = parsePrice(priceFrom);
   const valPor = parsePrice(priceFor);
 
@@ -40,7 +42,7 @@ export function PosterPreviewTotem({
 
   return (
     <Card 
-      className="w-full h-full overflow-hidden shadow-none border-none rounded-none bg-white text-black font-body relative flex flex-col items-center pt-[1.5cm] px-[0.8cm] pb-[1cm] box-border gap-y-12"
+      className={cn("w-full h-full overflow-hidden shadow-none border-none rounded-none text-black font-body relative flex flex-col items-center pt-[1.5cm] px-[0.8cm] pb-[1cm] box-border gap-y-12", isOffer ? 'bg-[#FFF200] print:!bg-white' : 'bg-white')}
       style={{ fontSize: '12px' }} 
     >
       
