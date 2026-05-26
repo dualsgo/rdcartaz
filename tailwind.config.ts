@@ -12,6 +12,7 @@ export default {
       fontFamily: {
         body: ['Inter', 'sans-serif'],
         headline: ['Poppins', 'sans-serif'],
+        gotham: ['Gotham', 'sans-serif'],
         code: ['monospace'],
       },
       colors: {

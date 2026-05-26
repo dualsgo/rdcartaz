@@ -44,27 +44,27 @@ export function PosterPreviewVitrine({
   
   // Tamanhos significativamente maiores, já que não temos o bloco de código de barras
   const mainPriceSize = isRegular 
-    ? (hasInstallments ? '45px' : '55px')
-    : (hasInstallments ? '38px' : '45px');
+    ? (hasInstallments ? '40.5px' : '46.8px')
+    : (hasInstallments ? '31.5px' : '36px');
     
-  const dePriceSize = hasInstallments ? '32px' : '36px';
+  const dePriceSize = hasInstallments ? '28.8px' : '32.4px';
   
   const labelSize = isRegular
-    ? (hasInstallments ? '15px' : '18px')
-    : (hasInstallments ? '14px' : '16px');
+    ? (hasInstallments ? '10.8px' : '12.6px')
+    : (hasInstallments ? '9.9px' : '11.7px');
     
   const unSize = isRegular
-    ? (hasInstallments ? '12px' : '14px')
-    : (hasInstallments ? '10px' : '12px');
+    ? (hasInstallments ? '9px' : '9.9px')
+    : (hasInstallments ? '7.6px' : '9px');
 
   // Ajuste fixo proporcional e elegante (sempre garantindo > 1/3 do preço principal)
-  const instValueSize = isRegular ? '20px' : '18px';
-  const instXSize = isRegular ? '14px' : '12px';
-  const instJurosSize = isRegular ? '7px' : '6px';
-  const instRsSize = isRegular ? '10px' : '9px';
+  const instValueSize = isRegular ? '18px' : '16.2px';
+  const instXSize = isRegular ? '12.6px' : '10.8px';
+  const instJurosSize = isRegular ? '6.3px' : '5.4px';
+  const instRsSize = isRegular ? '9px' : '8.1px';
 
   return (
-    <div className={cn("w-full h-full text-black font-montserrat overflow-hidden relative flex flex-col box-border p-[2.5mm]", isOffer ? 'bg-[#FFF200] print:!bg-white' : 'bg-white')}>
+    <div className={cn("w-full h-full text-black font-gotham overflow-hidden relative flex flex-col box-border p-[2.5mm]", isOffer ? 'bg-[#FFF200] print:!bg-white' : 'bg-white')}>
       {/* Container de compressão para margem de segurança */}
       <div className="w-full h-full flex flex-col justify-between" style={{ transform: 'scale(0.95)', transformOrigin: 'center' }}>
         
@@ -114,7 +114,7 @@ export function PosterPreviewVitrine({
                     </div>
                  </div>
              ) : (
-                  <div className={cn("flex w-full justify-center", isRegular && "-mt-2", !hasInstallments ? "flex-row items-baseline gap-2" : "flex-row items-baseline gap-2")}>
+                  <div className={cn("flex w-full justify-center", !hasInstallments ? "flex-row items-baseline gap-2" : "flex-row items-baseline gap-2")}>
                        <div className={cn("flex items-baseline shrink-0", !hasInstallments ? "" : "mr-1")}>
                          {hasInstallments && (
                              <span className="font-bold uppercase leading-none tracking-normal mr-2" style={{ fontSize: labelSize }}>Preço à Vista:</span>
@@ -142,10 +142,10 @@ export function PosterPreviewVitrine({
               <div className="flex items-center justify-center gap-8">
                 <div className="flex flex-col items-center border-black/20 pr-3">
                    <span className="font-bold leading-none tracking-tighter" style={{ fontSize: instXSize }}>{maxInstallments}X</span>
-                   <span className="font-bold leading-none uppercase mt-0.5" style={{ fontSize: instJurosSize }}>Sem Juros</span>
+                   <span className="font-normal leading-none uppercase mt-0.5" style={{ fontSize: instJurosSize }}>Sem Juros</span>
                 </div>
                 <div className="flex items-start gap-1">
-                   <span className="font-bold leading-none self-start mt-[0.5mm]" style={{ fontSize: instRsSize }}>R$</span>
+                   <span className="font-normal leading-none self-start mt-[0.5mm]" style={{ fontSize: instRsSize }}>R$</span>
                    <span className="font-bold leading-none tracking-tighter" style={{ fontSize: instValueSize }}>{formatCurrency(installmentValue)}</span>
                 </div>
               </div>
@@ -154,34 +154,36 @@ export function PosterPreviewVitrine({
 
         {/* 4. RODAPÉ LINEAR: REF | FORNECEDOR | SAP | EAN */}
          <div className="shrink-0 mt-auto overflow-hidden h-[4.5mm] flex justify-center items-center w-full px-1">
-            <div className="text-[7.2px] font-medium uppercase text-black/80 grid grid-cols-[20fr_auto_40fr_auto_20fr_auto_20fr] w-full items-center">
-              <div className="overflow-hidden whitespace-nowrap text-clip text-left">
-                 {reference && <span>REF: <b className="font-bold">{reference}</b></span>}
-              </div>
+            <div className="text-[7.2px] font-medium uppercase text-black/80 flex justify-between w-full items-center gap-1">
+              {reference && (
+                <div className="shrink-0 whitespace-nowrap">
+                  REF: <b className="font-bold">{reference}</b>
+                </div>
+              )}
               
-              <div className="text-black/30 text-center px-[0.5mm]">
-                 {reference && displaySupplier ? '|' : ''}
-              </div>
+              {reference && displaySupplier && <div className="text-black/30 shrink-0">|</div>}
 
-              <div className="overflow-hidden whitespace-nowrap text-clip text-center">
-                 {displaySupplier && <span>{displaySupplier}</span>}
-              </div>
+              {displaySupplier && (
+                <div className="flex-1 min-w-0 truncate text-center">
+                  <span>{displaySupplier}</span>
+                </div>
+              )}
               
-              <div className="text-black/30 text-center px-[0.5mm]">
-                 {displaySupplier && code ? '|' : ''}
-              </div>
+              {displaySupplier && code && <div className="text-black/30 shrink-0">|</div>}
 
-              <div className="overflow-hidden whitespace-nowrap text-clip text-center">
-                 {code && <span>SAP: <b className="font-bold">{code}</b></span>}
-              </div>
+              {code && (
+                <div className="shrink-0 whitespace-nowrap">
+                  SAP: <b className="font-bold">{code}</b>
+                </div>
+              )}
               
-              <div className="text-black/30 text-center px-[0.5mm]">
-                 {code && ean ? '|' : ''}
-              </div>
+              {code && ean && <div className="text-black/30 shrink-0">|</div>}
 
-              <div className="overflow-hidden whitespace-nowrap text-clip text-right">
-                 {ean && <span>EAN: <b className="font-bold">{ean}</b></span>}
-              </div>
+              {ean && (
+                <div className="shrink-0 whitespace-nowrap">
+                  EAN: <b className="font-bold">{ean}</b>
+                </div>
+              )}
             </div>
          </div>
 

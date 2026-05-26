@@ -43,7 +43,7 @@ export function PosterPreviewTotem({
   return (
     <Card 
       className={cn("w-full h-full overflow-hidden shadow-none border-none rounded-none text-black font-body relative flex flex-col items-center pt-[1.5cm] px-[0.8cm] pb-[1cm] box-border gap-y-12", isOffer ? 'bg-[#FFF200] print:!bg-white' : 'bg-white')}
-      style={{ fontSize: '12px' }} 
+      style={{ fontSize: '10.8px' }} 
     >
       
       {/* TOPO: Cabeçalho OFERTAS + Nome do Produto + SAP/EAN */}
