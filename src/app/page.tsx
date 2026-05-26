@@ -432,6 +432,8 @@ export default function Home() {
   const [isMobile, setIsMobile] = useState(false);
   const [sessionProducts, setSessionProducts] = useState<Record<string, any>>({});
   const hasSessionData = Object.keys(sessionProducts).length > 0;
+  const [hasOldQueue, setHasOldQueue] = useState(false);
+  const isInitialMount = useRef(true);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -450,6 +452,9 @@ export default function Home() {
     title: string;
     message: string;
     onConfirm?: () => void;
+    onCancel?: () => void;
+    confirmText?: string;
+    cancelText?: string;
   }>({
     isOpen: false,
     type: 'error',
@@ -466,7 +471,16 @@ export default function Home() {
     }
     const savedQueue = localStorage.getItem('poster-queue');
     if (savedQueue) {
-      try { setQueue(JSON.parse(savedQueue)); } catch { /* ignore */ }
+      try { 
+        const parsedQueue = JSON.parse(savedQueue);
+        if (parsedQueue.length > 0) {
+          const lastUpdate = Number(localStorage.getItem('poster-queue-updated') || 0);
+          if (Date.now() - lastUpdate > 1000 * 60 * 5) { // 5 minutes
+            setHasOldQueue(true);
+          }
+        }
+        setQueue(parsedQueue); 
+      } catch { /* ignore */ }
     }
   }, []);
 
@@ -483,6 +497,11 @@ export default function Home() {
   // Save queue whenever it changes
   useEffect(() => {
     localStorage.setItem('poster-queue', JSON.stringify(queue));
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+    } else {
+      localStorage.setItem('poster-queue-updated', Date.now().toString());
+    }
   }, [queue]);
 
 
@@ -628,19 +647,50 @@ export default function Home() {
           message: `Este produto está com um desconto de ${Math.round(discount * 100)}%. Você confirma que o preço final de R$ ${currentPoster.priceFor} está correto?`,
           onConfirm: () => {
             setSecurityModal(prev => ({ ...prev, isOpen: false }));
-            proceedAddToQueue();
+            checkOldQueueAndProceed();
           }
         });
         return;
       }
     }
 
+    checkOldQueueAndProceed();
+  };
+
+  const checkOldQueueAndProceed = () => {
+    const lastUpdate = Number(localStorage.getItem('poster-queue-updated') || Date.now());
+    const isStale = (Date.now() - lastUpdate) > 1000 * 60 * 5; // 5 minutes
+
+    if (queue.length > 0 && (hasOldQueue || isStale)) {
+      setSecurityModal({
+        isOpen: true,
+        type: 'warning',
+        title: 'Cartazes Antigos na Lista',
+        message: 'Detectamos que já existem cartazes na sua lista. Você deseja adicionar este novo cartaz junto com os antigos ou limpar a lista anterior?',
+        confirmText: 'LIMPAR E ADICIONAR',
+        cancelText: 'MANTER E ADICIONAR',
+        onConfirm: () => {
+          setSecurityModal(prev => ({ ...prev, isOpen: false }));
+          setHasOldQueue(false);
+          proceedAddToQueue(undefined, true);
+        },
+        onCancel: () => {
+          setSecurityModal(prev => ({ ...prev, isOpen: false }));
+          setHasOldQueue(false);
+          proceedAddToQueue(undefined, false);
+        }
+      });
+      return;
+    }
     proceedAddToQueue();
   };
 
-  const proceedAddToQueue = (dataToAdd?: PosterData) => {
+  const proceedAddToQueue = (dataToAdd?: PosterData, clearFirst: boolean = false) => {
     const poster = dataToAdd || currentPoster;
-    setQueue((prev: PosterData[]) => [...prev, { ...poster, quantity: 1 }]);
+    setQueue((prev: PosterData[]) => {
+      const baseQueue = clearFirst ? [] : prev;
+      return [...baseQueue, { ...poster, quantity: 1 }];
+    });
     
     // Reseta o formulário preservando algumas preferências do usuário
     const resetData = {
