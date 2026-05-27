@@ -235,6 +235,16 @@ function createMapping(headers: string[]): Record<string, number> {
     return hasHeaders ? -1 : defaultIdx;
   };
   
+  // Custom logic for supplier to avoid matching 'cod. forn'
+  const findSupplierIdx = () => {
+    const idx = headers.findIndex(h => {
+      const normH = normalize(h);
+      if (normH.includes('cod. forn') || normH.includes('cód. forn')) return false;
+      return normH.includes('fornecedor');
+    });
+    return idx !== -1 ? idx : (hasHeaders ? -1 : -1);
+  };
+
   // Mapeamento baseado na descrição do usuário:
   // Cod. Int = SAP
   // EAN = EAN/BARRAS
@@ -248,7 +258,7 @@ function createMapping(headers: string[]): Record<string, number> {
     precoAtual: findIdx(['anterior', 'atual', 'preço', 'preÃ§o'], 7),
     novoPreco:  findIdx(['novo'], 8),
     promocao:   findIdx(['promo', 'ção', 'Ã§Ã£o', 'promoção'], 9),
-    supplier:   findIdx(['fornecedor', 'forn'], -1),
+    supplier:   findSupplierIdx(),
   };
 }
 
