@@ -793,14 +793,42 @@ export default function Home() {
               }
             }
 
-            setQueue(prev => [...prev, ...filtered]);
-            setQueueFilter(importMode === 'offer' ? 'offer' : 'normal');
-            setImportCount(filtered.length);
-            setImportStatus('success');
-            setPreviewMode('page'); 
-            
-            if (importMode === 'normal' && posterType === 'reliquias') {
-              setPosterType('etiqueta-oficial');
+            const proceedImport = (clearFirst: boolean) => {
+              setQueue(prev => clearFirst ? [...filtered] : [...prev, ...filtered]);
+              setQueueFilter(importMode === 'offer' ? 'offer' : 'normal');
+              setImportCount(filtered.length);
+              setImportStatus('success');
+              setPreviewMode('page'); 
+              
+              if (importMode === 'normal' && posterType === 'reliquias') {
+                setPosterType('etiqueta-oficial');
+              }
+            };
+
+            const lastUpdate = Number(localStorage.getItem('poster-queue-updated') || Date.now());
+            const isStale = (Date.now() - lastUpdate) > 1000 * 60 * 5; // 5 minutes
+
+            if (queue.length > 0 && (hasOldQueue || isStale)) {
+              setSecurityModal({
+                isOpen: true,
+                type: 'warning',
+                title: 'Cartazes Antigos na Lista',
+                message: 'Detectamos que já existem cartazes na sua lista. Você deseja adicionar este novo lote junto com os antigos ou limpar a lista anterior?',
+                confirmText: 'LIMPAR E ADICIONAR',
+                cancelText: 'MANTER E ADICIONAR',
+                onConfirm: () => {
+                  setSecurityModal(prev => ({ ...prev, isOpen: false }));
+                  setHasOldQueue(false);
+                  proceedImport(true);
+                },
+                onCancel: () => {
+                  setSecurityModal(prev => ({ ...prev, isOpen: false }));
+                  setHasOldQueue(false);
+                  proceedImport(false);
+                }
+              });
+            } else {
+              proceedImport(false);
             }
           } else {
             setImportStatus('error');
