@@ -224,25 +224,27 @@ const normalize = (str: string) =>
 function createMapping(headers: string[]): Record<string, number> {
   const hasHeaders = headers && headers.length > 0;
   
-
   const findIdx = (terms: string[], defaultIdx: number) => {
     const normTerms = terms.map(t => normalize(t));
     const idx = headers.findIndex(h => {
       const normH = normalize(h);
-      return normTerms.some(t => normH.includes(t));
+      return normTerms.some(t => normH.includes(t) || normH === t);
     });
     
     if (idx !== -1) return idx;
-    // Se temos headers mas não encontramos o termo, retornamos -1 para evitar pegar coluna errada
     return hasHeaders ? -1 : defaultIdx;
   };
   
-  // Mapeamento baseado na descrição do usuário e imagem
+  // Mapeamento baseado na descrição do usuário:
+  // Cod. Int = SAP
+  // EAN = EAN/BARRAS
+  // Cód. Forn. = REFERENCIA
+  // Mercadoria = DESCRIÇÃO
   return {
-    sap:        findIdx(['sap', 'interno', 'código', 'codigo', 'cod.', 'cód.'], 2),
+    sap:        findIdx(['sap', 'interno', 'código', 'codigo', 'cod. int', 'cód. int'], 2),
     ean:        findIdx(['ean', 'barras'], 3),
     mercadoria: findIdx(['mercadoria', 'descrição', 'descricao', 'produto', 'nome'], 5),
-    ref:        findIdx(['referencia', 'referência', 'ref', 'cod. forn', 'cód. forn', 'fornecedor', 'forn'], 4),
+    ref:        findIdx(['referencia', 'referência', 'ref', 'cod. forn', 'cód. forn'], 4),
     precoAtual: findIdx(['anterior', 'atual', 'preço', 'preÃ§o'], 7),
     novoPreco:  findIdx(['novo'], 8),
     promocao:   findIdx(['promo', 'ção', 'Ã§Ã£o', 'promoção'], 9),

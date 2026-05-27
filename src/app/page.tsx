@@ -744,45 +744,74 @@ export default function Home() {
     reader.onload = (event) => {
       setImportStatus('processing');
 
-      // Pequeno atraso artificial para dar peso à animação de processamento
-      setTimeout(() => {
-        let imported: any[] = [];
-        
-        if (isExcel) {
-          const buffer = event.target?.result as ArrayBuffer;
-          imported = parseProductExcel(buffer, settings);
-        } else {
-          const content = event.target?.result as string;
-          imported = parseProductCSV(content, settings);
-        }
-
-        // Filtra baseado no modo selecionado pelo usuário
-        let filtered: any[] = [];
-        if (importMode === 'offer') {
-          filtered = imported.filter((item: any) => item.posterSubType === 'offer');
-        } else {
-          // Para "etiquetas sem oferta", pegamos os que são 'normal' e têm 'novoPreco' (ou simplesmente os 'normal')
-          // Mas o usuário especificou que quer o preço da coluna 'novo preço'. 
-          // No parser, os 'normal' com 'novoPreco' já vêm com priceFor preenchido com esse valor.
-          filtered = imported.filter((item: any) => item.posterSubType === 'normal');
-        }
-
-        if (filtered.length > 0) {
-          setQueue(prev => [...prev, ...filtered]);
-          setQueueFilter(importMode === 'offer' ? 'offer' : 'normal');
-          setImportCount(filtered.length);
-          setImportStatus('success');
-          setPreviewMode('page'); // Muda para ver a página inteira após importar
+      setTimeout(async () => {
+        try {
+          let imported: any[] = [];
           
-          // Se importou etiquetas normais, já muda o tipo do cartaz para etiqueta oficial se estiver em relíquias
-          if (importMode === 'normal' && posterType === 'reliquias') {
-            setPosterType('etiqueta-oficial');
+          if (isExcel) {
+            const buffer = event.target?.result as ArrayBuffer;
+            imported = parseProductExcel(buffer, settings);
+          } else {
+            const content = event.target?.result as string;
+            imported = parseProductCSV(content, settings);
           }
-        } else {
+
+          // Filtra baseado no modo selecionado pelo usuário
+          let filtered: any[] = [];
+          if (importMode === 'offer') {
+            filtered = imported.filter((item: any) => item.posterSubType === 'offer');
+          } else {
+            filtered = imported.filter((item: any) => item.posterSubType === 'normal');
+          }
+
+          if (filtered.length > 0) {
+            // Buscar informações na base de dados (Fornecedor, Referência)
+            const keysToLookup = Array.from(new Set(filtered.map(item => item.code || item.ean).filter(Boolean)));
+            if (keysToLookup.length > 0) {
+              const res = await fetch('/api/produto/bulk-lookup', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ keys: keysToLookup })
+              });
+              
+              if (res.ok) {
+                const data = await res.json();
+                if (data.results) {
+                  filtered = filtered.map(item => {
+                    const dbItem = data.results[item.code] || data.results[item.ean];
+                    if (dbItem) {
+                      return {
+                        ...item,
+                        supplier: item.supplier || dbItem.supplier || '',
+                        reference: item.reference || dbItem.reference || '',
+                        description: item.description && item.description.length > 2 ? item.description : (dbItem.description || item.description),
+                      };
+                    }
+                    return item;
+                  });
+                }
+              }
+            }
+
+            setQueue(prev => [...prev, ...filtered]);
+            setQueueFilter(importMode === 'offer' ? 'offer' : 'normal');
+            setImportCount(filtered.length);
+            setImportStatus('success');
+            setPreviewMode('page'); 
+            
+            if (importMode === 'normal' && posterType === 'reliquias') {
+              setPosterType('etiqueta-oficial');
+            }
+          } else {
+            setImportStatus('error');
+          }
+        } catch (e) {
+          console.error(e);
           setImportStatus('error');
+        } finally {
+          if (fileInputRef.current) fileInputRef.current.value = '';
         }
-        if (fileInputRef.current) fileInputRef.current.value = '';
-      }, 800);
+      }, 100);
     };
 
     if (isExcel) {
