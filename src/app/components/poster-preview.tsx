@@ -73,9 +73,9 @@ export function PosterPreview({
               </h2>
             </div>
     
-            <div className={`flex-1 flex flex-col items-start justify-end pb-10 px-4 transition-opacity ${hasDiscount ? 'opacity-100' : 'opacity-0'}`}>
-              <div className="relative inline-block ml-4">
-                <span className="absolute -top-[0.4rem] -left-[1.0cm] text-[0.8em] font-headline font-bold uppercase leading-none z-10 whitespace-nowrap">DE: R$</span>
+            <div className={`flex-1 flex flex-col items-center justify-end pb-10 transition-opacity ${hasDiscount ? 'opacity-100' : 'opacity-0'}`}>
+              <div className="relative inline-block">
+                <span className="absolute -top-[0.6rem] -left-[1.0cm] text-[0.8em] font-headline font-bold uppercase leading-none z-10 whitespace-nowrap">DE: R$</span>
                 <span className="font-headline font-bold text-[2.0rem] leading-none tabular-nums">
                   {formatCurrency(valDe)}
                 </span>
@@ -94,11 +94,11 @@ export function PosterPreview({
         </div>
 
         {/* PARTE INFERIOR: Preço POR Centralizado (25% da altura) */}
-        <div className="flex-1 flex flex-col items-start justify-center relative px-[1.2cm] mt-[-0.5cm]">
-          <div className="flex flex-col space-y-1 ml-10 mt-[-1.5rem]">
+        <div className="flex-1 flex flex-col items-center justify-center relative px-[1.2cm] mt-[-0.5cm]">
+          <div className="flex flex-col space-y-1 mt-[-1.5rem] items-center">
             {/* Bloco POR */}
-            <div className="flex flex-col items-start">
-              <div className="relative inline-block ml-4">
+            <div className="flex flex-col items-center">
+              <div className="relative inline-block">
                 <span className="absolute -top-[0.6rem] -left-[1.2cm] text-[0.8em] font-headline font-bold uppercase leading-none z-10 whitespace-nowrap">POR: R$</span>
                 <span className="font-headline font-bold text-[4.3rem] tracking-tight tabular-nums leading-none">
                   {porInteger},{porDecimal}
