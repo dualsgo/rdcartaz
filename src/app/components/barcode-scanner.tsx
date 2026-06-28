@@ -129,7 +129,6 @@ export function BarcodeScanner({ onScan, onClose, scanCount = 0, scanStatus }: B
               fps: 20, 
               qrbox: { width: 280, height: 160 },
               aspectRatio: 1.0,
-              useBarCodeDetectorIfSupported: true,
               formatsToSupport: [
                 Html5QrcodeSupportedFormats.EAN_13,
                 Html5QrcodeSupportedFormats.EAN_8,

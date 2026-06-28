@@ -896,8 +896,51 @@ export default function Home() {
 
   /* Print content: one div per page, each with page-break */
   const renderPrintContent = () => {
-    if (expandedQueue.length === 0) return null;
     const orientation = POSTER_ORIENTATION[posterType as PosterType];
+
+    if (previewMode === 'single' && posterType === 'reliquias') {
+      if (!isProductReady) return null;
+      return (
+        <div
+          className="print-page bg-white"
+          style={{
+            width:          orientation === 'landscape' ? '297mm'  : '210mm',
+            height:         orientation === 'landscape' ? '210mm'  : '297mm',
+            pageBreakAfter: 'auto',
+            breakAfter:     'auto',
+            position: 'relative',
+          }}
+        >
+          {/* Same padding as PageGrid to respect borders */}
+          <div 
+            className="w-full h-full relative"
+            style={{
+              padding: '1.5cm 1.2cm',
+              boxSizing: 'border-box',
+            }}
+          >
+            {/* The scaled container: 50% width/height, scaled by 2, from top left */}
+            <div style={{ width: '50%', height: '50%', transform: 'scale(2)', transformOrigin: 'top left' }}>
+              <div className="w-full h-full p-[0.4cm] box-border print:border-none">
+                <div style={{ width: '100%', height: '100%', overflow: 'hidden' }}>
+                  <PosterPreview {...currentPoster} isImperdiveis={false} settings={settings} />
+                </div>
+              </div>
+            </div>
+            
+            {/* Perforations overlay */}
+            <div className="absolute inset-0 pointer-events-none print:hidden z-50">
+              <div className="absolute left-0 right-0 top-[16mm] border-t border-dashed border-black/40" />
+              <div className="absolute left-0 right-0 bottom-[14mm] border-b border-dashed border-black/40" />
+              <div className="absolute top-0 bottom-0 left-[14.2mm] border-l border-dashed border-black/40" />
+              <div className="absolute top-0 bottom-0 right-[10.8mm] border-r border-dashed border-black/40" />
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    if (expandedQueue.length === 0) return null;
     return Array.from({ length: totalPages }).map((_, pageIdx: number) => {
       const pageItems = expandedQueue.slice(pageIdx * perPage, (pageIdx + 1) * perPage);
       return (
@@ -1025,7 +1068,7 @@ export default function Home() {
                 <Button
                   variant="outline"
                   onClick={handlePrint}
-                  disabled={queue.length === 0}
+                  disabled={(previewMode === 'single' && posterType === 'reliquias') ? !isProductReady : queue.length === 0}
                   className="transition-transform active:scale-95 px-3"
                 >
                   <FileDown className="mr-1.5 h-4 w-4" />
@@ -1033,11 +1076,11 @@ export default function Home() {
                 </Button>
                 <Button
                   onClick={handlePrint}
-                  disabled={queue.length === 0}
+                  disabled={(previewMode === 'single' && posterType === 'reliquias') ? !isProductReady : queue.length === 0}
                   className="transition-transform active:scale-95 px-3"
                 >
                   <Printer className="mr-1.5 h-4 w-4" />
-                  Imprimir {queue.length > 0 ? `(${totalPages}p)` : ''}
+                  Imprimir {previewMode === 'single' && posterType === 'reliquias' ? '(1 Cartaz A4)' : (queue.length > 0 ? `(${totalPages}p)` : '')}
                 </Button>
               </div>
           </div>
@@ -1281,24 +1324,29 @@ export default function Home() {
             </div>
 
             <div className="flex items-center justify-center gap-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 py-2">
-               {queue.length > 0 && (
+               {previewMode === 'single' && isProductReady && posterType === 'reliquias' ? (
+                 <span className="text-primary bg-primary/10 px-3 py-1 rounded-full">
+                   Modo Individual: O cartaz será impresso no tamanho de uma folha A4 inteira
+                 </span>
+               ) : queue.length > 0 ? (
                  <>
                    <span>Total: {queue.length} Itens</span>
                    <span className="w-1 h-1 bg-border rounded-full" />
                    <span>Impressão: {totalPages} {totalPages === 1 ? 'Página' : 'Páginas'}</span>
                  </>
-               )}
+               ) : null}
             </div>
              
              {/* Mobile Save Button & Instructions */}
-             {queue.length > 0 && (
+             {(queue.length > 0 || (previewMode === 'single' && isProductReady && posterType === 'reliquias')) && (
                <div className="lg:hidden space-y-3 mt-2">
                  <Button
                    onClick={handlePrint}
+                   disabled={(previewMode === 'single' && posterType === 'reliquias') ? !isProductReady : queue.length === 0}
                    className="w-full h-14 bg-blue-600 hover:bg-blue-700 text-white font-black uppercase tracking-widest gap-2 shadow-lg active:scale-95 transition-all"
                  >
                    <FileDown className="h-6 w-6" />
-                   Salvar PDF para Imprimir
+                   {previewMode === 'single' && posterType === 'reliquias' ? 'Salvar PDF (A4 Inteira)' : 'Salvar PDF para Imprimir'}
                  </Button>
                  
                  <div className="p-4 bg-blue-50 rounded-xl border border-blue-100 space-y-2">
