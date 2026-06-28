@@ -33,7 +33,7 @@ const PER_PAGE: Record<PosterType, number> = {
   reliquias: 4,
   'etiqueta-oficial': 16,
   vitrine: 16,
-  aereo: 4,
+  aereo: 2,
   totem: 1,
 };
 
@@ -44,7 +44,7 @@ const SINGLE_DIMS: Record<PosterType, { w: number; h: number }> = {
   reliquias:            { w: 491, h: 340 },
   'etiqueta-oficial':   { w: 340, h: 128 }, // 90mm x 34mm
   vitrine:              { w: 340, h: 128 }, // 90mm x 34mm
-  aereo:                { w: 695, h: 256 },  // 184mm x 67.75mm @ 96dpi
+  aereo:                { w: 660, h: 496 },  // 174mm x 131mm @ 96dpi (4 linhas de gôndola)
   totem:                { w: 794, h: 1123 }, // A4 @ 96dpi
 };
 
@@ -99,6 +99,12 @@ function SinglePosterPreview({
   const dims = SINGLE_DIMS[posterType] || { w: 491, h: 340 };
   const { w, h } = dims;
 
+  // Para o aéreo, o preview mostra apenas a área de conteúdo (75%),
+  // ocultando o espaço em branco do topo sem alterar a impressão.
+  const blankFraction  = posterType === 'aereo' ? 0.22 : 0;
+  const previewH       = Math.round(h * (1 - blankFraction));
+  const blankOffsetPx  = Math.round(h * blankFraction);
+
   useEffect(() => {
     // Recalcula escala quando o tipo muda ou dimensões mudam
     setReady(false);
@@ -110,7 +116,7 @@ function SinglePosterPreview({
       const cw = outer.clientWidth;
       const ch = outer.clientHeight;
       if (cw === 0 || ch === 0) return;
-      setScale(Math.min(cw / w, ch / h) * 0.96);
+      setScale(Math.min(cw / w, ch / previewH) * 0.96);
 
       setReady(true);
     };
@@ -149,7 +155,7 @@ function SinglePosterPreview({
         <div
           style={{
             width: `${w}px`,
-            height: `${h}px`,
+            height: `${previewH}px`,
             flexShrink: 0,
             transformOrigin: 'center center',
             transform: `scale(${scale})`,
@@ -157,15 +163,17 @@ function SinglePosterPreview({
             backgroundColor: 'white',
             boxShadow: '0 8px 32px -4px rgb(0 0 0 / 0.35)',
             overflow: 'hidden',
+            position: 'relative',
           }}
         >
-          {posterType === 'reliquias' && <PosterPreview {...data} isImperdiveis={false} settings={settings} />}
-          {posterType === 'etiqueta-oficial' && <PosterPreviewEtiquetaOficial {...data} settings={settings} />}
-          {posterType === 'vitrine' && <PosterPreviewVitrine {...data} settings={settings} />}
-          {posterType === 'aereo' && <PosterPreviewAereo {...data} settings={settings} />}
-          {posterType === 'totem' && <PosterPreviewTotem {...data} settings={settings} />}
-
-
+          {/* Cartaz deslocado para cima para esconder o branco inicial */}
+          <div style={{ marginTop: blankOffsetPx > 0 ? `-${blankOffsetPx}px` : undefined, width: '100%', height: `${h}px` }}>
+            {posterType === 'reliquias' && <PosterPreview {...data} isImperdiveis={false} settings={settings} />}
+            {posterType === 'etiqueta-oficial' && <PosterPreviewEtiquetaOficial {...data} settings={settings} />}
+            {posterType === 'vitrine' && <PosterPreviewVitrine {...data} settings={settings} />}
+            {posterType === 'aereo' && <PosterPreviewAereo {...data} settings={settings} />}
+            {posterType === 'totem' && <PosterPreviewTotem {...data} settings={settings} />}
+          </div>
         </div>
       )}
     </div>
@@ -303,10 +311,11 @@ function PageGrid({
         className={cn("w-full h-full relative", pageBgClass)}
         style={{ 
         display: 'grid', 
-        gridTemplateColumns: '184mm', 
-        gridTemplateRows: 'repeat(4, 67.75mm)', 
-        gap: '0', 
+        gridTemplateColumns: '174mm', 
+        gridTemplateRows: 'repeat(2, 131mm)', 
+        gap: '5mm', 
         justifyContent: 'center',
+        alignContent: 'start',
         paddingTop: '15mm', 
         paddingBottom: '11mm', 
         paddingLeft: '13mm', 
@@ -316,15 +325,15 @@ function PageGrid({
         {allSlots.map((d, i) => (
           <div 
             key={i} 
-            className="relative flex items-center justify-center pt-[1mm] box-border overflow-hidden print:border-none"
-            style={{ width: '184mm', height: '67.75mm' }}
+            className="relative flex items-center justify-center box-border overflow-hidden print:border-none"
+            style={{ width: '174mm', height: '131mm' }}
           >
             {d ? (
-              <div style={{ width: '174mm', height: '64mm' }}>
+              <div style={{ width: '174mm', height: '131mm' }}>
                 <PosterPreviewAereo {...d} settings={settings} />
               </div>
             ) : (
-              <div style={{ width: '174mm', height: '64mm', backgroundColor: 'transparent' }} />
+              <div style={{ width: '174mm', height: '131mm', backgroundColor: 'transparent' }} />
             )}
           </div>
         ))}
@@ -912,7 +921,7 @@ export default function Home() {
 
   const typeOptions = [
     { id: 'reliquias',             label: 'Relíquias'          },
-    // { id: 'aereo',                 label: 'Aéreo'              },   // OCULTO - não exibir para usuários
+    { id: 'aereo',                 label: 'Aéreo'              },
     { id: 'etiqueta-oficial',      label: 'Gôndola Oficial'    },
     { id: 'vitrine',               label: 'Vitrine'            },
     // { id: 'totem',                 label: 'Totem'              },   // OCULTO - não exibir para usuários
