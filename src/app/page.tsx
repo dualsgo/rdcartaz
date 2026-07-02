@@ -182,19 +182,19 @@ function SinglePosterPreview({
 
 /* ─────────────────────────── PagePreview (Scaled Batch) ─────────────────── */
 function PagePreview({ 
-  items, 
+  pages, 
   posterType, 
   perPage, 
   settings 
 }: { 
-  items: PosterData[]; 
+  pages: PosterData[][]; 
   posterType: PosterType; 
   perPage: number; 
   settings: PosterSettings;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0.4);
-  const totalPages = Math.ceil(items.length / perPage);
+  const totalPages = pages.length;
   const orientation = POSTER_ORIENTATION[posterType] || 'landscape';
   const isPortrait = orientation === 'portrait';
   const targetW = (isPortrait ? 210 : 297) * 3.78;
@@ -216,7 +216,7 @@ function PagePreview({
   return (
     <div ref={containerRef} className="w-full h-full bg-muted/40 overflow-y-auto custom-scrollbar p-8">
       <div className="flex flex-col items-center gap-12 pb-12">
-        {Array.from({ length: totalPages }).map((_, idx) => (
+        {pages.map((pageItems, idx) => (
           <div key={idx} className="relative group">
             {/* Page Number Badge */}
             <div className="absolute -top-6 left-0 bg-primary text-primary-foreground text-[10px] font-black px-2 py-0.5 rounded shadow-sm opacity-60 group-hover:opacity-100 transition-opacity">
@@ -234,7 +234,7 @@ function PagePreview({
             >
 
               <PageGrid 
-                items={items.slice(idx * perPage, (idx + 1) * perPage)} 
+                items={pageItems} 
                 posterType={posterType} 
                 perPage={perPage} 
                 settings={settings} 
@@ -563,7 +563,37 @@ export default function Home() {
     return result;
   }, [filteredQueue]);
 
-  const totalPages = expandedQueue.length > 0 ? Math.ceil(expandedQueue.length / perPage) : 0;
+  // Agrupa os itens em páginas garantindo que não misture oferta e normal na mesma página
+  const printPages = useMemo(() => {
+    const pages: PosterData[][] = [];
+    let currentPage: PosterData[] = [];
+    
+    expandedQueue.forEach(item => {
+      if (currentPage.length === perPage) {
+        pages.push(currentPage);
+        currentPage = [];
+      }
+      
+      if (currentPage.length > 0) {
+        const isCurrentOffer = currentPage[0].posterSubType === 'offer';
+        const isItemOffer = item.posterSubType === 'offer';
+        if (isCurrentOffer !== isItemOffer) {
+          pages.push(currentPage);
+          currentPage = [];
+        }
+      }
+      
+      currentPage.push(item);
+    });
+    
+    if (currentPage.length > 0) {
+      pages.push(currentPage);
+    }
+    
+    return pages;
+  }, [expandedQueue, perPage]);
+
+  const totalPages = printPages.length;
 
   // Update print CSS immediately when poster type changes
   useEffect(() => {
@@ -940,9 +970,8 @@ export default function Home() {
       );
     }
 
-    if (expandedQueue.length === 0) return null;
-    return Array.from({ length: totalPages }).map((_, pageIdx: number) => {
-      const pageItems = expandedQueue.slice(pageIdx * perPage, (pageIdx + 1) * perPage);
+    if (printPages.length === 0) return null;
+    return printPages.map((pageItems, pageIdx: number) => {
       return (
         <div
           key={pageIdx}
@@ -1314,7 +1343,7 @@ export default function Home() {
                   />
                 ) : (
                   <PagePreview
-                    items={expandedQueue}
+                    pages={printPages}
                     posterType={posterType}
                     perPage={perPage}
                     settings={settings}
