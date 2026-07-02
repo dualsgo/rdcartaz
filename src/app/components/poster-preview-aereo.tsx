@@ -30,11 +30,13 @@ export function PosterPreviewAereo({
   const installStr = formatCurrency(installmentValue);
 
   const displayDescription = truncateDescription(description, 50);
+  const displaySupplier = supplier ? supplier.split(' ').slice(0, 2).join(' ').substring(0, 20) : '';
 
   // ── FONTE À VISTA (maior — CDC) ──────────────────────────────────────────
   // Linha 4 box height ≈ 115px (88% de ~131px). Máximo sem vazar.
   let priceFontSize = '6.9rem';
-  if (priceDisplay.length >= 8)      priceFontSize = '3.5rem';
+  if (valPor === 0)                  priceFontSize = '4.2rem';
+  else if (priceDisplay.length >= 8) priceFontSize = '3.5rem';
   else if (priceDisplay.length >= 7) priceFontSize = '4.2rem';
   else if (priceDisplay.length >= 6) priceFontSize = '5.47rem';
   else if (priceDisplay.length >= 5) priceFontSize = '6.19rem';
@@ -205,8 +207,8 @@ export function PosterPreviewAereo({
             className="flex items-center gap-x-3 font-gotham font-medium uppercase text-black whitespace-nowrap overflow-hidden"
             style={{ fontSize: '0.84rem' }}
           >
-            {supplier  && <span>{supplier}</span>}
-            {supplier  && (code || ean || reference) && <span>|</span>}
+            {displaySupplier  && <span>{displaySupplier}</span>}
+            {displaySupplier  && (code || ean || reference) && <span>|</span>}
             {code      && <span>SAP: {code}</span>}
             {ean       && <span>EAN: {ean}</span>}
             {reference && <span>REF.: {reference}</span>}
