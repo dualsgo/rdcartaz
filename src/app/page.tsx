@@ -993,8 +993,8 @@ export default function Home() {
 
   const typeOptions = [
     { id: 'reliquias',             label: 'Relíquias'          },
-    { id: 'aereo',                 label: 'Aéreo'              },
-    { id: 'etiqueta-oficial',      label: 'Gôndola Oficial'    },
+    // { id: 'aereo',                 label: 'Aéreo'              },   // OCULTO - não exibir para usuários
+    { id: 'etiqueta-oficial',      label: 'Gôndola'            },
     { id: 'vitrine',               label: 'Vitrine'            },
     // { id: 'totem',                 label: 'Totem'              },   // OCULTO - não exibir para usuários
   ] as const;
