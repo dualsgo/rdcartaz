@@ -2,7 +2,7 @@
 
 Esta é uma interface web robusta desenvolvida para a plataforma **RD Cartaz**, criada para ser a solução definitiva, visual e de alta eficiência para a geração e impressão de cartazes promocionais em loja. O objetivo é eliminar as barreiras operacionais do uso de planilhas complexas, oferecendo uma experiência fluida, automatizada e aderente aos padrões visuais do varejo.
 
-Atualmente suporta os modelos da loja **Ri Happy**: **Relíquias de Diversão**, **Aéreo**, **Gôndola Oficial** e **Totem**.
+Atualmente suporta os modelos da loja **Ri Happy**: **Relíquias de Diversão**, **Gôndola** e **Vitrine** (Aéreo e Totem encontram-se ocultos no código).
 
 ---
 
@@ -41,17 +41,17 @@ O ecossistema conta com diversos modelos de cartazes focados em diferentes neces
   - Composição visual agressiva de preço "DE" (riscado) + "POR" com tipografia proeminente.
   - Exclusivo para modo Oferta.
 
-### ✈️ Modelo Aéreo
+### ✈️ Modelo Aéreo (Oculto)
 - **Disposição**: 4 cartazes por folha A4 retrato (empilhados em coluna).
 - **Funcionalidades**:
   - Design achatado de altíssimo impacto para encaixe em prateleiras, cantoneiras ou testeiras.
   - Bloco de preço "DE" à esquerda e desconto em destaque à direita.
   - Flexível: Suporta exibição de preço normal e preço de oferta.
 
-### 🛒 Modelo Gôndola Oficial
+### 🛒 Modelo Gôndola
 - Focado na exibição padronizada das canaletas e precificadores de gôndolas convencionais, mantendo a identidade visual exigida pela marca.
 
-### 🏢 Modelo Totem
+### 🏢 Modelo Totem (Oculto)
 - **Disposição**: 1 cartaz por folha A4 retrato (ocupação total da página).
 - **Funcionalidades**:
   - Especialmente criado para pilhas de produtos volumosos e displays grandes de chão.
@@ -100,8 +100,9 @@ O sistema de geração de impressão via navegador é poderoso, mas exige config
 | Modelo | Orientação | Layout de Impressão |
 |--------|-----------|--------|
 | Relíquias de Diversão | A4 Paisagem | Grade 2×2 (4 cartazes simultâneos) |
-| Aéreo | A4 Retrato | 4 cartazes empilhados verticalmente |
-| Totem | A4 Retrato | 1 cartaz preenchendo a folha por completo |
+| Gôndola / Vitrine | A4 Retrato | Grade 2x8 (16 etiquetas simultâneas) |
+| Aéreo (Oculto) | A4 Retrato | 4 cartazes empilhados verticalmente |
+| Totem (Oculto) | A4 Retrato | 1 cartaz preenchendo a folha por completo |
 
 ---
 
