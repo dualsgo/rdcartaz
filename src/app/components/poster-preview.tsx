@@ -1,14 +1,7 @@
 'use client';
 
 import type { PosterData, PosterSettings } from '@/app/lib/types';
-import { Card } from '@/components/ui/card';
-import { OfertasHeader } from './ofertas-header';
-import { parsePrice, formatCurrency, calculateInstallments, truncateMultiLine } from '@/app/lib/poster-utils';
-
-/** Tamanho dinâmico da fonte da descrição baseado no número de linhas */
-function descFontSize(linesCount: number): string {
-  return '1.15em';
-}
+import { parsePrice, formatCurrency, calculateInstallments } from '@/app/lib/poster-utils';
 
 export function PosterPreview({
   description,
@@ -22,120 +15,354 @@ export function PosterPreview({
   posterSubType,
   offerValidityStart,
   offerValidity,
-  isImperdiveis,
   settings,
 }: PosterData & { isImperdiveis?: boolean; settings: PosterSettings }) {
   const isOffer = posterSubType === 'offer';
   const valDe  = parsePrice(priceFrom);
   const valPor = parsePrice(priceFor);
 
-  const displayDescriptionLines = truncateMultiLine(description, 20, 2);
-
   const hasDiscount = valDe > 0 && valPor > 0 && valDe > valPor;
   const discount    = hasDiscount ? Math.round(((valDe - valPor) / valDe) * 100) : 0;
 
   const [porInteger, porDecimal] = formatCurrency(valPor).split(',');
+  const [deInteger, deDecimal] = formatCurrency(valDe).split(',');
 
   const { maxInstallments, installmentValue } = calculateInstallments(valPor, settings);
-  const installmentText  = paymentOption === 'installment' && maxInstallments > 1 ? (
-    <div className="font-headline text-center font-bold text-[0.8em] leading-tight mt-3 opacity-90 flex flex-col items-center uppercase">
-      <span>ou parcelado em até</span>
-      <span className="text-[1.15em]">{maxInstallments}x sem juros de R$ {formatCurrency(installmentValue)}</span>
-    </div>
-  ) : null;
+  const showInstallments = maxInstallments > 1;
+  const [instInteger, instDecimal] = formatCurrency(installmentValue).split(',');
 
-  let priceFontSize = '2.8rem';
-  if (porInteger.length >= 6) priceFontSize = '1.6rem';
-  else if (porInteger.length === 5) priceFontSize = '2.0rem';
-  else if (porInteger.length === 4) priceFontSize = '2.4rem';
+  // Ajuste dinâmico de fonte para a descrição (Roboto Bold)
+  // "PEL URSINHO LUIZ CREME G" (25 caracteres) cabe em 1 linha.
+  // Máximo permitido: 2 linhas.
+  let descFontSize = '12.2pt';
+  if (description.length > 45) descFontSize = '9.5pt';
+  else if (description.length > 32) descFontSize = '10.5pt';
+  else if (description.length > 22) descFontSize = '12pt';
+  else if (description.length <= 14) descFontSize = '15.5pt';
+  else descFontSize = '13pt';
+
+  // Ajuste dinâmico de fonte para numerais do preço vigente caso tenha muitos dígitos (padrão 43pt do Pricefy)
+  let porNumFontSize = '43pt';
+  if (porInteger.length >= 6) porNumFontSize = '28pt';
+  else if (porInteger.length === 5) porNumFontSize = '33pt';
+  else if (porInteger.length === 4) porNumFontSize = '37pt';
+
+  // Ajuste dinâmico de fonte para o preço antigo caso tenha muitos dígitos (padrão 30pt do Pricefy)
+  let deNumFontSize = '30pt';
+  if (deInteger.length >= 5) deNumFontSize = '22pt';
+  else if (deInteger.length === 4) deNumFontSize = '25pt';
+
+  // Ajuste dinâmico de fonte para parcela (padrão 35pt do Pricefy)
+  let instNumFontSize = '35pt';
+  if (instInteger.length >= 4) instNumFontSize = '26pt';
+  else if (instInteger.length === 3) instNumFontSize = '30pt';
+
+  const validityText = offerValidityStart || offerValidity
+    ? `OFERTA VÁLIDA ${offerValidityStart ? `DE ${offerValidityStart} ` : ''}${offerValidity ? `A ${offerValidity}` : ''}`
+    : 'OFERTA VÁLIDA ENQUANTO DURAREM OS ESTOQUES';
 
   return (
-    <div className={`w-full h-full overflow-hidden text-black font-body relative ${isOffer ? 'bg-[#FFF200] print:!bg-white' : 'bg-white'}`} style={{ fontSize: '16px' }}>
-      {/* Layout: duas colunas, cada uma com grid de 3 linhas fixas */}
-      <div className="flex flex-col h-full w-full">
-        {/* PARTE SUPERIOR: Duas Colunas (75% da altura) */}
-        <div className="flex h-[75%] w-full">
-          {/* Coluna Esquerda: Header, Descrição e Preço DE */}
-          <div className="w-1/2 p-[0.35cm] pb-2 flex flex-col overflow-hidden">
-            <div className="shrink-0 mb-2">
-              <OfertasHeader
-                textSize={70}
-                title={isImperdiveis ? 'OFERTA IMPERDÍVEL' : 'OFERTA'}
-              />
-            </div>
-
-            <div className="shrink-0 mb-2 h-[3.5em] flex items-center justify-center">
-              <h2 
-                className="font-headline font-black uppercase leading-[1.05] tracking-tight text-center text-black line-clamp-3"
-                style={{ fontSize: descFontSize(displayDescriptionLines.length) }}
-              >
-                {displayDescriptionLines.join('\n')}
-              </h2>
-            </div>
-    
-            <div className={`flex-1 flex flex-col items-center justify-end pb-10 transition-opacity ${hasDiscount ? 'opacity-100' : 'opacity-0'}`}>
-              <div className="relative inline-block">
-                <span className="absolute -top-[0.6rem] -left-[1.0cm] text-[0.8em] font-headline font-bold uppercase leading-none z-10 whitespace-nowrap">DE: R$</span>
-                <span className="font-headline font-bold text-[2.0rem] leading-none tabular-nums">
-                  {formatCurrency(valDe)}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div className="w-1/2 flex flex-col overflow-hidden pt-0 pr-0 pb-0 pl-[0.35cm]">
-            <div className="bg-black text-white text-center font-headline flex flex-col items-center justify-center print:color-adjust-exact px-3 w-full h-[85%]">
-              <div className="flex flex-col justify-center items-center">
-                <span className="text-[6.0em] leading-[0.9] font-medium tracking-tight tabular-nums">{discount}%</span>
-                <span className="text-[0.8em] leading-none uppercase mt-2 tracking-tight font-bold">DE DESCONTO</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* PARTE INFERIOR: Preço POR Centralizado (25% da altura) */}
-        <div className="flex-1 flex flex-col items-center justify-center relative px-[1.2cm] mt-[-0.5cm]">
-          <div className="flex flex-col space-y-1 mt-[-1.5rem] items-center">
-            {/* Bloco POR */}
-            <div className="flex flex-col items-center">
-              <div className="relative inline-block">
-                <span className="absolute -top-[0.6rem] -left-[1.2cm] text-[0.8em] font-headline font-bold uppercase leading-none z-10 whitespace-nowrap">POR: R$</span>
-                <span className="font-headline font-bold text-[4.3rem] tracking-tight tabular-nums leading-none">
-                  {porInteger},{porDecimal}
-                </span>
-                {valPor > 0 && (
-                  <div className="absolute right-[-1.8cm] bottom-[0.8em] font-bold text-black whitespace-nowrap">
-                    <span className="text-[0.5em] uppercase leading-none">un. à vista</span>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Validade logo abaixo do preço */}
-          <div className="shrink-0 text-[0.45em] w-full leading-tight text-black font-semibold flex flex-col items-center text-center mt-4">
-            {(offerValidityStart || offerValidity) && (
-              <>
-                <span>
-                  Oferta válida{' '}
-                  {offerValidityStart && <span>de <b className="font-black">{offerValidityStart}</b>{' '}</span>}
-                  {offerValidity      && <span>até <b className="font-black">{offerValidity}</b></span>}
-                </span>
-                <span>ou enquanto durarem os estoques.</span>
-              </>
-            )}
-          </div>
-        </div>
+    <div
+      className="relative select-none print:color-adjust-exact overflow-hidden bg-white"
+      style={{
+        width: '13.6cm',
+        height: '9.0cm',
+        backgroundImage: "url('/backgrounds/reliquias-bg.png')",
+        backgroundRepeat: 'no-repeat',
+        backgroundSize: '13.6cm 9.0cm',
+        backgroundPosition: '0 0',
+      }}
+    >
+      {/* ── 4. DESCRIÇÃO DO PRODUTO (Roboto-Regular bold, máx 2 linhas) ── */}
+      <div 
+        style={{
+          position: 'absolute',
+          top: '3.04cm',
+          left: '0.38cm',
+          width: '6.66cm',
+          height: '1.75cm',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          overflow: 'hidden',
+        }}
+      >
+        <h2
+          style={{
+            fontSize: descFontSize,
+            fontFamily: 'Roboto, sans-serif',
+            fontWeight: 'bold',
+            color: 'rgb(0, 0, 0)',
+            textAlign: 'center',
+            lineHeight: '1.12',
+            letterSpacing: '-0.3px',
+            textTransform: 'uppercase',
+            margin: 0,
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
+            maxHeight: '1.75cm',
+          }}
+        >
+          {description}
+        </h2>
       </div>
 
-      {/* RODAPÉ FULL WIDTH (Ponta a Ponta) - Fonte mínima e em preto sólido */}
-      <div className="absolute bottom-[0.35cm] left-0 right-0 flex justify-center overflow-hidden px-[0.35cm] opacity-100">
-        <div className="text-[0.45em] text-black font-bold uppercase flex flex-nowrap items-center gap-x-1">
-          {supplier && <span>{supplier}</span>}
-          {(supplier && (code || ean || reference)) && <span className="mx-1">|</span>}
-          {code && <span className="ml-1">SAP: {code}</span>}
-          {ean && <span className="ml-3">EAN: {ean}</span>}
-          {reference && <span className="ml-3">REF.: {reference}</span>}
+      {/* ── 1. SELO CIRCULAR DE DESCONTO COM CONTEÚDO INTEGRADO (Helvetica) ── */}
+      {hasDiscount && (
+        <div
+          style={{
+            position: 'absolute',
+            top: '0.29cm',
+            right: '0.45cm',
+            width: '5.50cm',
+            height: '5.00cm',
+            background: '#000000',
+            borderRadius: '50%',
+            fontFamily: 'Helvetica, Arial, sans-serif',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 10,
+            overflow: 'hidden',
+          }}
+        >
+          {/* Porcentagem em Arial Bold (64pt) */}
+          <span
+            style={{
+              fontSize: '56pt',
+              fontFamily: 'Arial, sans-serif',
+              fontWeight: 'bold',
+              color: '#ffffff',
+              lineHeight: '0.9',
+              textAlign: 'center',
+              letterSpacing: '-2px',
+            }}
+          >
+            {discount}%
+          </span>
+          {/* Rótulo "De Desconto" em Roboto Bold (24pt) */}
+          <span
+            style={{
+              fontSize: '20pt',
+              fontFamily: 'Roboto, sans-serif',
+              fontWeight: 'bold',
+              color: '#ffffff',
+              lineHeight: '1',
+              textAlign: 'center',
+              marginTop: '0.08cm',
+            }}
+          >
+            De Desconto
+          </span>
+        </div>
+      )}
+
+      {/* ── 5. RÓTULO "DE: R$" (10pt, Arial) ── */}
+      {hasDiscount && (
+        <div
+          style={{
+            position: 'absolute',
+            top: '4.71cm',
+            left: '0.25cm',
+            width: '1.39cm',
+            height: '0.47cm',
+            fontSize: '10pt',
+            fontFamily: 'Arial, sans-serif',
+            fontWeight: 'normal',
+            color: 'rgb(0, 0, 0)',
+            textAlign: 'center',
+            lineHeight: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          DE: R$
+        </div>
+      )}
+
+      {/* ── 6 e 7. PREÇO ANTIGO - REAIS E CENTAVOS (30pt, GOTHICBI bold italic) ── */}
+      {hasDiscount && (
+        <div
+          style={{
+            position: 'absolute',
+            top: '4.68cm',
+            left: '1.80cm',
+            display: 'flex',
+            alignItems: 'baseline',
+            fontSize: deNumFontSize,
+            fontFamily: 'GOTHICBI, "Century Gothic", sans-serif',
+            fontWeight: 'bold',
+            fontStyle: 'italic',
+            color: 'rgb(0, 0, 0)',
+            lineHeight: '1',
+            overflow: 'visible',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          <span>{deInteger}</span>
+          <span>,{deDecimal}</span>
+        </div>
+      )}
+
+      {/* ── 8. RÓTULO "POR: R$" (10pt, Arial) ── */}
+      <div
+        style={{
+          position: 'absolute',
+          top: '6.12cm',
+          left: '0.33cm',
+          width: '1.66cm',
+          height: '0.60cm',
+          fontSize: '10pt',
+          fontFamily: 'Arial, sans-serif',
+          fontWeight: 'normal',
+          color: 'rgb(0, 0, 0)',
+          textAlign: 'center',
+          lineHeight: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        POR: R$
+      </div>
+
+      {/* ── 9 e 10. PREÇO OFERTA - REAIS E CENTAVOS (43pt, GOTHICBI bold italic) ── */}
+      <div
+        style={{
+          position: 'absolute',
+          top: '6.02cm',
+          left: '2.05cm',
+          display: 'flex',
+          alignItems: 'baseline',
+          fontSize: porNumFontSize,
+          fontFamily: 'GOTHICBI, "Century Gothic", sans-serif',
+          fontWeight: 'bold',
+          fontStyle: 'italic',
+          color: 'rgb(0, 0, 0)',
+          lineHeight: '1',
+          overflow: 'visible',
+          whiteSpace: 'nowrap',
+        }}
+      >
+        <span>{porInteger}</span>
+        <span>,{porDecimal}</span>
+      </div>
+
+      {/* ── 11, 12, 13. BLOCO DE PARCELAMENTO ALINHADO VERTICALMENTE AO SELO (X% DE DESCONTO) ── */}
+      {showInstallments && (
+        <div
+          style={{
+            position: 'absolute',
+            top: '5.55cm',
+            right: '0.45cm',
+            width: '5.50cm',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            textAlign: 'center',
+            zIndex: 10,
+          }}
+        >
+          {/* Texto de Parcelamento (14pt, Arial bold) */}
+          <span
+            style={{
+              fontSize: '13.5pt',
+              fontFamily: 'Arial, sans-serif',
+              fontWeight: 'bold',
+              color: '#000000',
+              lineHeight: '1.1',
+              whiteSpace: 'nowrap',
+              textAlign: 'center',
+            }}
+          >
+            {maxInstallments}X sem juros
+          </span>
+
+          {/* Valor da Parcela (Reais 35pt / Centavos 18.55pt, GOTHICBI bold italic) */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'baseline',
+              justifyContent: 'center',
+              marginTop: '0.08cm',
+            }}
+          >
+            <span
+              style={{
+                fontSize: instNumFontSize,
+                fontFamily: 'GOTHICBI, "Century Gothic", sans-serif',
+                fontWeight: 'bold',
+                fontStyle: 'italic',
+                color: '#000000',
+                lineHeight: '0.8',
+              }}
+            >
+              {instInteger}
+            </span>
+            <span
+              style={{
+                fontSize: '18.55pt',
+                fontFamily: 'GOTHICBI, "Century Gothic", sans-serif',
+                fontWeight: 'bold',
+                fontStyle: 'italic',
+                color: '#000000',
+                lineHeight: '0.8',
+                marginLeft: '0.05cm',
+              }}
+            >
+              ,{instDecimal}
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* ── 14, 15, 16. RODAPÉ OFICIAL: SAP, EAN, REF À ESQUERDA E ESTOQUE À DIREITA ── */}
+      <div
+        style={{
+          position: 'absolute',
+          bottom: '0.28cm',
+          left: '0.38cm',
+          right: '0.38cm',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          fontFamily: 'Arial, sans-serif',
+          lineHeight: '1',
+          zIndex: 20,
+        }}
+      >
+        {/* Identificadores à esquerda com preferência para SAP, EAN e REF */}
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.25cm', whiteSpace: 'nowrap' }}>
+          {code && (
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.05cm' }}>
+              <span style={{ fontSize: '5.5pt', color: 'rgb(80, 80, 80)', fontWeight: 'bold' }}>SAP:</span>
+              <span style={{ fontSize: '6.8pt', color: 'rgb(0, 0, 0)', fontWeight: 'bold' }}>{code}</span>
+            </div>
+          )}
+
+          {ean && (
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.05cm' }}>
+              <span style={{ fontSize: '5.5pt', color: 'rgb(80, 80, 80)', fontWeight: 'bold' }}>EAN:</span>
+              <span style={{ fontSize: '6.8pt', color: 'rgb(0, 0, 0)', fontWeight: 'bold' }}>{ean}</span>
+            </div>
+          )}
+
+          {reference && (
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.05cm' }}>
+              <span style={{ fontSize: '5.5pt', color: 'rgb(80, 80, 80)', fontWeight: 'bold' }}>REF:</span>
+              <span style={{ fontSize: '6.8pt', color: 'rgb(0, 0, 0)', fontWeight: 'bold' }}>{reference}</span>
+            </div>
+          )}
+        </div>
+
+        {/* Mensagem de estoque à direita mantida intacta */}
+        <div style={{ fontSize: '5.8pt', color: 'rgb(0, 0, 0)', fontWeight: 'bold', textTransform: 'uppercase', textAlign: 'right', whiteSpace: 'nowrap' }}>
+          {validityText}
         </div>
       </div>
     </div>

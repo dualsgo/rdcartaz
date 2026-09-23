@@ -171,7 +171,20 @@ function SinglePosterPreview({
         >
           {/* Cartaz deslocado para cima para esconder o branco inicial */}
           <div style={{ marginTop: blankOffsetPx > 0 ? `-${blankOffsetPx}px` : undefined, width: '100%', height: `${h}px` }}>
-            {(posterType === 'reliquias' || posterType === 'reliquias-a6') && <PosterPreview {...data} isImperdiveis={false} settings={settings} />}
+            {posterType === 'reliquias' && (
+              <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ width: '13.6cm', height: '9.0cm', transform: 'scale(2.15)', transformOrigin: 'center center' }}>
+                  <PosterPreview {...data} isImperdiveis={false} settings={settings} />
+                </div>
+              </div>
+            )}
+            {posterType === 'reliquias-a6' && (
+              <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ width: '13.6cm', height: '9.0cm', transform: 'scale(0.9)', transformOrigin: 'center center' }}>
+                  <PosterPreview {...data} isImperdiveis={false} settings={settings} />
+                </div>
+              </div>
+            )}
             {posterType === 'etiqueta-oficial' && <PosterPreviewEtiquetaOficial {...data} settings={settings} />}
             {posterType === 'vitrine' && <PosterPreviewVitrine {...data} settings={settings} />}
             {posterType === 'aereo' && <PosterPreviewAereo {...data} settings={settings} />}
@@ -262,8 +275,7 @@ function PageGrid({
   perPage: number;
   settings: PosterSettings;
 }) {
-  const isOfferPage = items.some(item => item.posterSubType === 'offer');
-  const pageBgClass = isOfferPage ? 'bg-[#FFF200] print:!bg-white' : 'bg-white';
+  const pageBgClass = 'bg-white';
   const allSlots = Array.from({ length: perPage }).map((_, i) => items[i] || null);
   const isPortrait = posterType !== 'reliquias' && posterType !== 'reliquias-a6';
 
@@ -391,47 +403,63 @@ function PageGrid({
 
   // Relíquias A4 (Folha Inteira - 1 cartaz por folha A4 paisagem)
   if (posterType === 'reliquias') {
-    const d = items[0];
     return (
       <div 
-        className={cn("w-full h-full relative", pageBgClass)}
+        className={cn("w-full h-full relative flex items-center justify-center overflow-hidden", pageBgClass)}
         style={{
-          padding: '1.5cm 1.2cm',
+          width: '297mm',
+          height: '210mm',
           boxSizing: 'border-box',
         }}
       >
-        <div style={{ width: '50%', height: '50%', transform: 'scale(2)', transformOrigin: 'top left' }}>
-          <div className="w-full h-full p-[0.4cm] box-border print:border-none">
-            {d && (
-              <div style={{ width: '100%', height: '100%', overflow: 'hidden' }}>
-                <PosterPreview {...d} isImperdiveis={false} settings={settings} />
-              </div>
-            )}
+        {items[0] && (
+          <div 
+            style={{ 
+              width: '13.6cm', 
+              height: '9.0cm', 
+              transform: 'scale(2.15)', 
+              transformOrigin: 'center center',
+              flexShrink: 0,
+            }}
+          >
+            <PosterPreview {...items[0]} isImperdiveis={false} settings={settings} />
           </div>
-        </div>
-        {renderPerforations()}
+        )}
       </div>
     );
   }
-
 
   return (
     <div 
       className={cn("w-full h-full relative", pageBgClass)}
       style={{
       display: 'grid',
-      gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr)',
-      gridTemplateRows: 'minmax(0,1fr) minmax(0,1fr)',
-      padding: '1.5cm 1.2cm',
+      gridTemplateColumns: 'repeat(2, 13.6cm)',
+      gridTemplateRows: 'repeat(2, 9.0cm)',
+      justifyContent: 'center',
+      alignContent: 'center',
+      paddingTop: '16mm',
+      paddingBottom: '14mm',
+      paddingLeft: '14.2mm',
+      paddingRight: '10.8mm',
       boxSizing: 'border-box',
     }}>
       {allSlots.map((d, i) => (
         <div 
           key={i} 
-          className="w-full h-full p-[0.4cm] box-border print:border-none"
+          className="flex items-center justify-center overflow-hidden box-border print:border-none"
+          style={{ width: '13.6cm', height: '9.0cm' }}
         >
           {d && (
-            <div style={{ width: '100%', height: '100%', overflow: 'hidden' }}>
+            <div 
+              style={{ 
+                width: '13.6cm', 
+                height: '9.0cm', 
+                transform: 'scale(0.9)', 
+                transformOrigin: 'center center', 
+                overflow: 'hidden' 
+              }}
+            >
               <PosterPreview {...d} isImperdiveis={false} settings={settings} />
             </div>
           )}

@@ -151,3 +151,17 @@
   font-weight: 900;
   font-style: normal;
 }
+
+@font-face {
+  font-family: 'GOTHICBI';
+  src: local('Century Gothic Bold Italic'), local('Century Gothic'), url('/fonts/GOTHICBI.ttf') format('truetype');
+  font-weight: bold;
+  font-style: italic, normal;
+}
+
+@font-face {
+  font-family: 'GOTHICB';
+  src: local('Century Gothic Bold'), local('Century Gothic'), url('/fonts/GOTHICBI.ttf') format('truetype');
+  font-weight: bold;
+  font-style: normal;
+}
