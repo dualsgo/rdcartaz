@@ -92,31 +92,33 @@ export function BarcodeScanner({ onScan, onClose, scanCount = 0, scanStatus }: B
   useEffect(() => {
     const startScanner = async () => {
       try {
-        const html5QrCode = new Html5Qrcode("reader");
+        const supportedFormats = [
+          Html5QrcodeSupportedFormats.EAN_13,
+          Html5QrcodeSupportedFormats.EAN_8,
+          Html5QrcodeSupportedFormats.CODE_128,
+        ];
+        const html5QrCode = new Html5Qrcode("reader", {
+          formatsToSupport: supportedFormats,
+          verbose: false,
+        });
         scannerRef.current = html5QrCode;
 
         const availableCameras = await Html5Qrcode.getCameras();
         setCameras(availableCameras);
 
+        const scanConfig = {
+          fps: 20,
+          qrbox: { width: 280, height: 160 },
+          aspectRatio: 1.0,
+        };
+
         if (availableCameras && availableCameras.length > 0) {
           const defaultIndex = availableCameras.length > 1 ? availableCameras.length - 1 : 0;
           setCurrentCameraIndex(defaultIndex);
 
-          const config = {
-            fps: 20,
-            qrbox: { width: 280, height: 160 },
-            aspectRatio: 1.0,
-            useBarCodeDetectorIfSupported: true,
-            formatsToSupport: [
-              Html5QrcodeSupportedFormats.EAN_13,
-              Html5QrcodeSupportedFormats.EAN_8,
-              Html5QrcodeSupportedFormats.CODE_128,
-            ]
-          };
-
           await html5QrCode.start(
             availableCameras[defaultIndex].id,
-            config,
+            scanConfig,
             (decodedText) => {
               handleDecoded(decodedText);
             },
@@ -125,16 +127,7 @@ export function BarcodeScanner({ onScan, onClose, scanCount = 0, scanStatus }: B
         } else {
           await html5QrCode.start(
             { facingMode: "environment" },
-            { 
-              fps: 20, 
-              qrbox: { width: 280, height: 160 },
-              aspectRatio: 1.0,
-              formatsToSupport: [
-                Html5QrcodeSupportedFormats.EAN_13,
-                Html5QrcodeSupportedFormats.EAN_8,
-                Html5QrcodeSupportedFormats.CODE_128,
-              ]
-            },
+            scanConfig,
             (decodedText) => {
               handleDecoded(decodedText);
             },

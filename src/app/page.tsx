@@ -900,14 +900,14 @@ export default function Home() {
       const originalTitle = document.title;
       document.title = filename;
       
-      // Pequena espera para o navegador registrar a mudança de título
+      // Pequena espera para o navegador registrar a mudança de título e o modal fechar completamente
       setTimeout(() => {
         window.print();
         // Restaura o título após a abertura do diálogo de impressão
         setTimeout(() => {
           document.title = originalTitle;
         }, 500);
-      }, 50);
+      }, 150);
     };
 
     const orientationLabel = orientation === 'landscape' ? 'PAISAGEM' : 'RETRATO';
@@ -917,6 +917,8 @@ export default function Home() {
       type: 'warning',
       title: 'Confirme os ajustes de impressão',
       message: `Para o cartaz sair no tamanho correto, você PRECISA CONFERIR se nas configurações de impressão/PDF a MARGEM e a ESCALA estão em "PADRÃO" (100%) e o FORMATO está em "${orientationLabel}".`,
+      confirmText: 'CONFIRMAR E IMPRIMIR',
+      cancelText: 'CANCELAR',
       onConfirm: () => {
         setSecurityModal(prev => ({ ...prev, isOpen: false }));
         executePrint();

@@ -16,6 +16,18 @@ export function DisclaimerModal() {
     }
   }, []);
 
+  // Fechar com a tecla ESC
+  useEffect(() => {
+    if (!open) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        handleClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [open]);
+
   useEffect(() => {
     if (open && productCount === null) {
       fetch('/api/stats')
@@ -34,13 +46,31 @@ export function DisclaimerModal() {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 z-[115] flex items-center justify-center p-4"
       style={{ backgroundColor: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)' }}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          handleClose();
+        }
+      }}
     >
       <div
         className="relative w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in duration-300"
         style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)', border: '1px solid rgba(255,255,255,0.1)' }}
+        role="dialog"
+        aria-modal="true"
       >
+        {/* Botão Fechar X */}
+        <button
+          type="button"
+          onClick={handleClose}
+          className="absolute top-4 right-4 z-20 text-white/60 hover:text-white transition-colors p-1.5 rounded-full hover:bg-white/10 focus:outline-none"
+          title="Fechar aviso"
+          aria-label="Fechar aviso"
+        >
+          <X className="h-5 w-5" />
+        </button>
+
         <div className="flex flex-col max-h-[90vh]">
           {/* Barra pulsante */}
           <div
@@ -54,7 +84,7 @@ export function DisclaimerModal() {
 
           <div className="p-6 overflow-y-auto custom-scrollbar flex-1">
             {step === 1 ? (
-              <div className="space-y-5 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="space-y-5 animate-in fade-in slide-in-from-bottom-4 duration-500 pr-4">
                 <div className="flex items-center gap-3 mb-2">
                   <div className="bg-blue-500/20 p-2 rounded-lg">
                     <Sparkles className="h-6 w-6 text-blue-400" />
@@ -120,7 +150,7 @@ export function DisclaimerModal() {
                 </div>
               </div>
             ) : (
-              <div className="space-y-5 animate-in fade-in zoom-in-95 duration-500">
+              <div className="space-y-5 animate-in fade-in zoom-in-95 duration-500 pr-4">
                 <div className="flex items-center gap-3 mb-2">
                   <div className="bg-red-500/20 p-2 rounded-lg border border-red-500/40 pulse-border">
                     <AlertTriangle className="h-6 w-6 text-red-400 blink-icon" />
@@ -156,14 +186,25 @@ export function DisclaimerModal() {
 
           <div className="p-6 pt-2 shrink-0 bg-black/20 border-t border-white/5">
             {step === 1 ? (
-              <button
-                onClick={() => setStep(2)}
-                className="w-full py-4 rounded-xl font-black text-xs uppercase tracking-widest transition-all active:scale-95 bg-blue-600 text-white hover:bg-blue-500 shadow-[0_4px_15px_rgba(37,99,235,0.3)]"
-              >
-                Continuar para Avisos Importantes
-              </button>
+              <div className="flex flex-col gap-2">
+                <button
+                  type="button"
+                  onClick={() => setStep(2)}
+                  className="w-full py-4 rounded-xl font-black text-xs uppercase tracking-widest transition-all active:scale-95 bg-blue-600 text-white hover:bg-blue-500 shadow-[0_4px_15px_rgba(37,99,235,0.3)]"
+                >
+                  Continuar para Avisos Importantes
+                </button>
+                <button
+                  type="button"
+                  onClick={handleClose}
+                  className="w-full py-2 text-center text-xs font-bold text-gray-400 hover:text-white transition-colors"
+                >
+                  Pular e Começar
+                </button>
+              </div>
             ) : (
               <button
+                type="button"
                 onClick={handleClose}
                 className="w-full py-4 rounded-xl font-black text-xs uppercase tracking-widest transition-all active:scale-95 bg-red-600 text-white hover:bg-red-500 shadow-[0_4px_15px_rgba(220,38,38,0.3)] pulse-border"
               >

@@ -1,19 +1,11 @@
 'use client';
 
-import React from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from '@/components/ui/dialog';
+import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, XCircle } from 'lucide-react';
+import { AlertTriangle, XCircle, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-type SecurityModalProps = {
+export type SecurityModalProps = {
   isOpen: boolean;
   onClose: () => void;
   onConfirm?: () => void;
@@ -36,59 +28,115 @@ export function SecurityModal({
   confirmText,
   cancelText,
 }: SecurityModalProps) {
+  // Fecha com a tecla ESC
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (onCancel) onCancel();
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onCancel, onClose]);
+
+  if (!isOpen) return null;
+
+  const handleConfirm = () => {
+    onClose();
+    if (onConfirm) {
+      onConfirm();
+    }
+  };
+
+  const handleCancel = () => {
+    if (onCancel) {
+      onCancel();
+    }
+    onClose();
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-[425px] animate-in fade-in zoom-in duration-200">
-        <DialogHeader>
-          <div className="flex items-center gap-3 mb-2">
-            {type === 'error' ? (
-              <div className="p-2 bg-destructive/10 rounded-full">
-                <XCircle className="h-6 w-6 text-destructive" />
-              </div>
-            ) : (
-              <div className="p-2 bg-orange-100 rounded-full">
-                <AlertTriangle className="h-6 w-6 text-orange-600" />
-              </div>
-            )}
-            <DialogTitle className={cn(
-              "text-lg font-bold uppercase tracking-tight",
-              type === 'error' ? "text-destructive" : "text-orange-600"
+    <div 
+      className="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          handleCancel();
+        }
+      }}
+    >
+      <div 
+        className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-100 animate-in zoom-in-95 duration-200 p-6"
+        role="dialog"
+        aria-modal="true"
+      >
+        {/* Botão X para fechar */}
+        <button
+          type="button"
+          onClick={handleCancel}
+          className="absolute right-4 top-4 rounded-full p-1 text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors focus:outline-none"
+          aria-label="Fechar"
+        >
+          <X className="h-5 w-5" />
+        </button>
+
+        {/* Header */}
+        <div className="flex items-start gap-3 mb-4 pr-6">
+          {type === 'error' ? (
+            <div className="p-2.5 bg-red-100 text-red-600 rounded-full shrink-0">
+              <XCircle className="h-6 w-6" />
+            </div>
+          ) : (
+            <div className="p-2.5 bg-orange-100 text-orange-600 rounded-full shrink-0">
+              <AlertTriangle className="h-6 w-6" />
+            </div>
+          )}
+          <div>
+            <h3 className={cn(
+              "text-lg font-bold uppercase tracking-tight leading-snug",
+              type === 'error' ? "text-red-600" : "text-orange-600"
             )}>
               {title}
-            </DialogTitle>
+            </h3>
+            <p className="mt-2 text-sm text-gray-600 font-medium leading-relaxed">
+              {message}
+            </p>
           </div>
-          <DialogDescription className="text-gray-600 font-medium leading-relaxed">
-            {message}
-          </DialogDescription>
-        </DialogHeader>
-        <DialogFooter className="mt-6 flex flex-col-reverse sm:flex-row gap-3 sm:gap-2">
+        </div>
+
+        {/* Footer */}
+        <div className="mt-6 flex flex-col-reverse sm:flex-row justify-end gap-2.5">
           {type === 'warning' ? (
             <>
               <Button 
+                type="button"
                 variant="ghost" 
-                onClick={() => { if (onCancel) { onCancel(); } else { onClose(); } }} 
-                className="font-bold w-full sm:w-auto h-auto whitespace-normal py-2 text-center"
+                onClick={handleCancel} 
+                className="font-bold w-full sm:w-auto h-auto whitespace-normal py-2.5 text-center text-gray-600 hover:text-gray-900"
               >
                 {cancelText || 'CANCELAR'}
               </Button>
               <Button 
-                onClick={onConfirm} 
-                className="bg-orange-600 hover:bg-orange-700 text-white font-bold px-4 sm:px-8 shadow-lg shadow-orange-600/20 w-full sm:w-auto h-auto whitespace-normal py-2 text-center"
+                type="button"
+                onClick={handleConfirm} 
+                className="bg-orange-600 hover:bg-orange-700 text-white font-bold px-5 sm:px-6 shadow-lg shadow-orange-600/20 w-full sm:w-auto h-auto whitespace-normal py-2.5 text-center"
               >
-                {confirmText || 'SIM, ESTÁ CORRETO'}
+                {confirmText || 'CONFIRMAR'}
               </Button>
             </>
           ) : (
             <Button 
-              onClick={onClose} 
+              type="button"
+              onClick={handleCancel} 
               variant="destructive" 
-              className="w-full font-bold h-auto whitespace-normal py-2"
+              className="w-full font-bold h-auto whitespace-normal py-2.5"
             >
               ENTENDI
             </Button>
           )}
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </div>
+      </div>
+    </div>
   );
 }
