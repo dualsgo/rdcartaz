@@ -230,43 +230,50 @@ export function PosterPreview({
         POR: R$
       </div>
 
-      {/* ── 9 e 10. PREÇO OFERTA - REAIS E CENTAVOS (43pt, GOTHICBI bold italic) ── */}
+      {/* ── 9 e 10. PREÇO OFERTA - REAIS E CENTAVOS (43pt, GOTHICBI bold italic) COM "UN" ABAIXO À DIREITA ── */}
       <div
         style={{
           position: 'absolute',
           top: '6.02cm',
           left: '2.05cm',
           display: 'flex',
-          alignItems: 'baseline',
-          fontSize: porNumFontSize,
-          fontFamily: 'GOTHICBI, "Century Gothic", sans-serif',
-          fontWeight: 'bold',
-          fontStyle: 'italic',
-          color: 'rgb(0, 0, 0)',
-          lineHeight: '1',
-          overflow: 'visible',
-          whiteSpace: 'nowrap',
+          flexDirection: 'column',
+          alignItems: 'flex-end',
         }}
       >
-        <span>{porInteger}</span>
-        <span>,{porDecimal}</span>
-      </div>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'baseline',
+            fontSize: porNumFontSize,
+            fontFamily: 'GOTHICBI, "Century Gothic", sans-serif',
+            fontWeight: 'bold',
+            fontStyle: 'italic',
+            color: 'rgb(0, 0, 0)',
+            lineHeight: '1',
+            overflow: 'visible',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          <span>{porInteger}</span>
+          <span>,{porDecimal}</span>
+        </div>
 
-      {/* ── 10.1. RÓTULO "UN" ABAIXO DOS VALORES ── */}
-      <div
-        style={{
-          position: 'absolute',
-          top: '7.52cm',
-          left: '2.05cm',
-          fontSize: '9.5pt',
-          fontFamily: 'Arial, sans-serif',
-          fontWeight: 'bold',
-          color: 'rgb(0, 0, 0)',
-          lineHeight: '1',
-          letterSpacing: '0.5px',
-        }}
-      >
-        UN
+        {/* ── RÓTULO "UN" ABAIXO DOS VALORES (ALINHADO À DIREITA DO PREÇO) ── */}
+        <div
+          style={{
+            fontSize: '9.5pt',
+            fontFamily: 'Arial, sans-serif',
+            fontWeight: 'bold',
+            color: 'rgb(0, 0, 0)',
+            lineHeight: '1',
+            letterSpacing: '0.5px',
+            marginTop: '0.08cm',
+            paddingRight: '0.10cm',
+          }}
+        >
+          UN
+        </div>
       </div>
 
       {/* ── 11, 12, 13. BLOCO DE PARCELAMENTO ALINHADO VERTICALMENTE AO SELO (X% DE DESCONTO) ── */}
@@ -334,6 +341,21 @@ export function PosterPreview({
             >
               ,{instDecimal}
             </span>
+          </div>
+
+          {/* Rótulo "CADA" abaixo do valor da parcela no mesmo estilo do UN */}
+          <div
+            style={{
+              fontSize: '9.5pt',
+              fontFamily: 'Arial, sans-serif',
+              fontWeight: 'bold',
+              color: 'rgb(0, 0, 0)',
+              lineHeight: '1',
+              letterSpacing: '0.5px',
+              marginTop: '0.08cm',
+            }}
+          >
+            CADA
           </div>
         </div>
       )}
