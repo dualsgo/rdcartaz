@@ -490,7 +490,7 @@ export default function Home() {
 
   const [queueFilter, setQueueFilter] = useState<'all' | 'offer' | 'normal'>('all');
   const [settings, setSettings] = useState<PosterSettings>({
-    maxInstallments: 6,
+    maxInstallments: 10,
     minInstallmentAmount: 29.99,
   });
 
@@ -530,9 +530,23 @@ export default function Home() {
 
   // Load settings and queue
   useEffect(() => {
-    const savedSettings = localStorage.getItem('poster-settings');
+    const savedSettings = localStorage.getItem('poster-settings-v2');
     if (savedSettings) {
       try { setSettings(JSON.parse(savedSettings)); } catch { /* ignore */ }
+    } else {
+      const oldSettings = localStorage.getItem('poster-settings');
+      let newMax = 10;
+      if (oldSettings) {
+        try {
+          const parsed = JSON.parse(oldSettings);
+          // Se o usuário já usava 10x mantém 10x, se usava o padrão antigo 6x atualiza para o novo padrão 10x
+          if (parsed.maxInstallments === 10) newMax = 10;
+          else if (parsed.maxInstallments === 6) newMax = 10;
+        } catch { /* ignore */ }
+      }
+      const initialSettings = { maxInstallments: newMax, minInstallmentAmount: 29.99 };
+      setSettings(initialSettings);
+      localStorage.setItem('poster-settings-v2', JSON.stringify(initialSettings));
     }
     const savedQueue = localStorage.getItem('poster-queue');
     if (savedQueue) {
@@ -574,6 +588,7 @@ export default function Home() {
   const saveSettings = (newSettings: PosterSettings) => {
     setSettings(newSettings);
     localStorage.setItem('poster-settings', JSON.stringify(newSettings));
+    localStorage.setItem('poster-settings-v2', JSON.stringify(newSettings));
   };
 
   const handleImportSessionData = (items: any[]) => {

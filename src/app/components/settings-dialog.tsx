@@ -39,8 +39,8 @@ export function SettingsDialog({
   }, [settings]);
 
   const handleSave = () => {
-    let parsedMax = parseInt(maxInstallments, 10) || 6;
-    if (parsedMax !== 10) parsedMax = 6;
+    let parsedMax = parseInt(maxInstallments, 10) || 10;
+    if (parsedMax !== 6) parsedMax = 10;
 
     setMaxInstallments(parsedMax.toString());
     setMinAmount("29.99");
@@ -120,8 +120,8 @@ export function SettingsDialog({
                       <SelectValue placeholder="Selecione" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="6" className="font-bold">6x (Padrão)</SelectItem>
-                      <SelectItem value="10" className="font-bold">10x</SelectItem>
+                      <SelectItem value="10" className="font-bold">10x (Padrão)</SelectItem>
+                      <SelectItem value="6" className="font-bold">6x</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -153,7 +153,7 @@ export function SettingsDialog({
                 Um produto de <b>R$ 100,00</b> será parcelado em:
               </p>
               {(() => {
-                const maxI = parseInt(maxInstallments, 10) || 6;
+                const maxI = parseInt(maxInstallments, 10) || 10;
                 const minA = parseFloat(minAmount) || 29.99;
                 
                 // Calculando na hora
