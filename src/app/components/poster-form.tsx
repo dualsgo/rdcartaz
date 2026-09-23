@@ -74,6 +74,7 @@ type PosterFormProps = {
   onImportBatch?: () => void;
   sessionProducts?: Record<string, any>;
   onAutoAdd?: (data: PosterData) => void;
+  onPosterTypeChange?: (type: PosterType) => void;
 };
 
 function playBeep(type: 'success' | 'error') {
@@ -123,7 +124,7 @@ const defectOptions = [
   { value: 'outro', label: 'Outro (descrever)', discount: null },
 ];
 
-export function PosterForm({ data, setData, posterType, settings, onLookupStatusChange, onImportBatch, sessionProducts, onAutoAdd }: PosterFormProps) {
+export function PosterForm({ data, setData, posterType, settings, onLookupStatusChange, onImportBatch, sessionProducts, onAutoAdd, onPosterTypeChange }: PosterFormProps) {
   const [lookupStatus, setLookupStatus] = useState<LookupStatus>('idle');
   const [showScanner, setShowScanner] = useState(false);
   const [sessionScanCount, setSessionScanCount] = useState(0);
@@ -618,7 +619,75 @@ export function PosterForm({ data, setData, posterType, settings, onLookupStatus
         ) : null}
       </div>
 
-      {/* SEÇÃO 2: PREÇOS E AJUSTES */}
+      {/* SELEÇÃO DO FORMATO DE IMPRESSÃO */}
+      {onPosterTypeChange && (
+        <div className="bg-white border rounded-xl p-5 shadow-sm space-y-3">
+          <div className="flex items-center justify-between">
+            <Label className="font-bold text-gray-900 uppercase tracking-tight text-sm">
+              2. Formato de Impressão
+            </Label>
+            <span className="text-[10px] font-bold text-primary bg-primary/10 px-2.5 py-0.5 rounded-full uppercase">
+              {posterType === 'reliquias' ? 'A4 Inteira (1/folha)' : posterType === 'reliquias-a6' ? 'A6 (4/folha)' : posterType === 'etiqueta-oficial' ? 'Gôndola' : 'Vitrine'}
+            </span>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => onPosterTypeChange('reliquias')}
+              className={cn(
+                'px-3 py-2.5 rounded-xl text-xs font-black transition-all flex flex-col items-center justify-center text-center border',
+                posterType === 'reliquias'
+                  ? 'bg-primary text-primary-foreground border-primary shadow-sm scale-[1.02]'
+                  : 'bg-muted/40 hover:bg-muted text-muted-foreground border-border/50 hover:text-foreground'
+              )}
+            >
+              <span>A4 Folha Inteira</span>
+              <span className="text-[9px] opacity-80 font-normal">1 cartaz por folha A4</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => onPosterTypeChange('reliquias-a6')}
+              className={cn(
+                'px-3 py-2.5 rounded-xl text-xs font-black transition-all flex flex-col items-center justify-center text-center border',
+                posterType === 'reliquias-a6'
+                  ? 'bg-primary text-primary-foreground border-primary shadow-sm scale-[1.02]'
+                  : 'bg-muted/40 hover:bg-muted text-muted-foreground border-border/50 hover:text-foreground'
+              )}
+            >
+              <span>A6 (4 por Folha)</span>
+              <span className="text-[9px] opacity-80 font-normal">4 cartazes por folha A4</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => onPosterTypeChange('etiqueta-oficial')}
+              className={cn(
+                'px-3 py-2.5 rounded-xl text-xs font-black transition-all flex flex-col items-center justify-center text-center border',
+                posterType === 'etiqueta-oficial'
+                  ? 'bg-primary text-primary-foreground border-primary shadow-sm scale-[1.02]'
+                  : 'bg-muted/40 hover:bg-muted text-muted-foreground border-border/50 hover:text-foreground'
+              )}
+            >
+              <span>Gôndola</span>
+              <span className="text-[9px] opacity-80 font-normal">16 etiquetas por folha</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => onPosterTypeChange('vitrine')}
+              className={cn(
+                'px-3 py-2.5 rounded-xl text-xs font-black transition-all flex flex-col items-center justify-center text-center border',
+                posterType === 'vitrine'
+                  ? 'bg-primary text-primary-foreground border-primary shadow-sm scale-[1.02]'
+                  : 'bg-muted/40 hover:bg-muted text-muted-foreground border-border/50 hover:text-foreground'
+              )}
+            >
+              <span>Vitrine</span>
+              <span className="text-[9px] opacity-80 font-normal">16 etiquetas por folha</span>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* SEÇÃO 3: PREÇOS E AJUSTES */}
       <fieldset 
         className={cn("space-y-4", !isEnabled && "opacity-40 pointer-events-none")}
         disabled={!isEnabled}
@@ -626,7 +695,7 @@ export function PosterForm({ data, setData, posterType, settings, onLookupStatus
         <div className="bg-white border rounded-xl p-5 shadow-sm space-y-5">
            <div className="flex items-center justify-between border-b pb-2 flex-wrap gap-2">
              <Label className="font-bold text-gray-900 uppercase tracking-tight text-sm">
-                2. Preços e Formato
+                3. Preços e Oferta
              </Label>
              <div className="flex flex-wrap gap-3">
                {!['reliquias', 'reliquias-a6', 'totem'].includes(posterType) && (

@@ -478,6 +478,7 @@ export default function Home() {
   const [queue, setQueue] = useState<PosterData[]>([]);
   const [currentPoster, setCurrentPoster] = useState<PosterData>(initialPosterData());
   const [isProductReady, setIsProductReady] = useState(false);
+  const [selectedQueueIndex, setSelectedQueueIndex] = useState<number | null>(null);
   const [formKey, setFormKey] = useState(0);
   const [showAbout, setShowAbout] = useState(false);
   const [showDatabase, setShowDatabase] = useState(false);
@@ -609,18 +610,12 @@ export default function Home() {
   
   const filteredQueue = useMemo(() => {
     let result = queue;
-    
-    // Filtro automático: Relíquias só aceita Ofertas
-    if (posterType === 'reliquias' || posterType === 'reliquias-a6') {
-      result = result.filter(item => item.posterSubType === 'offer');
-    }
-
     if (queueFilter === 'all') return result;
     return result.filter(item => {
       const isOfferType = item.posterSubType === 'offer';
       return queueFilter === 'offer' ? isOfferType : !isOfferType;
     });
-  }, [queue, queueFilter, posterType]);
+  }, [queue, queueFilter]);
 
 
   // Expande a fila considerando as quantidades de cada item para impressão
@@ -705,21 +700,14 @@ export default function Home() {
   }, [posterType]);
 
   const handlePosterTypeChange = (newType: PosterType) => {
-    const isReliquiasSwitch = 
-      (posterType === 'reliquias' && newType === 'reliquias-a6') ||
-      (posterType === 'reliquias-a6' && newType === 'reliquias');
-
     setPosterType(newType);
 
-    if (!isReliquiasSwitch) {
-      const resetData = {
-        ...initialPosterData(),
-        posterSubType: (['reliquias', 'reliquias-a6', 'etiqueta-oficial', 'aereo', 'totem'].includes(newType) ? 'offer' : 'normal') as 'offer' | 'normal',
-      };
-      lastResetRef.current = JSON.stringify(resetData);
-      setCurrentPoster(resetData);
-      setIsProductReady(false);
-      setFormKey((k: number) => k + 1);
+    // Se o formulário já tem um produto preenchido/carregado, preserva os dados ao trocar de formato
+    if (isProductReady || (currentPoster.description && currentPoster.description !== 'DESCRIÇÃO DO PRODUTO')) {
+      setCurrentPoster(prev => ({
+        ...prev,
+        posterSubType: ['reliquias', 'reliquias-a6', 'totem'].includes(newType) ? 'offer' : prev.posterSubType,
+      }));
     }
   };
 
@@ -1092,14 +1080,14 @@ export default function Home() {
           <div className="flex items-center gap-4 w-full md:w-auto mt-2 md:mt-0 justify-between">
             {/* Mobile select */}
 
-            {/* Desktop button group */}
-            <div className="flex bg-muted p-1 rounded-xl gap-1 shadow-inner">
+            {/* Desktop and Mobile button group */}
+            <div className="flex bg-muted p-1 rounded-xl gap-1 shadow-inner overflow-x-auto max-w-[calc(100vw-32px)] sm:max-w-none no-scrollbar">
                {typeOptions.map(opt => (
                  <button
                    key={opt.id}
                    onClick={() => handlePosterTypeChange(opt.id as PosterType)}
                    className={cn(
-                     'px-4 py-2 rounded-lg text-[13px] font-bold transition-all duration-200 whitespace-nowrap',
+                     'px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-[13px] font-bold transition-all duration-200 whitespace-nowrap shrink-0',
                      posterType === opt.id
                        ? 'bg-background text-primary shadow-sm scale-[1.02]'
                        : 'text-muted-foreground hover:bg-black/5'
@@ -1186,6 +1174,7 @@ export default function Home() {
                   onImportBatch={() => setShowAutomation(true)}
                   sessionProducts={sessionProducts}
                   onAutoAdd={(data) => proceedAddToQueue(data)}
+                  onPosterTypeChange={handlePosterTypeChange}
                 />
 
                 <Button
@@ -1281,9 +1270,25 @@ export default function Home() {
                               </p>
                             </div>
                           )}
-                          <div className="flex items-center gap-3 px-4 py-3 hover:bg-white transition-colors group border-b border-border/30 last:border-b-0 relative">
+                          <div 
+                            onClick={() => {
+                              setSelectedQueueIndex(realIndex);
+                              setCurrentPoster({ ...item });
+                              setIsProductReady(true);
+                              setPreviewMode('single');
+                            }}
+                            className={cn(
+                              "flex items-center gap-3 px-4 py-3 hover:bg-white transition-colors group border-b border-border/30 last:border-b-0 relative cursor-pointer",
+                              selectedQueueIndex === realIndex && "bg-primary/5 border-l-2 border-l-primary"
+                            )}
+                            title="Clique para visualizar ou editar este cartaz"
+                          >
                             <button
-                              onClick={() => handleRemoveFromQueue(realIndex)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleRemoveFromQueue(realIndex);
+                                if (selectedQueueIndex === realIndex) setSelectedQueueIndex(null);
+                              }}
                               className="shrink-0 p-1.5 text-muted-foreground hover:text-destructive hover:bg-red-50 rounded-lg transition-all opacity-0 group-hover:opacity-100"
                               title="Remover item"
                             >
@@ -1351,34 +1356,56 @@ export default function Home() {
               </div>
 
               <div className="flex items-center gap-2 flex-wrap">
-                {(posterType === 'reliquias' || posterType === 'reliquias-a6') && (
-                  <div className="flex bg-muted p-1 rounded-xl shadow-inner gap-1 border border-border/50">
-                    <button
-                      onClick={() => handlePosterTypeChange('reliquias')}
-                      className={cn(
-                        "px-3 py-1.5 text-[10px] font-black rounded-lg transition-all",
-                        posterType === 'reliquias'
-                          ? "bg-background text-primary shadow-sm scale-105"
-                          : "text-muted-foreground hover:bg-black/5"
-                      )}
-                      title="1 cartaz por folha A4 (Folha Inteira)"
-                    >
-                      FOLHA INTEIRA (A4)
-                    </button>
-                    <button
-                      onClick={() => handlePosterTypeChange('reliquias-a6')}
-                      className={cn(
-                        "px-3 py-1.5 text-[10px] font-black rounded-lg transition-all",
-                        posterType === 'reliquias-a6'
-                          ? "bg-background text-primary shadow-sm scale-105"
-                          : "text-muted-foreground hover:bg-black/5"
-                      )}
-                      title="4 cartazes por folha A4 (tamanho A6)"
-                    >
-                      4 POR FOLHA (A6)
-                    </button>
-                  </div>
-                )}
+                <div className="flex bg-muted p-1 rounded-xl shadow-inner gap-1 border border-border/50">
+                  <button
+                    onClick={() => handlePosterTypeChange('reliquias')}
+                    className={cn(
+                      "px-2.5 py-1.5 text-[10px] font-black rounded-lg transition-all whitespace-nowrap",
+                      posterType === 'reliquias'
+                        ? "bg-background text-primary shadow-sm scale-105"
+                        : "text-muted-foreground hover:bg-black/5"
+                    )}
+                    title="1 cartaz por folha A4 (Folha Inteira)"
+                  >
+                    FOLHA INTEIRA (A4)
+                  </button>
+                  <button
+                    onClick={() => handlePosterTypeChange('reliquias-a6')}
+                    className={cn(
+                      "px-2.5 py-1.5 text-[10px] font-black rounded-lg transition-all whitespace-nowrap",
+                      posterType === 'reliquias-a6'
+                        ? "bg-background text-primary shadow-sm scale-105"
+                        : "text-muted-foreground hover:bg-black/5"
+                    )}
+                    title="4 cartazes por folha A4 (tamanho A6)"
+                  >
+                    4 POR FOLHA (A6)
+                  </button>
+                  <button
+                    onClick={() => handlePosterTypeChange('etiqueta-oficial')}
+                    className={cn(
+                      "px-2.5 py-1.5 text-[10px] font-black rounded-lg transition-all whitespace-nowrap",
+                      posterType === 'etiqueta-oficial'
+                        ? "bg-background text-primary shadow-sm scale-105"
+                        : "text-muted-foreground hover:bg-black/5"
+                    )}
+                    title="Gôndola (16 por folha)"
+                  >
+                    GÔNDOLA
+                  </button>
+                  <button
+                    onClick={() => handlePosterTypeChange('vitrine')}
+                    className={cn(
+                      "px-2.5 py-1.5 text-[10px] font-black rounded-lg transition-all whitespace-nowrap",
+                      posterType === 'vitrine'
+                        ? "bg-background text-primary shadow-sm scale-105"
+                        : "text-muted-foreground hover:bg-black/5"
+                    )}
+                    title="Vitrine (16 por folha)"
+                  >
+                    VITRINE
+                  </button>
+                </div>
 
                 <div className="flex bg-muted p-1 rounded-xl shadow-inner border border-border/50">
                   <button 
@@ -1407,9 +1434,9 @@ export default function Home() {
               <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
                 {previewMode === 'single' ? (
                   <SinglePosterPreview
-                    data={currentPoster}
+                    data={isProductReady ? currentPoster : (selectedQueueIndex !== null && queue[selectedQueueIndex] ? queue[selectedQueueIndex] : (queue.length > 0 ? queue[queue.length - 1] : currentPoster))}
                     posterType={posterType}
-                    isReady={isProductReady}
+                    isReady={isProductReady || queue.length > 0}
                     settings={settings}
                   />
                 ) : (
