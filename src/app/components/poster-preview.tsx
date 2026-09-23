@@ -252,6 +252,23 @@ export function PosterPreview({
         <span>,{porDecimal}</span>
       </div>
 
+      {/* ── 10.1. RÓTULO "UN" ABAIXO DOS VALORES ── */}
+      <div
+        style={{
+          position: 'absolute',
+          top: '7.52cm',
+          left: '2.05cm',
+          fontSize: '9.5pt',
+          fontFamily: 'Arial, sans-serif',
+          fontWeight: 'bold',
+          color: 'rgb(0, 0, 0)',
+          lineHeight: '1',
+          letterSpacing: '0.5px',
+        }}
+      >
+        UN
+      </div>
+
       {/* ── 11, 12, 13. BLOCO DE PARCELAMENTO ALINHADO VERTICALMENTE AO SELO (X% DE DESCONTO) ── */}
       {showInstallments && (
         <div
