@@ -42,8 +42,8 @@ const PER_PAGE: Record<PosterType, number> = {
 
 // Dimensões do cartaz individual para o preview (px)
 const SINGLE_DIMS: Record<PosterType, { w: number; h: number }> = {
-  reliquias:            { w: 491, h: 340 },
-  'reliquias-a6':       { w: 491, h: 340 },
+  reliquias:            { w: 514, h: 340 },
+  'reliquias-a6':       { w: 514, h: 340 },
   'etiqueta-oficial':   { w: 340, h: 128 }, // 90mm x 34mm
   vitrine:              { w: 340, h: 128 }, // 90mm x 34mm
   aereo:                { w: 660, h: 496 },  // 174mm x 131mm @ 96dpi (4 linhas de gôndola)
@@ -173,7 +173,7 @@ function SinglePosterPreview({
           <div style={{ marginTop: blankOffsetPx > 0 ? `-${blankOffsetPx}px` : undefined, width: '100%', height: `${h}px` }}>
             {posterType === 'reliquias' && (
               <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <div style={{ width: '13.6cm', height: '9.0cm', transform: 'scale(2.15)', transformOrigin: 'center center' }}>
+                <div style={{ width: '13.6cm', height: '9.0cm' }}>
                   <PosterPreview {...data} isImperdiveis={false} settings={settings} />
                 </div>
               </div>
@@ -403,6 +403,7 @@ function PageGrid({
 
   // Relíquias A4 (Folha Inteira - 1 cartaz por folha A4 paisagem)
   if (posterType === 'reliquias') {
+    const d = items[0];
     return (
       <div 
         className={cn("w-full h-full relative flex items-center justify-center overflow-hidden", pageBgClass)}
@@ -412,17 +413,17 @@ function PageGrid({
           boxSizing: 'border-box',
         }}
       >
-        {items[0] && (
+        {d && (
           <div 
             style={{ 
               width: '13.6cm', 
               height: '9.0cm', 
-              transform: 'scale(2.15)', 
+              transform: 'scale(2)', 
               transformOrigin: 'center center',
               flexShrink: 0,
             }}
           >
-            <PosterPreview {...items[0]} isImperdiveis={false} settings={settings} />
+            <PosterPreview {...d} isImperdiveis={false} settings={settings} />
           </div>
         )}
       </div>
