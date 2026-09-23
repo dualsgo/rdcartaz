@@ -281,7 +281,7 @@ export function PosterPreview({
         <div
           style={{
             position: 'absolute',
-            top: '5.55cm',
+            top: '5.45cm',
             right: '0.45cm',
             width: '5.50cm',
             display: 'flex',
@@ -292,30 +292,62 @@ export function PosterPreview({
             zIndex: 10,
           }}
         >
-          {/* Texto de Parcelamento (14pt, Arial bold) */}
-          <span
+          {/* Texto de Parcelamento (2 linhas para caber perfeitamente no espaço designado) */}
+          <div
             style={{
-              fontSize: '13.5pt',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              textAlign: 'center',
               fontFamily: 'Arial, sans-serif',
               fontWeight: 'bold',
               color: '#000000',
-              lineHeight: '1.1',
-              whiteSpace: 'nowrap',
-              textAlign: 'center',
+              lineHeight: '1.15',
+              textTransform: 'uppercase',
             }}
           >
-            {maxInstallments}X sem juros
-          </span>
+            <span
+              style={{
+                fontSize: '9pt',
+                letterSpacing: '0.2px',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              OU PARCELADO EM ATÉ
+            </span>
+            <span
+              style={{
+                fontSize: '11.5pt',
+                letterSpacing: '0.3px',
+                whiteSpace: 'nowrap',
+                marginTop: '0.04cm',
+              }}
+            >
+              {maxInstallments} VEZES DE
+            </span>
+          </div>
 
-          {/* Valor da Parcela (Reais 35pt / Centavos 18.55pt, GOTHICBI bold italic) */}
+          {/* Valor da Parcela com R$ e CADA pequeno ao lado dos centavos */}
           <div
             style={{
               display: 'flex',
               alignItems: 'baseline',
               justifyContent: 'center',
-              marginTop: '0.08cm',
+              marginTop: '0.06cm',
+              whiteSpace: 'nowrap',
             }}
           >
+            <span
+              style={{
+                fontSize: '11pt',
+                fontFamily: 'Arial, sans-serif',
+                fontWeight: 'bold',
+                color: '#000000',
+                marginRight: '0.08cm',
+              }}
+            >
+              R$
+            </span>
             <span
               style={{
                 fontSize: instNumFontSize,
@@ -341,21 +373,19 @@ export function PosterPreview({
             >
               ,{instDecimal}
             </span>
-          </div>
-
-          {/* Rótulo "CADA" abaixo do valor da parcela no mesmo estilo do UN */}
-          <div
-            style={{
-              fontSize: '9.5pt',
-              fontFamily: 'Arial, sans-serif',
-              fontWeight: 'bold',
-              color: 'rgb(0, 0, 0)',
-              lineHeight: '1',
-              letterSpacing: '0.5px',
-              marginTop: '0.08cm',
-            }}
-          >
-            CADA
+            <span
+              style={{
+                fontSize: '8.5pt',
+                fontFamily: 'Arial, sans-serif',
+                fontWeight: 'bold',
+                color: '#000000',
+                lineHeight: '1',
+                letterSpacing: '0.3px',
+                marginLeft: '0.12cm',
+              }}
+            >
+              CADA
+            </span>
           </div>
         </div>
       )}
