@@ -37,9 +37,9 @@ export function PosterPreviewEtiquetaOficial({
   const fontGothic = "'GOTHICB', 'Century Gothic', 'TeX Gyre Adventor', sans-serif";
   const fontRoboto = "'Roboto', 'Arial', sans-serif";
 
-  // Fornecedor e Referência formatados conforme Pricefy: "MOAS INDUSTRIA E COMERCIO LTDA - Ref 13805"
+  // Fornecedor e Referência formatados conforme Pricefy: "ESTRELA DISTR DE BRINQ... - Ref 13805"
   const fornecedorRefText = [
-    supplier ? truncateDescription(supplier, 32) : '',
+    supplier ? truncateDescription(supplier, 34) : '',
     reference ? `Ref ${reference}` : ''
   ].filter(Boolean).join(' - ');
 
@@ -55,7 +55,9 @@ export function PosterPreviewEtiquetaOficial({
         position: 'relative',
       }}
     >
-      {/* 1. DESCRIÇÃO DO PRODUTO (top: 0.3cm, left: 0.6cm, width: 5.4cm, height: 0.65cm) */}
+      {/* ───────────────────────────────────────────────────────────
+          1. TOPO ESQUERDO: NOME DO PRODUTO (Roboto-Bold, 11.5pt)
+      ──────────────────────────────────────────────────────────── */}
       <div 
         id="field_produtoDescricaoEtiqueta"
         className="absolute overflow-hidden flex items-center"
@@ -78,9 +80,11 @@ export function PosterPreviewEtiquetaOficial({
         </h2>
       </div>
 
-      {/* 2. ÁREA DE PREÇO E PARCELAMENTO */}
+      {/* ───────────────────────────────────────────────────────────
+          2. MEIO E ÁREA CENTRAL: PREÇOS E PARCELAMENTO
+      ──────────────────────────────────────────────────────────── */}
       {isOffer && hasDiscount ? (
-        /* --- CASO OFERTA: DE / POR --- */
+        /* ─── CASO OFERTA (DE / POR) ─── */
         <>
           {/* DE: R$ XX,XX */}
           <div 
@@ -170,9 +174,9 @@ export function PosterPreviewEtiquetaOficial({
           )}
         </>
       ) : hasInstallments ? (
-        /* --- CASO REGULAR COM PARCELAMENTO (Template Oficial Pricefy) --- */
+        /* ─── CASO REGULAR COM PARCELAMENTO (Layout Oficial Pricefy) ─── */
         <>
-          {/* PREÇO À VISTA: R$ (top: 1.15cm, left: 1cm, width: 4.5cm) */}
+          {/* [Meio Esquerdo]: PREÇO À VISTA: R$ */}
           <div 
             id="field_Total"
             className="absolute leading-none"
@@ -187,7 +191,7 @@ export function PosterPreviewEtiquetaOficial({
             PREÇO À VISTA: R$
           </div>
 
-          {/* VALOR VIGENTE INTEIRO (top: 1.178cm, left: 4.1cm, font: 30pt GOTHICB) */}
+          {/* [Meio Centro/Direito]: PREÇO TOTAL INTEIRO (30pt GOTHICB) */}
           <div 
             id="field_valorVigente_num"
             className="absolute leading-[0.735em] text-left"
@@ -202,7 +206,7 @@ export function PosterPreviewEtiquetaOficial({
             {porInteger}
           </div>
 
-          {/* VALOR VIGENTE CENTAVOS (top: 1.178cm, left: 5.285cm, font: 30pt GOTHICB) */}
+          {/* [Meio Centro/Direito]: PREÇO TOTAL CENTAVOS (30pt GOTHICB) */}
           <div 
             id="field_valorVigente_cen"
             className="absolute leading-[0.735em] text-left"
@@ -217,7 +221,7 @@ export function PosterPreviewEtiquetaOficial({
             ,{porDecimal}
           </div>
 
-          {/* UNIDADE UN (top: 2.236cm, left: 6cm, font: 4.5pt Roboto-Bold) */}
+          {/* [Abaixo do Preço Principal]: UNIDADE UN */}
           <div 
             id="field_produtoApresentacao"
             className="absolute leading-none"
@@ -232,7 +236,7 @@ export function PosterPreviewEtiquetaOficial({
             UN
           </div>
 
-          {/* QUANTIDADE DE PARCELAS: 2X (top: 1.581cm, left: 1cm, font: 20pt GOTHICB) */}
+          {/* [Meio Esquerdo]: QUANTIDADE DE PARCELAS: 2X/3X/4X */}
           <div 
             id="field_quantidadeDeParcelas"
             className="absolute leading-[0.935em] text-center"
@@ -248,7 +252,7 @@ export function PosterPreviewEtiquetaOficial({
             {maxInstallments}X
           </div>
 
-          {/* TEXTO PARCELA: SEM JUROS (top: 2.081cm, left: 0.625cm, font: 4.5pt Roboto-Bold) */}
+          {/* [Meio Esquerdo]: SUBTEXTO: SEM JUROS */}
           <div 
             id="field_textparcela"
             className="absolute text-center leading-none"
@@ -264,7 +268,23 @@ export function PosterPreviewEtiquetaOficial({
             SEM JUROS
           </div>
 
-          {/* SÍMBOLO R$ DA PARCELA (top: 2.481cm, left: 3.25cm, font: 6pt Roboto-Bold) */}
+          {/* [Meio Esquerdo]: INDICADOR NUMÉRICO: 0 */}
+          <div 
+            id="field_produtoDepartamentoCodigo"
+            className="absolute text-center leading-none"
+            style={{
+              top: '26.81mm',
+              left: '11.5mm',
+              width: '15.0mm',
+              fontFamily: fontRoboto,
+              fontSize: '5.5pt',
+              letterSpacing: '0.25mm',
+            }}
+          >
+            0
+          </div>
+
+          {/* [Abaixo do Preço Principal]: SÍMBOLO R$ DA PARCELA */}
           <div 
             id="field_simbolo"
             className="absolute leading-none"
@@ -279,7 +299,7 @@ export function PosterPreviewEtiquetaOficial({
             R$
           </div>
 
-          {/* VALOR DA PARCELA INTEIRO (top: 2.385cm, left: 3.75cm, font: 20pt GOTHICB) */}
+          {/* [Abaixo do Preço Principal]: VALOR PARCELA INTEIRO */}
           <div 
             id="field_valorDaParcela_num"
             className="absolute leading-[0.735em] text-left"
@@ -294,7 +314,7 @@ export function PosterPreviewEtiquetaOficial({
             {instInteger}
           </div>
 
-          {/* VALOR DA PARCELA CENTAVOS (top: 2.385cm, left: 4.54cm, font: 20pt GOTHICB) */}
+          {/* [Abaixo do Preço Principal]: VALOR PARCELA CENTAVOS */}
           <div 
             id="field_valorDaParcela_cen"
             className="absolute leading-[0.735em] text-left"
@@ -310,7 +330,7 @@ export function PosterPreviewEtiquetaOficial({
           </div>
         </>
       ) : (
-        /* --- CASO REGULAR SEM PARCELAMENTO (À VISTA AMPLO) --- */
+        /* ─── CASO REGULAR SEM PARCELAMENTO (À VISTA) ─── */
         <>
           <div 
             className="absolute leading-none"
@@ -349,29 +369,29 @@ export function PosterPreviewEtiquetaOficial({
           >
             UN
           </div>
+          <div 
+            id="field_produtoDepartamentoCodigo"
+            className="absolute text-center leading-none"
+            style={{
+              top: '26.81mm',
+              left: '11.5mm',
+              width: '15.0mm',
+              fontFamily: fontRoboto,
+              fontSize: '5.5pt',
+              letterSpacing: '0.25mm',
+            }}
+          >
+            0
+          </div>
         </>
       )}
 
-      {/* 3. DEPARTAMENTO (top: 2.681cm, left: 1.15cm, font: 5.5pt Roboto-Bold) */}
-      <div 
-        id="field_produtoDepartamentoCodigo"
-        className="absolute text-center leading-none"
-        style={{
-          top: '26.81mm',
-          left: '11.5mm',
-          width: '15.0mm',
-          fontFamily: fontRoboto,
-          fontSize: '5.5pt',
-          letterSpacing: '0.25mm',
-        }}
-      >
-        0
-      </div>
-
-      {/* 4. FORNECEDOR / REFERÊNCIA (top: 3.031cm, left: 0.6cm, width: 5.4cm, text-align: right) */}
+      {/* ───────────────────────────────────────────────────────────
+          3. RODAPÉ DO CORPO: FORNECEDOR / RAZÃO SOCIAL - Ref XXX
+      ──────────────────────────────────────────────────────────── */}
       <div 
         id="field_fornecedor"
-        className="absolute text-right leading-none truncate overflow-hidden"
+        className="absolute text-left leading-none truncate overflow-hidden"
         style={{
           top: '30.31mm',
           left: '6.0mm',
@@ -384,13 +404,19 @@ export function PosterPreviewEtiquetaOficial({
         {fornecedorRefText}
       </div>
 
-      {/* 5. CÓDIGO SAP VERTICAL - ROTACIONADO -90deg (top: 1.606cm, left: 6cm, width: 2.65cm) */}
+      {/* ───────────────────────────────────────────────────────────
+          4. LATERAL DIREITA (Orientação Vertical 90°):
+             - Coluna interna: CÓDIGO INTERNO (SAP)
+             - Coluna externa (borda): CÓDIGO DE BARRAS + NÚMERO EAN
+      ──────────────────────────────────────────────────────────── */}
+
+      {/* COLUNA INTERNA: Código Numérico Interno / SKU */}
       <div 
         id="field_produtoCodigo"
         className="absolute text-center leading-none font-bold"
         style={{
           top: '16.06mm',
-          left: '57.0mm',
+          left: '60.0mm',
           width: '26.5mm',
           transform: 'rotate(-90deg)',
           transformOrigin: 'center center',
@@ -402,31 +428,13 @@ export function PosterPreviewEtiquetaOficial({
         {code || ''}
       </div>
 
-      {/* 6. CÓDIGO EAN VERTICAL - ROTACIONADO -90deg (top: 1.606cm, left: 7.175cm, width: 2.65cm) */}
-      <div 
-        id="field_codigoBarras"
-        className="absolute text-center leading-none font-bold"
-        style={{
-          top: '16.06mm',
-          left: '70.5mm',
-          width: '26.5mm',
-          transform: 'rotate(-90deg)',
-          transformOrigin: 'center center',
-          fontFamily: fontRoboto,
-          fontSize: '5.5pt',
-          letterSpacing: '0.25mm',
-        }}
-      >
-        {ean || code || ''}
-      </div>
-
-      {/* 7. CÓDIGO DE BARRAS GRÁFICO - ROTACIONADO -90deg (top: 1.25cm, left: 6.5cm, width: 2.9cm, height: 1cm) */}
+      {/* COLUNA EXTERNA: Código de Barras Vertical */}
       <div 
         id="static_16"
         className="absolute flex items-center justify-center overflow-hidden"
         style={{
           top: '12.5mm',
-          left: '64.5mm',
+          left: '65.0mm',
           width: '29.0mm',
           height: '10.0mm',
           transform: 'rotate(-90deg)',
@@ -438,6 +446,24 @@ export function PosterPreviewEtiquetaOficial({
         ) : code ? (
           <BarcodeSAP value={code} height="10mm" width="29mm" />
         ) : null}
+      </div>
+
+      {/* COLUNA EXTERNA (BORDA): Número EAN impresso */}
+      <div 
+        id="field_codigoBarras"
+        className="absolute text-center leading-none font-bold"
+        style={{
+          top: '16.06mm',
+          left: '71.75mm',
+          width: '26.5mm',
+          transform: 'rotate(-90deg)',
+          transformOrigin: 'center center',
+          fontFamily: fontRoboto,
+          fontSize: '5.5pt',
+          letterSpacing: '0.25mm',
+        }}
+      >
+        {ean || code || ''}
       </div>
     </div>
   );
