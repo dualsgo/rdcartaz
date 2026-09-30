@@ -37,7 +37,7 @@ export function PosterPreviewEtiquetaOficial({
   const fontGothic = "'GOTHICB', 'Century Gothic', 'TeX Gyre Adventor', sans-serif";
   const fontRoboto = "'Roboto', 'Arial', sans-serif";
 
-  // Fornecedor e Referência formatados conforme Pricefy: "ESTRELA DISTR DE BRINQ... - Ref 13805"
+  // Fornecedor e Referência formatados: "ESTRELA DISTR DE BRINQ... - Ref 13805"
   const fornecedorRefText = [
     supplier ? truncateDescription(supplier, 34) : '',
     reference ? `Ref ${reference}` : ''
@@ -130,7 +130,7 @@ export function PosterPreviewEtiquetaOficial({
           {/* UNIDADE UN */}
           <div 
             className="absolute"
-            style={{ top: '21.5mm', left: '57.0mm' }}
+            style={{ top: '21.5mm', left: '56.0mm' }}
           >
             <span 
               className="font-bold uppercase"
@@ -174,7 +174,7 @@ export function PosterPreviewEtiquetaOficial({
           )}
         </>
       ) : hasInstallments ? (
-        /* ─── CASO REGULAR COM PARCELAMENTO (Layout Oficial Pricefy) ─── */
+        /* ─── CASO REGULAR COM PARCELAMENTO ─── */
         <>
           {/* [Meio Esquerdo]: PREÇO À VISTA: R$ */}
           <div 
@@ -182,7 +182,7 @@ export function PosterPreviewEtiquetaOficial({
             className="absolute leading-none"
             style={{
               top: '11.5mm',
-              left: '10.0mm',
+              left: '6.0mm',
               fontFamily: fontGothic,
               fontSize: '7pt',
               fontWeight: 'bold',
@@ -191,34 +191,20 @@ export function PosterPreviewEtiquetaOficial({
             PREÇO À VISTA: R$
           </div>
 
-          {/* [Meio Centro/Direito]: PREÇO TOTAL INTEIRO (30pt GOTHICB) */}
+          {/* [Meio Centro/Direito]: PREÇO TOTAL INTEIRO + CENTAVOS (30pt GOTHICB) */}
           <div 
-            id="field_valorVigente_num"
-            className="absolute leading-[0.735em] text-left"
+            id="field_valorVigente"
+            className="absolute flex items-baseline leading-[0.735em] text-left"
             style={{
-              top: '11.78mm',
-              left: '41.0mm',
+              top: '11.2mm',
+              left: '38.0mm',
               fontFamily: fontGothic,
               fontSize: '30pt',
               fontWeight: 'bold',
             }}
           >
-            {porInteger}
-          </div>
-
-          {/* [Meio Centro/Direito]: PREÇO TOTAL CENTAVOS (30pt GOTHICB) */}
-          <div 
-            id="field_valorVigente_cen"
-            className="absolute leading-[0.735em] text-left"
-            style={{
-              top: '11.78mm',
-              left: '52.85mm',
-              fontFamily: fontGothic,
-              fontSize: '30pt',
-              fontWeight: 'bold',
-            }}
-          >
-            ,{porDecimal}
+            <span>{porInteger}</span>
+            <span style={{ fontSize: '30pt' }}>,{porDecimal}</span>
           </div>
 
           {/* [Abaixo do Preço Principal]: UNIDADE UN */}
@@ -226,8 +212,8 @@ export function PosterPreviewEtiquetaOficial({
             id="field_produtoApresentacao"
             className="absolute leading-none"
             style={{
-              top: '22.36mm',
-              left: '60.0mm',
+              top: '21.5mm',
+              left: '56.0mm',
               fontFamily: fontRoboto,
               fontSize: '4.5pt',
               fontWeight: 'bold',
@@ -236,97 +222,73 @@ export function PosterPreviewEtiquetaOficial({
             UN
           </div>
 
-          {/* [Meio Esquerdo]: QUANTIDADE DE PARCELAS: 2X/3X/4X */}
+          {/* [Meio Esquerdo]: BLOCO DE PARCELAS: [NUM]X e SEM JUROS (sempre abaixo de [NUM]X) */}
           <div 
-            id="field_quantidadeDeParcelas"
-            className="absolute leading-[0.935em] text-center"
+            id="field_blocoParcelas"
+            className="absolute flex flex-col items-center justify-center text-center"
             style={{
-              top: '15.81mm',
-              left: '10.0mm',
-              width: '17.5mm',
-              fontFamily: fontGothic,
-              fontSize: '20pt',
-              fontWeight: 'bold',
+              top: '14.5mm',
+              left: '6.0mm',
+              width: '22.0mm',
             }}
           >
-            {maxInstallments}X
+            {/* QUANTIDADE DE PARCELAS: 2X/3X/4X */}
+            <span 
+              id="field_quantidadeDeParcelas"
+              className="font-bold leading-none text-center"
+              style={{
+                fontFamily: fontGothic,
+                fontSize: '20pt',
+              }}
+            >
+              {maxInstallments}X
+            </span>
+
+            {/* SUBTEXTO: SEM JUROS (posicionado logo abaixo do número) */}
+            <span 
+              id="field_textparcela"
+              className="font-bold uppercase text-center leading-none mt-[1.2mm]"
+              style={{
+                fontFamily: fontRoboto,
+                fontSize: '4.5pt',
+                letterSpacing: '0.15mm',
+              }}
+            >
+              SEM JUROS
+            </span>
           </div>
 
-          {/* [Meio Esquerdo]: SUBTEXTO: SEM JUROS */}
+          {/* [Abaixo do Preço Principal]: VALOR DA PARCELA (R$ XX,XX) */}
           <div 
-            id="field_textparcela"
-            className="absolute text-center leading-none"
+            id="field_blocoValorParcela"
+            className="absolute flex items-baseline gap-1 leading-none"
             style={{
-              top: '20.81mm',
-              left: '6.25mm',
-              width: '25.0mm',
-              fontFamily: fontRoboto,
-              fontSize: '4.5pt',
-              letterSpacing: '0.15mm',
+              top: '23.5mm',
+              left: '31.0mm',
             }}
           >
-            SEM JUROS
-          </div>
-
-          {/* [Meio Esquerdo]: INDICADOR NUMÉRICO: 0 */}
-          <div 
-            id="field_produtoDepartamentoCodigo"
-            className="absolute text-center leading-none"
-            style={{
-              top: '26.81mm',
-              left: '11.5mm',
-              width: '15.0mm',
-              fontFamily: fontRoboto,
-              fontSize: '5.5pt',
-              letterSpacing: '0.25mm',
-            }}
-          >
-            0
-          </div>
-
-          {/* [Abaixo do Preço Principal]: SÍMBOLO R$ DA PARCELA */}
-          <div 
-            id="field_simbolo"
-            className="absolute leading-none"
-            style={{
-              top: '24.81mm',
-              left: '32.5mm',
-              fontFamily: fontRoboto,
-              fontSize: '6pt',
-              fontWeight: 'bold',
-            }}
-          >
-            R$
-          </div>
-
-          {/* [Abaixo do Preço Principal]: VALOR PARCELA INTEIRO */}
-          <div 
-            id="field_valorDaParcela_num"
-            className="absolute leading-[0.735em] text-left"
-            style={{
-              top: '23.85mm',
-              left: '37.5mm',
-              fontFamily: fontGothic,
-              fontSize: '20pt',
-              fontWeight: 'bold',
-            }}
-          >
-            {instInteger}
-          </div>
-
-          {/* [Abaixo do Preço Principal]: VALOR PARCELA CENTAVOS */}
-          <div 
-            id="field_valorDaParcela_cen"
-            className="absolute leading-[0.735em] text-left"
-            style={{
-              top: '23.85mm',
-              left: '45.4mm',
-              fontFamily: fontGothic,
-              fontSize: '20pt',
-              fontWeight: 'bold',
-            }}
-          >
-            ,{instDecimal}
+            <span 
+              id="field_simbolo"
+              className="font-bold leading-none"
+              style={{
+                fontFamily: fontRoboto,
+                fontSize: '6.5pt',
+              }}
+            >
+              R$
+            </span>
+            <div 
+              id="field_valorDaParcela"
+              className="flex items-baseline leading-[0.735em]"
+              style={{
+                fontFamily: fontGothic,
+                fontSize: '20pt',
+                fontWeight: 'bold',
+              }}
+            >
+              <span>{instInteger}</span>
+              <span style={{ fontSize: '20pt' }}>,{instDecimal}</span>
+            </div>
           </div>
         </>
       ) : (
@@ -361,27 +323,13 @@ export function PosterPreviewEtiquetaOficial({
             className="absolute leading-none"
             style={{
               top: '22.36mm',
-              left: '58.0mm',
+              left: '56.0mm',
               fontFamily: fontRoboto,
               fontSize: '5pt',
               fontWeight: 'bold',
             }}
           >
             UN
-          </div>
-          <div 
-            id="field_produtoDepartamentoCodigo"
-            className="absolute text-center leading-none"
-            style={{
-              top: '26.81mm',
-              left: '11.5mm',
-              width: '15.0mm',
-              fontFamily: fontRoboto,
-              fontSize: '5.5pt',
-              letterSpacing: '0.25mm',
-            }}
-          >
-            0
           </div>
         </>
       )}
@@ -395,7 +343,7 @@ export function PosterPreviewEtiquetaOficial({
         style={{
           top: '30.31mm',
           left: '6.0mm',
-          width: '54.0mm',
+          width: '50.0mm',
           fontFamily: fontRoboto,
           fontSize: '5pt',
           letterSpacing: '0.15mm',
@@ -406,8 +354,9 @@ export function PosterPreviewEtiquetaOficial({
 
       {/* ───────────────────────────────────────────────────────────
           4. LATERAL DIREITA (Orientação Vertical 90°):
-             - Coluna interna: CÓDIGO INTERNO (SAP)
-             - Coluna externa (borda): CÓDIGO DE BARRAS + NÚMERO EAN
+             - Coluna interna (left: 55mm): CÓDIGO INTERNO (SAP)
+             - Faixa intermediária (left: 64mm): CÓDIGO DE BARRAS VERTICAL
+             - Borda externa (left: 74mm): NÚMERO EAN AFASTADO DAS BARRAS
       ──────────────────────────────────────────────────────────── */}
 
       {/* COLUNA INTERNA: Código Numérico Interno / SKU */}
@@ -415,9 +364,9 @@ export function PosterPreviewEtiquetaOficial({
         id="field_produtoCodigo"
         className="absolute text-center leading-none font-bold"
         style={{
-          top: '16.06mm',
-          left: '60.0mm',
-          width: '26.5mm',
+          top: '17.0mm',
+          left: '54.0mm',
+          width: '28.0mm',
           transform: 'rotate(-90deg)',
           transformOrigin: 'center center',
           fontFamily: fontRoboto,
@@ -428,34 +377,34 @@ export function PosterPreviewEtiquetaOficial({
         {code || ''}
       </div>
 
-      {/* COLUNA EXTERNA: Código de Barras Vertical */}
+      {/* COLUNA CENTRAL: Código de Barras Vertical */}
       <div 
         id="static_16"
         className="absolute flex items-center justify-center overflow-hidden"
         style={{
           top: '12.5mm',
-          left: '65.0mm',
-          width: '29.0mm',
-          height: '10.0mm',
+          left: '63.5mm',
+          width: '28.0mm',
+          height: '8.5mm',
           transform: 'rotate(-90deg)',
           transformOrigin: 'center center',
         }}
       >
         {ean && ean.length >= 12 ? (
-          <BarcodeEAN value={ean} height="10mm" width="29mm" showText={false} />
+          <BarcodeEAN value={ean} height="8.5mm" width="28mm" showText={false} />
         ) : code ? (
-          <BarcodeSAP value={code} height="10mm" width="29mm" />
+          <BarcodeSAP value={code} height="8.5mm" width="28mm" />
         ) : null}
       </div>
 
-      {/* COLUNA EXTERNA (BORDA): Número EAN impresso */}
+      {/* COLUNA EXTERNA (BORDA DIREITA): Número EAN afastado das barras */}
       <div 
         id="field_codigoBarras"
         className="absolute text-center leading-none font-bold"
         style={{
-          top: '16.06mm',
-          left: '71.75mm',
-          width: '26.5mm',
+          top: '17.0mm',
+          left: '73.5mm',
+          width: '28.0mm',
           transform: 'rotate(-90deg)',
           transformOrigin: 'center center',
           fontFamily: fontRoboto,
