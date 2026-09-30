@@ -1,0 +1,1826 @@
+<!DOCTYPE html><html lang="en" class=" bgpositionshorthand bgpositionxy bgrepeatround bgrepeatspace bgsizecover borderradius cssanimations csscalc csstransforms supports csstransforms3d preserve3d csstransitions no-flexboxtweener fontface svg svgasimg svgclippaths svgfilters svgforeignobject inlinesvg smil localstorage sessionstorage no-websqldatabase multiplebgs"><head><style type="text/css">.swal-icon--error{border-color:#f27474;-webkit-animation:animateErrorIcon .5s;animation:animateErrorIcon .5s}.swal-icon--error__x-mark{position:relative;display:block;-webkit-animation:animateXMark .5s;animation:animateXMark .5s}.swal-icon--error__line{position:absolute;height:5px;width:47px;background-color:#f27474;display:block;top:37px;border-radius:2px}.swal-icon--error__line--left{-webkit-transform:rotate(45deg);transform:rotate(45deg);left:17px}.swal-icon--error__line--right{-webkit-transform:rotate(-45deg);transform:rotate(-45deg);right:16px}@-webkit-keyframes animateErrorIcon{0%{-webkit-transform:rotateX(100deg);transform:rotateX(100deg);opacity:0}to{-webkit-transform:rotateX(0deg);transform:rotateX(0deg);opacity:1}}@keyframes animateErrorIcon{0%{-webkit-transform:rotateX(100deg);transform:rotateX(100deg);opacity:0}to{-webkit-transform:rotateX(0deg);transform:rotateX(0deg);opacity:1}}@-webkit-keyframes animateXMark{0%{-webkit-transform:scale(.4);transform:scale(.4);margin-top:26px;opacity:0}50%{-webkit-transform:scale(.4);transform:scale(.4);margin-top:26px;opacity:0}80%{-webkit-transform:scale(1.15);transform:scale(1.15);margin-top:-6px}to{-webkit-transform:scale(1);transform:scale(1);margin-top:0;opacity:1}}@keyframes animateXMark{0%{-webkit-transform:scale(.4);transform:scale(.4);margin-top:26px;opacity:0}50%{-webkit-transform:scale(.4);transform:scale(.4);margin-top:26px;opacity:0}80%{-webkit-transform:scale(1.15);transform:scale(1.15);margin-top:-6px}to{-webkit-transform:scale(1);transform:scale(1);margin-top:0;opacity:1}}.swal-icon--warning{border-color:#f8bb86;-webkit-animation:pulseWarning .75s infinite alternate;animation:pulseWarning .75s infinite alternate}.swal-icon--warning__body{width:5px;height:47px;top:10px;border-radius:2px;margin-left:-2px}.swal-icon--warning__body,.swal-icon--warning__dot{position:absolute;left:50%;background-color:#f8bb86}.swal-icon--warning__dot{width:7px;height:7px;border-radius:50%;margin-left:-4px;bottom:-11px}@-webkit-keyframes pulseWarning{0%{border-color:#f8d486}to{border-color:#f8bb86}}@keyframes pulseWarning{0%{border-color:#f8d486}to{border-color:#f8bb86}}.swal-icon--success{border-color:#a5dc86}.swal-icon--success:after,.swal-icon--success:before{content:"";border-radius:50%;position:absolute;width:60px;height:120px;background:#fff;-webkit-transform:rotate(45deg);transform:rotate(45deg)}.swal-icon--success:before{border-radius:120px 0 0 120px;top:-7px;left:-33px;-webkit-transform:rotate(-45deg);transform:rotate(-45deg);-webkit-transform-origin:60px 60px;transform-origin:60px 60px}.swal-icon--success:after{border-radius:0 120px 120px 0;top:-11px;left:30px;-webkit-transform:rotate(-45deg);transform:rotate(-45deg);-webkit-transform-origin:0 60px;transform-origin:0 60px;-webkit-animation:rotatePlaceholder 4.25s ease-in;animation:rotatePlaceholder 4.25s ease-in}.swal-icon--success__ring{width:80px;height:80px;border:4px solid hsla(98,55%,69%,.2);border-radius:50%;box-sizing:content-box;position:absolute;left:-4px;top:-4px;z-index:2}.swal-icon--success__hide-corners{width:5px;height:90px;background-color:#fff;padding:1px;position:absolute;left:28px;top:8px;z-index:1;-webkit-transform:rotate(-45deg);transform:rotate(-45deg)}.swal-icon--success__line{height:5px;background-color:#a5dc86;display:block;border-radius:2px;position:absolute;z-index:2}.swal-icon--success__line--tip{width:25px;left:14px;top:46px;-webkit-transform:rotate(45deg);transform:rotate(45deg);-webkit-animation:animateSuccessTip .75s;animation:animateSuccessTip .75s}.swal-icon--success__line--long{width:47px;right:8px;top:38px;-webkit-transform:rotate(-45deg);transform:rotate(-45deg);-webkit-animation:animateSuccessLong .75s;animation:animateSuccessLong .75s}@-webkit-keyframes rotatePlaceholder{0%{-webkit-transform:rotate(-45deg);transform:rotate(-45deg)}5%{-webkit-transform:rotate(-45deg);transform:rotate(-45deg)}12%{-webkit-transform:rotate(-405deg);transform:rotate(-405deg)}to{-webkit-transform:rotate(-405deg);transform:rotate(-405deg)}}@keyframes rotatePlaceholder{0%{-webkit-transform:rotate(-45deg);transform:rotate(-45deg)}5%{-webkit-transform:rotate(-45deg);transform:rotate(-45deg)}12%{-webkit-transform:rotate(-405deg);transform:rotate(-405deg)}to{-webkit-transform:rotate(-405deg);transform:rotate(-405deg)}}@-webkit-keyframes animateSuccessTip{0%{width:0;left:1px;top:19px}54%{width:0;left:1px;top:19px}70%{width:50px;left:-8px;top:37px}84%{width:17px;left:21px;top:48px}to{width:25px;left:14px;top:45px}}@keyframes animateSuccessTip{0%{width:0;left:1px;top:19px}54%{width:0;left:1px;top:19px}70%{width:50px;left:-8px;top:37px}84%{width:17px;left:21px;top:48px}to{width:25px;left:14px;top:45px}}@-webkit-keyframes animateSuccessLong{0%{width:0;right:46px;top:54px}65%{width:0;right:46px;top:54px}84%{width:55px;right:0;top:35px}to{width:47px;right:8px;top:38px}}@keyframes animateSuccessLong{0%{width:0;right:46px;top:54px}65%{width:0;right:46px;top:54px}84%{width:55px;right:0;top:35px}to{width:47px;right:8px;top:38px}}.swal-icon--info{border-color:#c9dae1}.swal-icon--info:before{width:5px;height:29px;bottom:17px;border-radius:2px;margin-left:-2px}.swal-icon--info:after,.swal-icon--info:before{content:"";position:absolute;left:50%;background-color:#c9dae1}.swal-icon--info:after{width:7px;height:7px;border-radius:50%;margin-left:-3px;top:19px}.swal-icon{width:80px;height:80px;border-width:4px;border-style:solid;border-radius:50%;padding:0;position:relative;box-sizing:content-box;margin:20px auto}.swal-icon:first-child{margin-top:32px}.swal-icon--custom{width:auto;height:auto;max-width:100%;border:none;border-radius:0}.swal-icon img{max-width:100%;max-height:100%}.swal-title{color:rgba(0,0,0,.65);font-weight:600;text-transform:none;position:relative;display:block;padding:13px 16px;font-size:27px;line-height:normal;text-align:center;margin-bottom:0}.swal-title:first-child{margin-top:26px}.swal-title:not(:first-child){padding-bottom:0}.swal-title:not(:last-child){margin-bottom:13px}.swal-text{font-size:16px;position:relative;float:none;line-height:normal;vertical-align:top;text-align:left;display:inline-block;margin:0;padding:0 10px;font-weight:400;color:rgba(0,0,0,.64);max-width:calc(100% - 20px);overflow-wrap:break-word;box-sizing:border-box}.swal-text:first-child{margin-top:45px}.swal-text:last-child{margin-bottom:45px}.swal-footer{text-align:right;padding-top:13px;margin-top:13px;padding:13px 16px;border-radius:inherit;border-top-left-radius:0;border-top-right-radius:0}.swal-button-container{margin:5px;display:inline-block;position:relative}.swal-button{background-color:#7cd1f9;color:#fff;border:none;box-shadow:none;border-radius:5px;font-weight:600;font-size:14px;padding:10px 24px;margin:0;cursor:pointer}.swal-button:not([disabled]):hover{background-color:#78cbf2}.swal-button:active{background-color:#70bce0}.swal-button:focus{outline:none;box-shadow:0 0 0 1px #fff,0 0 0 3px rgba(43,114,165,.29)}.swal-button[disabled]{opacity:.5;cursor:default}.swal-button::-moz-focus-inner{border:0}.swal-button--cancel{color:#555;background-color:#efefef}.swal-button--cancel:not([disabled]):hover{background-color:#e8e8e8}.swal-button--cancel:active{background-color:#d7d7d7}.swal-button--cancel:focus{box-shadow:0 0 0 1px #fff,0 0 0 3px rgba(116,136,150,.29)}.swal-button--danger{background-color:#e64942}.swal-button--danger:not([disabled]):hover{background-color:#df4740}.swal-button--danger:active{background-color:#cf423b}.swal-button--danger:focus{box-shadow:0 0 0 1px #fff,0 0 0 3px rgba(165,43,43,.29)}.swal-content{padding:0 20px;margin-top:20px;font-size:medium}.swal-content:last-child{margin-bottom:20px}.swal-content__input,.swal-content__textarea{-webkit-appearance:none;background-color:#fff;border:none;font-size:14px;display:block;box-sizing:border-box;width:100%;border:1px solid rgba(0,0,0,.14);padding:10px 13px;border-radius:2px;transition:border-color .2s}.swal-content__input:focus,.swal-content__textarea:focus{outline:none;border-color:#6db8ff}.swal-content__textarea{resize:vertical}.swal-button--loading{color:transparent}.swal-button--loading~.swal-button__loader{opacity:1}.swal-button__loader{position:absolute;height:auto;width:43px;z-index:2;left:50%;top:50%;-webkit-transform:translateX(-50%) translateY(-50%);transform:translateX(-50%) translateY(-50%);text-align:center;pointer-events:none;opacity:0}.swal-button__loader div{display:inline-block;float:none;vertical-align:baseline;width:9px;height:9px;padding:0;border:none;margin:2px;opacity:.4;border-radius:7px;background-color:hsla(0,0%,100%,.9);transition:background .2s;-webkit-animation:swal-loading-anim 1s infinite;animation:swal-loading-anim 1s infinite}.swal-button__loader div:nth-child(3n+2){-webkit-animation-delay:.15s;animation-delay:.15s}.swal-button__loader div:nth-child(3n+3){-webkit-animation-delay:.3s;animation-delay:.3s}@-webkit-keyframes swal-loading-anim{0%{opacity:.4}20%{opacity:.4}50%{opacity:1}to{opacity:.4}}@keyframes swal-loading-anim{0%{opacity:.4}20%{opacity:.4}50%{opacity:1}to{opacity:.4}}.swal-overlay{position:fixed;top:0;bottom:0;left:0;right:0;text-align:center;font-size:0;overflow-y:auto;background-color:rgba(0,0,0,.4);z-index:10000;pointer-events:none;opacity:0;transition:opacity .3s}.swal-overlay:before{content:" ";display:inline-block;vertical-align:middle;height:100%}.swal-overlay--show-modal{opacity:1;pointer-events:auto}.swal-overlay--show-modal .swal-modal{opacity:1;pointer-events:auto;box-sizing:border-box;-webkit-animation:showSweetAlert .3s;animation:showSweetAlert .3s;will-change:transform}.swal-modal{width:478px;opacity:0;pointer-events:none;background-color:#fff;text-align:center;border-radius:5px;position:static;margin:20px auto;display:inline-block;vertical-align:middle;-webkit-transform:scale(1);transform:scale(1);-webkit-transform-origin:50% 50%;transform-origin:50% 50%;z-index:10001;transition:opacity .2s,-webkit-transform .3s;transition:transform .3s,opacity .2s;transition:transform .3s,opacity .2s,-webkit-transform .3s}@media (max-width:500px){.swal-modal{width:calc(100% - 20px)}}@-webkit-keyframes showSweetAlert{0%{-webkit-transform:scale(1);transform:scale(1)}1%{-webkit-transform:scale(.5);transform:scale(.5)}45%{-webkit-transform:scale(1.05);transform:scale(1.05)}80%{-webkit-transform:scale(.95);transform:scale(.95)}to{-webkit-transform:scale(1);transform:scale(1)}}@keyframes showSweetAlert{0%{-webkit-transform:scale(1);transform:scale(1)}1%{-webkit-transform:scale(.5);transform:scale(.5)}45%{-webkit-transform:scale(1.05);transform:scale(1.05)}80%{-webkit-transform:scale(.95);transform:scale(.95)}to{-webkit-transform:scale(1);transform:scale(1)}}</style>
+    <meta charset="utf-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="pragma" content="no-cache">
+    <meta http-equiv="expires" content="-1">
+    <title class="notranslate">Pricefy Store</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <script async="" src="https://static.userguiding.com/media/user-guiding-31V84196CCPID-embedded.js"></script><script>
+      //Aqui vale um comentário, foi necessário usar javascript pra chamar o método googleAnalyticsTrackEvent() do
+      //angular porque no método de exibição do submenu o html é clonado e o (click) para de funcionar.
+      function onClickMenu(eventAction) {
+          var event = new CustomEvent('onClickMenu', {
+              detail: {
+                  eventAction: eventAction
+              }
+          })
+          window.dispatchEvent(event);
+      }
+    </script>
+
+    <!-- Hotjar Tracking Code for https://app.pricefy.com.br -->
+    <script>
+        (function(h,o,t,j,a,r){
+            h.hj=h.hj||function(){(h.hj.q=h.hj.q||[]).push(arguments)};
+            h._hjSettings={hjid:3476689,hjsv:6};
+            a=o.getElementsByTagName('head')[0];
+            r=o.createElement('script');r.async=1;
+            r.src=t+h._hjSettings.hjid+j+h._hjSettings.hjsv;
+            a.appendChild(r);
+        })(window,document,'https://static.hotjar.com/c/hotjar-','.js?sv=');
+    </script><script async="" src="https://static.hotjar.com/c/hotjar-3476689.js?sv=6"></script>
+
+    <script>
+        (function(g,u,i,d,e,s){g[e]=g[e]||[];var f=u.getElementsByTagName(i)[0];var k=u.createElement(i);k.async=true;k.src='https://static.userguiding.com/media/user-guiding-'+s+'-embedded.js';f.parentNode.insertBefore(k,f);if(g[d])return;var ug=g[d]={q:[]};ug.c=function(n){return function(){ug.q.push([n,arguments])};};var m=['previewGuide','finishPreview','track','identify','hideChecklist','launchChecklist'];for(var j=0;j<m.length;j+=1){ug[m[j]]=ug.c(m[j]);}})(window,document,'script','userGuiding','userGuidingLayer','31V84196CCPID');
+    </script>
+<link rel="stylesheet" href="styles.46fbb913b9283d942d64.css"><script>
+        (function(h,o,t,j,a,r){
+            h.hj=h.hj||function(){(h.hj.q=h.hj.q||[]).push(arguments)};
+            h._hjSettings={hjid:3476689,hjsv:6};
+            a=o.getElementsByTagName('head')[0];
+            r=o.createElement('script');r.async=1;
+            r.src=t+h._hjSettings.hjid+j+h._hjSettings.hjsv;
+            a.appendChild(r);
+        })(window,document,'https://static.hotjar.com/c/hotjar-','.js?sv=');
+        </script><script async="" src="https://static.hotjar.com/c/hotjar-3476689.js?sv=6"></script><script async="" src="https://script.hotjar.com/modules.e762be2b6b709245aabb.js" charset="utf-8"></script><style>.modal-dialog .modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #0B877D;
+  border-radius: 5px 5px 0px 0px;
+  color: #fff;
+  padding: 8px 16px;
+  height: 48px;
+}
+  .modal-dialog .modal-header #modal-title {
+  font-weight: 700;
+  line-height: 32px;
+}
+  .modal-dialog .modal-header span {
+  cursor: pointer;
+  font-size: 18px;
+}
+  .modal-dialog-500 {
+  max-width: 500px;
+}
+  .modal-dialog-500 .modal-content {
+  width: 500px !important;
+}
+  .modal-dialog-600 {
+  max-width: 600px;
+}
+  .modal-dialog-600 .modal-content {
+  width: 600px !important;
+}
+  .modal-dialog-900 {
+  max-width: 900px;
+}
+  .modal-dialog-900 .modal-content {
+  width: 900px !important;
+}
+  .tooltip-inner {
+  color: #fff;
+  text-align: start;
+  background-color: #494949;
+  border-radius: 8px;
+  padding: 0px 8px;
+  max-width: 215px;
+  white-space: normal;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 24px;
+}
+  .success-swal .swal-icon--success__line {
+  background-color: #1AAA42;
+}
+  .success-swal .swal-icon--success__ring {
+  border-color: #1AAA42;
+}
+  .success-swal .swal-title {
+  font-weight: 700;
+  font-size: 24px;
+  line-height: 48px;
+  color: #1AAA42;
+}
+  .success-swal .swal-text {
+  color: #494949;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 20px;
+}
+  .success-swal .swal-button--confirm {
+  font-weight: 400;
+  line-height: 14px;
+  font-size: 12px;
+  color: #fff;
+  background-color: #1AAA42;
+  border-radius: 5px;
+  padding: 9px 17px;
+}
+  .success-swal .swal-button--confirm:focus {
+  outline: 3px solid rgba(148, 148, 148, 0.5) !important;
+}
+  .success-swal .swal-button--confirm:hover {
+  background: #148735;
+}
+  .warning-swal .swal-icon--warning,   .warning-swal .swal-icon--error {
+  -webkit-animation: none;
+  border-color: #D43D4C;
+}
+  .warning-swal .swal-icon--warning__body,   .warning-swal .swal-icon--warning__dot,   .warning-swal .swal-icon--warning__line,   .warning-swal .swal-icon--error__body,   .warning-swal .swal-icon--error__dot,   .warning-swal .swal-icon--error__line {
+  background-color: #D43D4C;
+}
+  .warning-swal .swal-title {
+  font-weight: 700;
+  font-size: 24px;
+  line-height: 48px;
+  color: #D43D4C;
+}
+  .warning-swal .swal-text {
+  color: #494949;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 20px;
+  text-align: center;
+}
+  .warning-swal .swal-button--cancel {
+  font-weight: 400;
+  line-height: 14px;
+  font-size: 12px;
+  color: #D43D4C;
+  border: 1px solid #D43D4C;
+  background-color: #fff;
+  border-radius: 5px;
+  padding: 9px 17px;
+}
+  .warning-swal .swal-button--cancel:focus {
+  outline: 3px solid #D43D4C !important;
+  box-shadow: none;
+}
+  .warning-swal .swal-button--cancel:hover {
+  background-color: rgba(212, 61, 76, 0.1);
+}
+  .warning-swal .swal-button--confirm {
+  font-weight: 400;
+  line-height: 14px;
+  font-size: 12px;
+  color: #fff;
+  background-color: #D43D4C;
+  border-radius: 5px;
+  padding: 9px 17px;
+}
+  .warning-swal .swal-button--confirm:focus {
+  outline: 3px solid rgba(148, 148, 148, 0.5) !important;
+}
+  .warning-swal .swal-button--confirm:hover {
+  background: #92202C;
+}
+  .warning-swal .swal-content__input {
+  border: 1px solid #8F8F8F;
+  background: #fff;
+  color: #494949;
+  border-radius: 5px;
+  padding: 6px 8px;
+  font-size: 16px;
+}
+  .warning-swal .swal-content__input:-moz-read-only {
+  background: #E1E1E1;
+  border: 1px solid #8F8F8F;
+}
+  .warning-swal .swal-content__input:read-only {
+  background: #E1E1E1;
+  border: 1px solid #8F8F8F;
+}
+  .warning-swal .swal-content__input:-moz-read-only:focus {
+  border: 1px solid #8F8F8F !important;
+}
+  .warning-swal .swal-content__input:read-only:focus {
+  border: 1px solid #8F8F8F !important;
+}
+  .warning-swal .swal-content__input:focus {
+  border: 2px solid #8F8F8F;
+}</style><script charset="utf-8" src="8.226756000294b4b53158.js"></script><style>.margin-left-0.section-container[_ngcontent-twl-c180] {
+  margin-left: 0 !important;
+}
+
+.california[_ngcontent-twl-c180], .content-wrapper[_ngcontent-twl-c180] {
+  background: #fafafa;
+}
+
+.california.cloud-print-background-color[_ngcontent-twl-c180], .content-wrapper.cloud-print-background-color[_ngcontent-twl-c180] {
+  background: #fff !important;
+}</style><style>.btnLoginAsLoja[_ngcontent-twl-c183] {
+  margin: 10px 10px 10px 238px;
+  position: fixed;
+}
+
+.brand-logo[_ngcontent-twl-c183]    > img[_ngcontent-twl-c183] {
+  max-height: 30px;
+}
+
+.img-user[_ngcontent-twl-c183] {
+  height: 100px;
+  background-color: #fff;
+  text-align: center;
+}
+
+.img-cliente-user[_ngcontent-twl-c183] {
+  max-height: 80px;
+  margin: 0 auto;
+}
+
+.large-data-letters[_ngcontent-twl-c183]:before {
+  content: attr(data-letters);
+  display: inline-block;
+  font-size: 2em;
+  width: 2.8em;
+  height: 2.8em;
+  line-height: 2.8em;
+  text-align: center;
+  border-radius: 50%;
+  background: var(--color);
+  vertical-align: middle;
+  color: #fff;
+  margin: 20px 0 0 0;
+}
+
+.overlay-cliente-logo[_ngcontent-twl-c183] {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 110px;
+  width: 100%;
+  opacity: 0;
+  transition: 0.5s ease;
+  background-color: rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+}
+
+.overlay-cliente-logo[_ngcontent-twl-c183]   span[_ngcontent-twl-c183] {
+  color: white;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.img-user[_ngcontent-twl-c183]:hover   .overlay-cliente-logo[_ngcontent-twl-c183] {
+  opacity: 1;
+}
+
+.tooltip-arrow[_ngcontent-twl-c183]::after {
+  display: none !important;
+}
+
+.rounded[_ngcontent-twl-c183] {
+  border-radius: 10px !important;
+}
+
+.rounded-top[_ngcontent-twl-c183] {
+  border-radius: 10px 10px 0 0 !important;
+}
+
+.dropdown-menu-right[_ngcontent-twl-c183]::after {
+  border-bottom: 8px solid #FFFFFF;
+  border-left: 9px solid transparent;
+  border-right: 9px solid transparent;
+  content: "";
+  display: inline-block;
+  right: 3%;
+  
+  position: absolute;
+  top: -7px;
+}
+
+.dropdown-menu-right[_ngcontent-twl-c183]::before {
+  border-bottom: 9px solid rgba(0, 0, 0, 0.2);
+  border-left: 9px solid transparent;
+  border-right: 9px solid transparent;
+  content: "";
+  display: inline-block;
+  right: 3%;
+  
+  position: absolute;
+  top: -8px;
+}
+
+.dropdown-menu-right.full[_ngcontent-twl-c183]::before {
+  border-bottom: 9px solid rgba(0, 0, 0, 0.2);
+  border-left: 9px solid transparent;
+  border-right: 9px solid transparent;
+  content: "";
+  display: inline-block;
+  right: 7%;
+  
+  position: absolute;
+  top: -8px;
+}
+
+.dropdown-menu-right.full[_ngcontent-twl-c183]::after {
+  border-bottom: 8px solid #FFFFFF;
+  border-left: 9px solid transparent;
+  border-right: 9px solid transparent;
+  content: "";
+  display: inline-block;
+  right: 7%;
+  
+  position: absolute;
+  top: -7px;
+}
+
+.topnavbar[_ngcontent-twl-c183]   li[_ngcontent-twl-c183]   a[_ngcontent-twl-c183] {
+  padding: 14.5px 5px 2px !important;
+}
+
+.topnavbar[_ngcontent-twl-c183]   .navbar-nav[_ngcontent-twl-c183]    > li[_ngcontent-twl-c183]    > a[_ngcontent-twl-c183], .topnavbar[_ngcontent-twl-c183]   .navbar-nav[_ngcontent-twl-c183]    > .open[_ngcontent-twl-c183]    > a[_ngcontent-twl-c183], .topnavbar[_ngcontent-twl-c183]   .navbar-nav[_ngcontent-twl-c183]    > .open[_ngcontent-twl-c183]    > a[_ngcontent-twl-c183]:hover, .topnavbar[_ngcontent-twl-c183]   .navbar-nav[_ngcontent-twl-c183]    > .open[_ngcontent-twl-c183]    > a[_ngcontent-twl-c183]:visited {
+  color: #494949 !important;
+  margin-left: 5px;
+}
+
+nav[_ngcontent-twl-c183]    > .nav-wrapper[_ngcontent-twl-c183] {
+  position: relative;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+  z-index: 10;
+  padding-left: 30px;
+}
+
+.navbar-nav.navbar-right[_ngcontent-twl-c183]    > li[_ngcontent-twl-c183]    > a[_ngcontent-twl-c183]    > em[_ngcontent-twl-c183] {
+  font-size: 20px;
+  margin-top: 1px;
+}
+
+.navbar.topnavbar[_ngcontent-twl-c183]   li[_ngcontent-twl-c183]    > a[_ngcontent-twl-c183] {
+  color: #494949 !important;
+}
+
+.mt-5[_ngcontent-twl-c183] {
+  margin-top: 5px !important;
+}
+
+.mt-10[_ngcontent-twl-c183] {
+  margin-top: 10px !important;
+}
+
+.pt-5[_ngcontent-twl-c183] {
+  padding-top: 5px !important;
+}
+
+.border-top[_ngcontent-twl-c183] {
+  border-top: 1px solid #cfdbe2 !important;
+}
+
+.align-center[_ngcontent-twl-c183] {
+  text-align: center;
+}
+
+.user-block[_ngcontent-twl-c183] {
+  padding: 15px 0 0px;
+  margin: 0;
+  text-align: center;
+}
+
+#link-help-center[_ngcontent-twl-c183] {
+  margin-left: 6px !important;
+}
+
+.fs-16[_ngcontent-twl-c183] {
+  font-size: 16px;
+}
+
+  .tooltip-arrow.arrow {
+  display: none !important;
+}
+
+.header-lojas[_ngcontent-twl-c183] {
+  display: flex;
+  flex-wrap: wrap;
+  margin-right: 15px;
+  width: 350px;
+  align-items: inherit;
+}
+
+.header-lojas[_ngcontent-twl-c183]   .dropdown-header-lojas[_ngcontent-twl-c183] {
+  width: 285px;
+}
+
+.header-lojas[_ngcontent-twl-c183]   label[_ngcontent-twl-c183] {
+  padding: 10px;
+  font-size: 14px;
+  color: #fff;
+}
+
+.navbar-logo[_ngcontent-twl-c183] {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.loader-version-change[_ngcontent-twl-c183] {
+  color: white !important;
+  margin-left: 98px;
+  font-size: 24px;
+}
+
+.switch-new-store[_ngcontent-twl-c183] {
+  font-family: "roboto-regular";
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 14px;
+  border: none;
+  height: 32px;
+  border-radius: 5px;
+  color: #FFFFFF;
+  margin-left: 32px;
+  padding: 8px;
+}
+
+.switch-new-store.access[_ngcontent-twl-c183] {
+  background-color: #EF8943;
+}
+
+.switch-new-store.access[_ngcontent-twl-c183]:hover {
+  background-color: #BD5911;
+}
+
+.switch-new-store.back[_ngcontent-twl-c183] {
+  background-color: transparent;
+}
+
+.switch-new-store.back[_ngcontent-twl-c183]:hover {
+  background-color: #8F8F8F;
+}
+
+  .modal-premium .modal-content {
+  width: 600px !important;
+}</style><style></style><style type="text/css" id="appthemes"></style><style>[_nghost-twl-c72]   .nav-tabs[_ngcontent-twl-c72]   .nav-item.disabled[_ngcontent-twl-c72]   a.disabled[_ngcontent-twl-c72]{cursor:default}</style><style>#cabecalho-relatorio-etiqueta-lote[_ngcontent-twl-c229] {
+  display: none;
+}
+
+.tabela-cabecalho-relatorio[_ngcontent-twl-c229]   th[_ngcontent-twl-c229] {
+  background-color: #fff;
+  border: 1px solid #ccc;
+}
+
+.tabela-relatorio-etiqueta-lote[_ngcontent-twl-c229] {
+  width: 100%;
+  margin: 0 auto;
+}
+
+.tabela-relatorio-etiqueta-lote[_ngcontent-twl-c229]   th[_ngcontent-twl-c229]:nth-child(1), .tabela-relatorio-etiqueta-lote[_ngcontent-twl-c229]   th[_ngcontent-twl-c229]:nth-child(3), .tabela-relatorio-etiqueta-lote[_ngcontent-twl-c229]   td[_ngcontent-twl-c229]:nth-child(2) {
+  width: 40%;
+}
+
+.tabela-relatorio-etiqueta-lote[_ngcontent-twl-c229]   th[_ngcontent-twl-c229]:nth-child(2), .tabela-relatorio-etiqueta-lote[_ngcontent-twl-c229]   th[_ngcontent-twl-c229]:nth-child(4), .tabela-relatorio-etiqueta-lote[_ngcontent-twl-c229]   td[_ngcontent-twl-c229]:nth-child(3) {
+  width: 10%;
+}
+
+.tabela-relatorio-etiqueta-lote[_ngcontent-twl-c229]   td[_ngcontent-twl-c229]:nth-child(1) {
+  width: 50%;
+}
+
+.tabela-relatorio-etiqueta-lote[_ngcontent-twl-c229]   th[_ngcontent-twl-c229], .tabela-relatorio-etiqueta-lote[_ngcontent-twl-c229]   td[_ngcontent-twl-c229], .linha-relatorio-etiqueta-lote[_ngcontent-twl-c229]   th[_ngcontent-twl-c229], .linha-relatorio-etiqueta-lote[_ngcontent-twl-c229]   td[_ngcontent-twl-c229] {
+  padding: 2px 8px !important;
+  background-color: #fff;
+  font-size: 13px;
+}
+
+.tabela-relatorio-etiqueta-lote[_ngcontent-twl-c229]   th[_ngcontent-twl-c229], .linha-relatorio-etiqueta-lote[_ngcontent-twl-c229]   th[_ngcontent-twl-c229] {
+  padding: 5px 8px !important;
+}
+
+.tabela-relatorio-etiqueta-lote[_ngcontent-twl-c229]   th[_ngcontent-twl-c229], .linha-relatorio-etiqueta-lote[_ngcontent-twl-c229]   th[_ngcontent-twl-c229] {
+  font-size: 14px;
+}
+
+.com-borda-apenas-em-baixo[_ngcontent-twl-c229] {
+  border-top: none !important;
+  border-left: none !important;
+  border-right: none !important;
+}
+
+.sem-borda-esquerda-direita[_ngcontent-twl-c229] {
+  height: 10px;
+  border-left: none !important;
+  border-right: none !important;
+  background: #edf1f2 !important;
+}
+
+.tabela-relatorio-etiqueta-lote[_ngcontent-twl-c229]   .linha-escura[_ngcontent-twl-c229]   th[_ngcontent-twl-c229] {
+  -webkit-print-color-adjust: exact;
+  background-color: #666 !important;
+  color: #fff !important;
+}
+
+@media print {
+  #filtro[_ngcontent-twl-c229], .icon-row-filtro[_ngcontent-twl-c229] {
+    display: none;
+  }
+
+  #cabecalho-relatorio-etiqueta-lote[_ngcontent-twl-c229] {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .tabela-relatorio-etiqueta-lote[_ngcontent-twl-c229]   th[_ngcontent-twl-c229], .tabela-relatorio-etiqueta-lote[_ngcontent-twl-c229]   td[_ngcontent-twl-c229], .linha-relatorio-etiqueta-lote[_ngcontent-twl-c229]   th[_ngcontent-twl-c229], .linha-relatorio-etiqueta-lote[_ngcontent-twl-c229]   td[_ngcontent-twl-c229] {
+    font-size: 10px;
+  }
+
+  .tabela-relatorio-etiqueta-lote[_ngcontent-twl-c229]   th[_ngcontent-twl-c229], .linha-relatorio-etiqueta-lote[_ngcontent-twl-c229]   th[_ngcontent-twl-c229] {
+    font-size: 11px;
+  }
+
+  .sem-borda-esquerda-direita[_ngcontent-twl-c229] {
+    background: #fff !important;
+  }
+}</style><style>.ngx-select_multiple[_ngcontent-twl-c111]{height:auto;padding:3px 3px 0}.ngx-select_multiple[_ngcontent-twl-c111]   .ngx-select__search[_ngcontent-twl-c111]{background-color:transparent!important;border:none;outline:0;box-shadow:none;height:1.6666em;padding:0;margin-bottom:3px}.ngx-select__disabled[_ngcontent-twl-c111]{background-color:#eceeef;border-radius:4px;position:absolute;width:100%;height:100%;z-index:5;opacity:.6;top:0;left:0;cursor:not-allowed}.ngx-select__toggle[_ngcontent-twl-c111]{outline:0;position:relative;text-align:left!important;color:#333;background-color:#fff;border-color:#ccc;display:inline-flex;align-items:stretch;justify-content:space-between}.ngx-select__toggle[_ngcontent-twl-c111]:hover{color:#333;background-color:#e6e6e6;border-color:#adadad}.ngx-select__toggle-buttons[_ngcontent-twl-c111]{flex-shrink:0;display:flex;align-items:center}.ngx-select__toggle-caret[_ngcontent-twl-c111]{position:absolute;height:10px;top:50%;right:10px;margin-top:-2px}.ngx-select__placeholder[_ngcontent-twl-c111]{float:left;max-width:100%;text-overflow:ellipsis;overflow:hidden}.ngx-select__clear[_ngcontent-twl-c111]{margin-right:10px;padding:0;border:none}.ngx-select_multiple[_ngcontent-twl-c111]   .ngx-select__clear[_ngcontent-twl-c111]{line-height:initial;margin-left:5px;margin-right:0;color:#000;opacity:.5}.ngx-select__clear-icon[_ngcontent-twl-c111]{display:inline-block;font-size:inherit;cursor:pointer;position:relative;width:1em;height:.75em;padding:0}.ngx-select__clear-icon[_ngcontent-twl-c111]:after, .ngx-select__clear-icon[_ngcontent-twl-c111]:before{content:'';position:absolute;border-top:3px solid;width:100%;top:50%;left:0;margin-top:-1px}.ngx-select__clear-icon[_ngcontent-twl-c111]:before{-webkit-transform:rotate(45deg);transform:rotate(45deg)}.ngx-select__clear-icon[_ngcontent-twl-c111]:after{-webkit-transform:rotate(-45deg);transform:rotate(-45deg)}.ngx-select__choices[_ngcontent-twl-c111]{width:100%;height:auto;max-height:200px;overflow-x:hidden;margin-top:0;position:absolute}.ngx-select_multiple[_ngcontent-twl-c111]   .ngx-select__choices[_ngcontent-twl-c111]{margin-top:1px}.ngx-select__item[_ngcontent-twl-c111]{display:block;padding:3px 20px;clear:both;font-weight:400;line-height:1.42857143;white-space:nowrap;cursor:pointer;text-decoration:none}.ngx-select__item_disabled[_ngcontent-twl-c111], .ngx-select__item_no-found[_ngcontent-twl-c111]{cursor:default}.ngx-select__item_active[_ngcontent-twl-c111]{color:#fff;outline:0;background-color:#428bca}.ngx-select__selected-plural[_ngcontent-twl-c111], .ngx-select__selected-single[_ngcontent-twl-c111]{display:inline-flex;align-items:center;overflow:hidden}.ngx-select__selected-plural[_ngcontent-twl-c111]   span[_ngcontent-twl-c111], .ngx-select__selected-single[_ngcontent-twl-c111]   span[_ngcontent-twl-c111]{overflow:hidden;text-overflow:ellipsis}.ngx-select__selected-plural[_ngcontent-twl-c111]{outline:0;margin:0 3px 3px 0}.input-group[_ngcontent-twl-c111] > .dropdown[_ngcontent-twl-c111]{position:static}</style><script charset="utf-8" src="10.5fe45675d51e3c3b978e.js"></script><style>@charset "UTF-8";
+.content-body[_ngcontent-twl-c230] {
+  max-width: 1280px;
+  display: flex;
+  flex-direction: column;
+  margin: auto;
+}
+  .carousel-control-next-icon,   .carousel-control-prev-icon {
+  background-image: none;
+  font-family: "Font Awesome 6 Pro";
+  font-weight: 900;
+  color: #000;
+}
+  .carousel-control-prev-icon::before {
+  content: "";
+  font-size: 20px;
+  font-weight: bold;
+}
+  .carousel-control-prev {
+  margin-left: -60px;
+}
+  .carousel-control-next {
+  margin-right: -60px;
+}
+  .carousel-control-next-icon::before {
+  content: "";
+  font-size: 20px;
+  font-weight: bold;
+}
+.menu-cards[_ngcontent-twl-c230] {
+  display: flex;
+  width: 98%;
+  max-height: 296px;
+}
+.menu-cards[_ngcontent-twl-c230]   .not-printed-cards[_ngcontent-twl-c230] {
+  display: flex;
+  flex-wrap: wrap;
+  width: inherit;
+}
+.cards-app[_ngcontent-twl-c230] {
+  width: 50%;
+}
+.card-carousel[_ngcontent-twl-c230] {
+  display: flex;
+  margin-top: 16px !important;
+  border-radius: 10px;
+  border: 1px solid #C0C0C0;
+  width: 98%;
+  height: 35vh;
+  margin-bottom: 0 !important;
+}
+.card-carousel[_ngcontent-twl-c230]   .card-body-carousel[_ngcontent-twl-c230] {
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex: 2;
+  flex-direction: column;
+  align-items: center;
+}
+.card-carousel[_ngcontent-twl-c230]   .card-body-carousel[_ngcontent-twl-c230]   .card-title-carousel[_ngcontent-twl-c230] {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0.7rem 0 0.7rem 0;
+  margin-top: 16px;
+  color: #494949;
+}
+.card-carousel[_ngcontent-twl-c230]   .card-body-carousel[_ngcontent-twl-c230]   .div-carousel[_ngcontent-twl-c230] {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+.card-carousel[_ngcontent-twl-c230]   .card-body-carousel[_ngcontent-twl-c230]   .div-carousel[_ngcontent-twl-c230]   .carousel-slide[_ngcontent-twl-c230] {
+  width: 100%;
+  background-color: transparent;
+}
+.card-carousel[_ngcontent-twl-c230]   .card-body-carousel[_ngcontent-twl-c230]   .div-carousel[_ngcontent-twl-c230]   .carousel-slide[_ngcontent-twl-c230]   iframe[_ngcontent-twl-c230] {
+  width: 30vw;
+  height: 25vh;
+}</style><style>.sidebar[_ngcontent-twl-c181] {
+  width: 84px;
+}
+.sidebar[_ngcontent-twl-c181]   .sidebar-nav[_ngcontent-twl-c181] {
+  width: 76px;
+  font-size: 10px;
+}
+.sidebar[_ngcontent-twl-c181]   .sidebar-nav[_ngcontent-twl-c181]   li[_ngcontent-twl-c181] {
+  padding: 0;
+  height: 84px;
+  width: 76px;
+  margin-left: 4px;
+  margin-top: 6px;
+}
+.sidebar[_ngcontent-twl-c181]   .sidebar-nav[_ngcontent-twl-c181]   li[_ngcontent-twl-c181]   a[_ngcontent-twl-c181] {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 76px;
+  height: 71px;
+  margin: 0;
+  gap: 4px;
+}
+.sidebar[_ngcontent-twl-c181]   .sidebar-nav[_ngcontent-twl-c181]   li[_ngcontent-twl-c181]   a[_ngcontent-twl-c181]   em[_ngcontent-twl-c181] {
+  font-size: 16px;
+}
+.sidebar-separator-line[_ngcontent-twl-c181] {
+  margin: 9px 15px 0px 15px;
+  border-bottom: 1px solid #494949;
+}
+.sidebar-nav[_ngcontent-twl-c181]    > .nav-heading[_ngcontent-twl-c181]:first-child {
+  margin-bottom: 20px;
+}
+nav[_ngcontent-twl-c181]    > .sidebar-nav[_ngcontent-twl-c181]    > li[_ngcontent-twl-c181]    > a[_ngcontent-twl-c181], nav[_ngcontent-twl-c181]    > .sidebar-nav[_ngcontent-twl-c181]    > li[_ngcontent-twl-c181]    > .nav-item[_ngcontent-twl-c181] {
+  padding: 10px 0px;
+  color: #515253;
+  letter-spacing: 0.025em;
+  font-weight: normal;
+  cursor: pointer;
+}
+nav[_ngcontent-twl-c181]    > .sidebar-nav[_ngcontent-twl-c181]    > li[_ngcontent-twl-c181]    > a[_ngcontent-twl-c181]    > em[_ngcontent-twl-c181], nav[_ngcontent-twl-c181]    > .sidebar-nav[_ngcontent-twl-c181]    > li[_ngcontent-twl-c181]    > .nav-item[_ngcontent-twl-c181]    > em[_ngcontent-twl-c181] {
+  width: 1.8em;
+  display: inline-block;
+  font-style: normal;
+  font-weight: normal;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+  color: inherit;
+}
+nav[_ngcontent-twl-c181]    > .sidebar-nav[_ngcontent-twl-c181]    > li[_ngcontent-twl-c181] {
+  transition: border-left-color 0.4s ease;
+  padding: 10px 0;
+  border-left: none;
+}
+nav[_ngcontent-twl-c181]    > .sidebar-nav[_ngcontent-twl-c181]    > li[_ngcontent-twl-c181]    > a[_ngcontent-twl-c181] {
+  text-align: center;
+}
+nav[_ngcontent-twl-c181]    > .sidebar-nav[_ngcontent-twl-c181]    > li[_ngcontent-twl-c181]    > a[_ngcontent-twl-c181]    > em[_ngcontent-twl-c181] {
+  font-size: 20px !important;
+}
+nav[_ngcontent-twl-c181]    > .sidebar-nav[_ngcontent-twl-c181]    > li[_ngcontent-twl-c181]    > a[_ngcontent-twl-c181]    > span[_ngcontent-twl-c181] {
+  font-size: 10px;
+  white-space: normal;
+}
+nav[_ngcontent-twl-c181]    > .sidebar-nav[_ngcontent-twl-c181]    > li.active[_ngcontent-twl-c181]    > a[_ngcontent-twl-c181] {
+  color: #fff;
+  background-color: #494949 !important;
+}
+nav[_ngcontent-twl-c181]    > .sidebar-nav[_ngcontent-twl-c181]    > li.active[_ngcontent-twl-c181]    > a[_ngcontent-twl-c181]   .image-menu[_ngcontent-twl-c181] {
+  display: none;
+}
+nav[_ngcontent-twl-c181]    > .sidebar-nav[_ngcontent-twl-c181]    > li.active[_ngcontent-twl-c181]    > a[_ngcontent-twl-c181]   .image-menu-hover[_ngcontent-twl-c181] {
+  display: inline;
+}
+nav[_ngcontent-twl-c181]    > .sidebar-nav[_ngcontent-twl-c181]    > li[_ngcontent-twl-c181]    > a[_ngcontent-twl-c181], nav[_ngcontent-twl-c181]    > .sidebar-nav[_ngcontent-twl-c181]    > li[_ngcontent-twl-c181]    > .nav-item[_ngcontent-twl-c181] {
+  height: 62px;
+  margin: 10px 11px;
+  color: #515253;
+  letter-spacing: 0.025em;
+  font-weight: normal;
+  cursor: pointer;
+  border-radius: 5px;
+}
+nav[_ngcontent-twl-c181]    > .sidebar-nav[_ngcontent-twl-c181]    > li[_ngcontent-twl-c181]    > a[_ngcontent-twl-c181]   .image-menu[_ngcontent-twl-c181], nav[_ngcontent-twl-c181]    > .sidebar-nav[_ngcontent-twl-c181]    > li[_ngcontent-twl-c181]    > .nav-item[_ngcontent-twl-c181]   .image-menu[_ngcontent-twl-c181] {
+  display: inline;
+}
+nav[_ngcontent-twl-c181]    > .sidebar-nav[_ngcontent-twl-c181]    > li[_ngcontent-twl-c181]    > a[_ngcontent-twl-c181]   .image-menu-hover[_ngcontent-twl-c181], nav[_ngcontent-twl-c181]    > .sidebar-nav[_ngcontent-twl-c181]    > li[_ngcontent-twl-c181]    > .nav-item[_ngcontent-twl-c181]   .image-menu-hover[_ngcontent-twl-c181] {
+  display: none;
+}
+nav[_ngcontent-twl-c181]    > .sidebar-nav[_ngcontent-twl-c181]    > li[_ngcontent-twl-c181]    > a[_ngcontent-twl-c181]:hover, nav[_ngcontent-twl-c181]    > .sidebar-nav[_ngcontent-twl-c181]    > li[_ngcontent-twl-c181]    > .nav-item[_ngcontent-twl-c181]:hover {
+  color: #fff;
+  background-color: #8f8f8f !important;
+}
+nav[_ngcontent-twl-c181]    > .sidebar-nav[_ngcontent-twl-c181]    > li[_ngcontent-twl-c181]    > a[_ngcontent-twl-c181]:hover   .image-menu[_ngcontent-twl-c181], nav[_ngcontent-twl-c181]    > .sidebar-nav[_ngcontent-twl-c181]    > li[_ngcontent-twl-c181]    > .nav-item[_ngcontent-twl-c181]:hover   .image-menu[_ngcontent-twl-c181] {
+  display: none;
+}
+nav[_ngcontent-twl-c181]    > .sidebar-nav[_ngcontent-twl-c181]    > li[_ngcontent-twl-c181]    > a[_ngcontent-twl-c181]:hover   .image-menu-hover[_ngcontent-twl-c181], nav[_ngcontent-twl-c181]    > .sidebar-nav[_ngcontent-twl-c181]    > li[_ngcontent-twl-c181]    > .nav-item[_ngcontent-twl-c181]:hover   .image-menu-hover[_ngcontent-twl-c181] {
+  display: inline;
+}
+nav[_ngcontent-twl-c181]    > .sidebar-nav[_ngcontent-twl-c181]    > li.active[_ngcontent-twl-c181]    > a[_ngcontent-twl-c181]:hover, nav[_ngcontent-twl-c181]    > .sidebar-nav[_ngcontent-twl-c181]    > li.active[_ngcontent-twl-c181]    > .nav-item[_ngcontent-twl-c181]:hover {
+  color: #fff;
+  background-color: #515253 !important;
+}
+.sidebar[_ngcontent-twl-c181]    > .nav[_ngcontent-twl-c181]   .label[_ngcontent-twl-c181] {
+  display: block;
+}
+@media only screen and (min-width: 1025px) {
+  .sidebar[_ngcontent-twl-c181]:not(.show-scrollbar) {
+    overflow-y: none;
+  }
+}
+.sidebar-subnav[_ngcontent-twl-c181] {
+  background-color: #fff;
+}
+.sidebar-subnav[_ngcontent-twl-c181]    > .sidebar-subnav-header[_ngcontent-twl-c181] {
+  color: #515253;
+  display: none;
+  padding: 10px 20px;
+  font-weight: bold;
+}
+.sidebar-subnav[_ngcontent-twl-c181]    > li[_ngcontent-twl-c181] {
+  border-left: 0 !important;
+  padding-left: 0em;
+}
+.sidebar-subnav[_ngcontent-twl-c181]    > li[_ngcontent-twl-c181]    > a[_ngcontent-twl-c181], .sidebar-subnav[_ngcontent-twl-c181]    > li[_ngcontent-twl-c181]    > .nav-item[_ngcontent-twl-c181] {
+  display: block;
+  position: relative;
+  padding: 10px 20px;
+  padding-left: 25px;
+  font-weight: normal;
+  background-color: transparent !important;
+  color: #515253;
+}
+.sidebar-subnav[_ngcontent-twl-c181]    > li[_ngcontent-twl-c181]    > a[_ngcontent-twl-c181]:focus, .sidebar-subnav[_ngcontent-twl-c181]    > li[_ngcontent-twl-c181]    > .nav-item[_ngcontent-twl-c181]:focus, .sidebar-subnav[_ngcontent-twl-c181]    > li[_ngcontent-twl-c181]    > a[_ngcontent-twl-c181]:hover, .sidebar-subnav[_ngcontent-twl-c181]    > li[_ngcontent-twl-c181]    > .nav-item[_ngcontent-twl-c181]:hover {
+  color: #0B877D;
+}
+.sidebar-subnav[_ngcontent-twl-c181]    > li[_ngcontent-twl-c181]    > a[_ngcontent-twl-c181]    > em[_ngcontent-twl-c181], .sidebar-subnav[_ngcontent-twl-c181]    > li[_ngcontent-twl-c181]    > .nav-item[_ngcontent-twl-c181]    > em[_ngcontent-twl-c181] {
+  display: inline-block;
+  width: 1.8em;
+  margin: 0 0 0 -2em;
+}
+.sidebar-subnav[_ngcontent-twl-c181]    > li[_ngcontent-twl-c181]   .nav[_ngcontent-twl-c181]    > li[_ngcontent-twl-c181] {
+  padding-left: 5px;
+}
+.sidebar-subnav.nav-floating[_ngcontent-twl-c181] {
+  left: 0;
+  margin-left: 250px;
+  z-index: 1110;
+  min-width: 200px;
+  overflow: auto;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  margin-left: -1px;
+  background-color: #fff;
+  background-color: #fff;
+  border-radius: 5px;
+  box-shadow: rgba(0, 0, 0, 0.19) 0 10px 20px, rgba(0, 0, 0, 0.23) 0 6px 6px;
+}
+.sidebar-subnav.nav-floating[_ngcontent-twl-c181], .sidebar-subnav.nav-floating[_ngcontent-twl-c181]   .collapse[_ngcontent-twl-c181] {
+  height: auto !important;
+  display: block !important;
+  visibility: visible !important;
+}
+.sidebar-subnav.nav-floating[_ngcontent-twl-c181]    > .sidebar-subnav-header[_ngcontent-twl-c181] {
+  display: block;
+}
+.sidebar-subnav.nav-floating[_ngcontent-twl-c181]   li[_ngcontent-twl-c181]    > a[_ngcontent-twl-c181], .sidebar-subnav.nav-floating[_ngcontent-twl-c181]   li[_ngcontent-twl-c181]    > .nav-item[_ngcontent-twl-c181] {
+  padding-left: 20px;
+}
+.sidebar-subnav.nav-floating[_ngcontent-twl-c181]   li[_ngcontent-twl-c181]    > a[_ngcontent-twl-c181]   em[_ngcontent-twl-c181], .sidebar-subnav.nav-floating[_ngcontent-twl-c181]   li[_ngcontent-twl-c181]    > .nav-item[_ngcontent-twl-c181]   em[_ngcontent-twl-c181] {
+  margin-left: 0;
+}
+.sidebar-subnav[_ngcontent-twl-c181] {
+  background-color: #fff;
+}
+.sidebar-subnav[_ngcontent-twl-c181]    > .sidebar-subnav-header[_ngcontent-twl-c181] {
+  color: #515253;
+  display: none;
+  padding: 10px 20px;
+  font-weight: bold;
+}
+.sidebar-subnav[_ngcontent-twl-c181]    > li[_ngcontent-twl-c181] {
+  border-left: 0 !important;
+  padding-left: 0;
+  white-space: nowrap;
+}
+.sidebar-subnav[_ngcontent-twl-c181]    > li[_ngcontent-twl-c181]    > a[_ngcontent-twl-c181], .sidebar-subnav[_ngcontent-twl-c181]    > li[_ngcontent-twl-c181]    > .nav-item[_ngcontent-twl-c181] {
+  display: block;
+  position: relative;
+  padding: 10px 20px;
+  padding-left: 25px;
+  font-weight: normal;
+  background-color: transparent !important;
+  color: #515253;
+  text-align: left;
+  font-size: 20px !important;
+}
+.sidebar-subnav[_ngcontent-twl-c181]    > li[_ngcontent-twl-c181]    > a[_ngcontent-twl-c181]:focus, .sidebar-subnav[_ngcontent-twl-c181]    > li[_ngcontent-twl-c181]    > .nav-item[_ngcontent-twl-c181]:focus, .sidebar-subnav[_ngcontent-twl-c181]    > li[_ngcontent-twl-c181]    > a[_ngcontent-twl-c181]:hover, .sidebar-subnav[_ngcontent-twl-c181]    > li[_ngcontent-twl-c181]    > .nav-item[_ngcontent-twl-c181]:hover {
+  color: #0B877D;
+}
+.sidebar-subnav[_ngcontent-twl-c181]    > li[_ngcontent-twl-c181]    > a[_ngcontent-twl-c181]:hover {
+  background-color: #fff !important;
+}
+.sidebar-subnav[_ngcontent-twl-c181]    > li[_ngcontent-twl-c181]    > a[_ngcontent-twl-c181]    > em[_ngcontent-twl-c181], .sidebar-subnav[_ngcontent-twl-c181]    > li[_ngcontent-twl-c181]    > .nav-item[_ngcontent-twl-c181]    > em[_ngcontent-twl-c181] {
+  display: inline-block;
+  width: 1.8em;
+  margin: 0 0 0 -2em;
+}
+.sidebar-subnav[_ngcontent-twl-c181]    > li[_ngcontent-twl-c181]   .nav[_ngcontent-twl-c181]    > li[_ngcontent-twl-c181] {
+  padding-left: 5px;
+}
+.sidebar-subnav.nav-floating[_ngcontent-twl-c181] {
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  margin-left: 84px;
+}
+.sidebar-subnav.nav-floating[_ngcontent-twl-c181], .sidebar-subnav.nav-floating[_ngcontent-twl-c181]   .collapse[_ngcontent-twl-c181] {
+  height: auto !important;
+  display: block !important;
+  visibility: visible !important;
+  width: auto !important;
+}
+.sidebar-subnav.nav-floating[_ngcontent-twl-c181]    > .sidebar-subnav-header[_ngcontent-twl-c181] {
+  display: block;
+}
+.sidebar-subnav.nav-floating[_ngcontent-twl-c181]   li[_ngcontent-twl-c181]    > a[_ngcontent-twl-c181], .sidebar-subnav.nav-floating[_ngcontent-twl-c181]   li[_ngcontent-twl-c181]    > .nav-item[_ngcontent-twl-c181] {
+  padding-left: 20px;
+}
+.sidebar-subnav.nav-floating[_ngcontent-twl-c181]   li[_ngcontent-twl-c181]    > a[_ngcontent-twl-c181]   em[_ngcontent-twl-c181], .sidebar-subnav.nav-floating[_ngcontent-twl-c181]   li[_ngcontent-twl-c181]    > .nav-item[_ngcontent-twl-c181]   em[_ngcontent-twl-c181] {
+  margin-left: 0;
+}
+ul.sidebar-nav.sidebar-subnav[_ngcontent-twl-c181] {
+  height: 0px;
+}
+ul.sidebar-nav.sidebar-subnav[_ngcontent-twl-c181]    > li[_ngcontent-twl-c181] {
+  background-color: #fff !important;
+}
+ul.sidebar-nav.sidebar-subnav[_ngcontent-twl-c181]    > li[_ngcontent-twl-c181]    > a[_ngcontent-twl-c181] {
+  margin: 0px;
+  padding: 5px 20px !important;
+}
+ul.sidebar-nav.sidebar-subnav[_ngcontent-twl-c181]    > li[_ngcontent-twl-c181]    > a[_ngcontent-twl-c181]    > span[_ngcontent-twl-c181] {
+  font-size: 14px;
+  white-space: normal;
+}
+ul.sidebar-nav.sidebar-subnav[_ngcontent-twl-c181]    > li.active[_ngcontent-twl-c181]    > a[_ngcontent-twl-c181] {
+  font-weight: bold;
+  color: #0B877D;
+}
+.image-menu[_ngcontent-twl-c181], .image-menu-hover[_ngcontent-twl-c181] {
+  max-width: 36px;
+  max-height: 20px;
+}</style><style>#new-store-message[_ngcontent-twl-c124] {
+  max-width: 1280px;
+  margin: 0 auto 18px auto;
+  height: 50px;
+  line-height: 50px;
+  border-radius: 5px;
+  background-color: #FFE1CC;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 700;
+  color: #494949;
+}</style><style>.due-date-card[_ngcontent-twl-c231] {
+  width: 100%;
+  height: 296px;
+  background: #fff;
+  box-sizing: border-box;
+  border: 1px solid #C0C0C0;
+  border-radius: 5px;
+  margin-right: 10px;
+  padding: 16px;
+}
+.due-date-card[_ngcontent-twl-c231]   .due-date-card-header[_ngcontent-twl-c231] {
+  display: flex;
+  align-items: center;
+}
+.due-date-card[_ngcontent-twl-c231]   .due-date-card-header[_ngcontent-twl-c231]   h2[_ngcontent-twl-c231] {
+  margin-right: 10px;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 32px;
+  color: #494949;
+}
+.due-date-card[_ngcontent-twl-c231]   .due-date-card-header[_ngcontent-twl-c231]   i[_ngcontent-twl-c231] {
+  margin-bottom: 10px;
+}
+.due-date-card[_ngcontent-twl-c231]   .card-tabs[_ngcontent-twl-c231] {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #C0C0C0;
+  margin-bottom: 8px;
+}
+.due-date-card[_ngcontent-twl-c231]   .card-tabs[_ngcontent-twl-c231]   span[_ngcontent-twl-c231] {
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 24px;
+  padding: 4px 12px;
+  gap: 4px;
+  margin: 0;
+  color: #494949;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  border-radius: 8px 8px 0 0;
+}
+.due-date-card[_ngcontent-twl-c231]   .card-tabs[_ngcontent-twl-c231]   span[_ngcontent-twl-c231]:hover {
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 24px;
+  background-color: #FAFAFA;
+  border-bottom: 2px solid #C0C0C0;
+}
+.due-date-card[_ngcontent-twl-c231]   .card-tabs[_ngcontent-twl-c231]   .active-tab[_ngcontent-twl-c231] {
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 24px;
+  border-bottom: 2px solid #0B877D !important;
+}
+.due-date-card[_ngcontent-twl-c231]   .card-list[_ngcontent-twl-c231] {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+.due-date-card[_ngcontent-twl-c231]   .card-list[_ngcontent-twl-c231]   .list-item-container[_ngcontent-twl-c231] {
+  width: 100%;
+}
+.due-date-card[_ngcontent-twl-c231]   .card-list[_ngcontent-twl-c231]   .spinner-border[_ngcontent-twl-c231] {
+  color: #0088b9;
+}
+.due-date-card[_ngcontent-twl-c231]   .card-list[_ngcontent-twl-c231]   .list-item[_ngcontent-twl-c231] {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px;
+  margin-bottom: 8px;
+  width: 100%;
+  height: 50px;
+  background: #fff;
+  border: 1px solid #C0C0C0;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 400px;
+  line-height: 24px;
+  color: #494949;
+}
+.due-date-card[_ngcontent-twl-c231]   .card-list[_ngcontent-twl-c231]   .list-item[_ngcontent-twl-c231]   i[_ngcontent-twl-c231] {
+  font-size: 16px;
+  margin-right: 10px;
+  margin-top: 3px;
+}
+.due-date-card[_ngcontent-twl-c231]   .card-list[_ngcontent-twl-c231]   .list-item[_ngcontent-twl-c231]   a[_ngcontent-twl-c231] {
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 24px;
+  color: #0B877D;
+  cursor: pointer;
+}
+.due-date-card[_ngcontent-twl-c231]   .card-list[_ngcontent-twl-c231]   .list-item.disabled[_ngcontent-twl-c231] {
+  color: #494949;
+  opacity: 0.5;
+  cursor: auto;
+}
+.due-date-card[_ngcontent-twl-c231]   .card-list[_ngcontent-twl-c231]   .list-item[_ngcontent-twl-c231]   .item-description[_ngcontent-twl-c231] {
+  display: flex;
+  flex: 2;
+}</style><style>.not-printed-card[_ngcontent-twl-c232] {
+  box-sizing: border-box;
+  width: 95%;
+  height: 141px;
+  background: #fff;
+  border: 1px solid #C0C0C0;
+  border-radius: 5px;
+  padding: 25px 15px;
+  margin: 0 0px 14px 0px;
+  cursor: pointer;
+  display: flex;
+  flex: 2;
+}
+.not-printed-card[_ngcontent-twl-c232]:hover {
+  border: 1px solid #0B877D;
+  box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.16);
+}
+.not-printed-card.disabled[_ngcontent-twl-c232] {
+  color: #494949;
+  opacity: 0.5;
+  cursor: auto;
+}
+.not-printed-card.disabled[_ngcontent-twl-c232]:hover {
+  border: 1px solid #C0C0C0;
+  box-shadow: none;
+}
+.not-printed-card[_ngcontent-twl-c232]   h4[_ngcontent-twl-c232] {
+  font-size: 14px;
+  color: #494949;
+  line-height: 0.5;
+}
+.not-printed-card[_ngcontent-twl-c232]   .not-printed-header[_ngcontent-twl-c232] {
+  display: flex;
+  flex: 2;
+  flex-direction: column;
+  width: 142px;
+}
+.not-printed-card[_ngcontent-twl-c232]   .not-printed-header[_ngcontent-twl-c232]   div[_ngcontent-twl-c232]   span[_ngcontent-twl-c232] {
+  margin-top: -15px;
+  font-size: 36px;
+  font-weight: 700;
+  letter-spacing: 0em;
+  text-align: right;
+}
+.not-printed-card[_ngcontent-twl-c232]   .not-printed-header[_ngcontent-twl-c232]   .see-button[_ngcontent-twl-c232] {
+  display: flex;
+  width: 6em;
+  color: #0B877D;
+  font-size: 14px;
+  margin-top: 30px;
+}
+.not-printed-card[_ngcontent-twl-c232]   .not-printed-header[_ngcontent-twl-c232]   .header-title[_ngcontent-twl-c232] {
+  font-size: 18px;
+}
+.not-printed-card[_ngcontent-twl-c232]   .not-printed-header[_ngcontent-twl-c232]   .header-subtitle[_ngcontent-twl-c232] {
+  font-size: 16px;
+}
+.not-printed-card[_ngcontent-twl-c232]   .not-printed-count[_ngcontent-twl-c232] {
+  font-size: 36px;
+  font-weight: 700;
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: flex-end;
+  height: 107px;
+}
+.not-printed-card[_ngcontent-twl-c232]   .spinner-border[_ngcontent-twl-c232] {
+  color: #0088b9;
+  display: flex;
+  margin: auto;
+  margin-top: 30px;
+}
+.not-printed-card[_ngcontent-twl-c232]   .align-center[_ngcontent-twl-c232] {
+  margin: auto;
+}</style><style>.carousel-animation[_nghost-twl-c61] {
+       transition: opacity 0.6s ease, visibility 0.6s ease;
+       float: left;
+    }
+    .carousel-animation.active[_nghost-twl-c61] {
+      opacity: 1;
+      visibility: visible;
+    }
+    .carousel-animation[_nghost-twl-c61]:not(.active) {
+      display: block;
+      position: absolute;
+      opacity: 0;
+      visibility: hidden;
+    }</style><style>.spinner-awesome[_ngcontent-twl-c213] {
+  display: flex;
+  margin: auto;
+}
+
+.align-center[_ngcontent-twl-c213] {
+  display: flex;
+  margin: auto;
+  height: 95%;
+}</style><script charset="utf-8" src="11.eb68bc6100748508a96f.js"></script><style>.content-heading[_ngcontent-twl-c233] {
+  padding: 8px 24px;
+  margin-bottom: 12px;
+  height: 64px;
+}
+.custom-container[_ngcontent-twl-c233] {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
+.custom-container[_ngcontent-twl-c233]   .not-printed-count[_ngcontent-twl-c233] {
+  height: 56px;
+  padding: 16px;
+  border-radius: 5px;
+  background: #E1E1E1;
+}
+.custom-container[_ngcontent-twl-c233]   .card[_ngcontent-twl-c233] {
+  padding: 12px 16px;
+}
+.custom-container[_ngcontent-twl-c233]   .card[_ngcontent-twl-c233]   .tabs[_ngcontent-twl-c233] {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #C0C0C0;
+}
+.custom-container[_ngcontent-twl-c233]   .card[_ngcontent-twl-c233]   .tabs[_ngcontent-twl-c233]   h4[_ngcontent-twl-c233] {
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 24px;
+  padding: 4px 12px;
+  gap: 4px;
+  margin: 0;
+  color: #494949;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  border-radius: 8px 8px 0 0;
+}
+.custom-container[_ngcontent-twl-c233]   .card[_ngcontent-twl-c233]   .tabs[_ngcontent-twl-c233]   h4.disabled[_ngcontent-twl-c233] {
+  cursor: auto;
+  opacity: 0.5;
+}
+.custom-container[_ngcontent-twl-c233]   .card[_ngcontent-twl-c233]   .tabs[_ngcontent-twl-c233]   h4[_ngcontent-twl-c233]   span[_ngcontent-twl-c233] {
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.custom-container[_ngcontent-twl-c233]   .card[_ngcontent-twl-c233]   .tabs[_ngcontent-twl-c233]   h4.enabled[_ngcontent-twl-c233]:hover {
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 24px;
+  background: #FAFAFA;
+  border-bottom: 2px solid #C0C0C0;
+}
+.custom-container[_ngcontent-twl-c233]   .card[_ngcontent-twl-c233]   .tabs[_ngcontent-twl-c233]   h4.active[_ngcontent-twl-c233] {
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 24px;
+  border-bottom: 2px solid #0B877D !important;
+}
+.custom-container[_ngcontent-twl-c233]   .card[_ngcontent-twl-c233]   .toastr-info[_ngcontent-twl-c233] {
+  height: 56px;
+  padding: 16px;
+  margin: 16px 0;
+  border-radius: 5px;
+  background: #FAFAFA;
+}
+.custom-container[_ngcontent-twl-c233]   .card[_ngcontent-twl-c233]   .toastr-info[_ngcontent-twl-c233]   a[_ngcontent-twl-c233]:hover {
+  text-decoration: underline !important;
+  color: #0B877D !important;
+}
+@media screen and (min-width: 1280px) {
+  .card[_ngcontent-twl-c233] {
+    max-width: 1280px;
+  }
+}
+@media only screen and (min-width: 1721px) {
+  [_nghost-twl-c233] {
+    height: calc(100vh - 74px);
+    max-height: calc(100vh - 74px);
+  }
+
+  .custom-container[_ngcontent-twl-c233] {
+    height: calc(100vh - 174px);
+    max-height: calc(100vh - 174px);
+  }
+}
+@media only screen and (min-width: 1058px) and (max-width: 1720px) {
+  [_nghost-twl-c233] {
+    height: calc(100vh - 74px);
+    max-height: calc(100vh - 74px);
+  }
+
+  .custom-container[_ngcontent-twl-c233] {
+    height: calc(100vh - 174px);
+    max-height: calc(100vh - 174px);
+  }
+}
+@media only screen and (min-width: 795px) and (max-width: 1057px) {
+  [_nghost-twl-c233] {
+    height: calc(100vh - 74px);
+    max-height: calc(100vh - 74px);
+  }
+
+  .custom-container[_ngcontent-twl-c233] {
+    height: calc(100vh - 144px);
+    max-height: calc(100vh - 144px);
+  }
+}
+@media only screen and (min-width: 768px) and (max-width: 796px) {
+  [_nghost-twl-c233], .card[_ngcontent-twl-c233], .custom-container[_ngcontent-twl-c233] {
+    height: calc(100vh - 74px);
+    max-height: calc(100vh - 74px);
+  }
+}</style><style>.modal-body[_ngcontent-twl-c234] {
+  height: 470px;
+}
+.modal-body[_ngcontent-twl-c234]   .search-bar[_ngcontent-twl-c234] {
+  width: 100%;
+  height: 80px;
+  gap: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+.modal-body[_ngcontent-twl-c234]   .search-bar[_ngcontent-twl-c234]   .type-select[_ngcontent-twl-c234] {
+  display: flex;
+  flex-direction: column;
+  width: 279px;
+}
+.modal-body[_ngcontent-twl-c234]   .search-bar[_ngcontent-twl-c234]   .product-data[_ngcontent-twl-c234] {
+  display: flex;
+  flex-direction: column;
+  width: 426px;
+}
+.modal-body[_ngcontent-twl-c234]   .search-bar[_ngcontent-twl-c234]   .product-data-label[_ngcontent-twl-c234] {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+.modal-body[_ngcontent-twl-c234]   .search-bar[_ngcontent-twl-c234]   .add[_ngcontent-twl-c234] {
+  margin-top: 21px;
+  width: 120px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.modal-body[_ngcontent-twl-c234]   section[_ngcontent-twl-c234] {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.modal-body[_ngcontent-twl-c234]   section[_ngcontent-twl-c234]   a[_ngcontent-twl-c234]:hover {
+  color: #0B877D !important;
+  text-decoration: underline;
+}
+.modal-body[_ngcontent-twl-c234]   section[_ngcontent-twl-c234]   app-blankslate[_ngcontent-twl-c234], .modal-body[_ngcontent-twl-c234]   section[_ngcontent-twl-c234]   .loader[_ngcontent-twl-c234] {
+  height: 336px;
+}
+.modal-body[_ngcontent-twl-c234]   section[_ngcontent-twl-c234]   .posters[_ngcontent-twl-c234] {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+  width: 100%;
+}
+.modal-body[_ngcontent-twl-c234]   section[_ngcontent-twl-c234]   .posters[_ngcontent-twl-c234]   .poster[_ngcontent-twl-c234] {
+  height: 130px;
+  padding: 0 16px;
+}
+.modal-body[_ngcontent-twl-c234]   section[_ngcontent-twl-c234]   .posters[_ngcontent-twl-c234]   .poster-info[_ngcontent-twl-c234] {
+  display: flex;
+  height: 99px;
+  width: 100%;
+}
+.modal-body[_ngcontent-twl-c234]   section[_ngcontent-twl-c234]   .posters[_ngcontent-twl-c234]   .poster-info[_ngcontent-twl-c234]   .fa-trash-can[_ngcontent-twl-c234]:hover {
+  color: #D43D4C !important;
+}
+.modal-body[_ngcontent-twl-c234]   section[_ngcontent-twl-c234]   .posters[_ngcontent-twl-c234]   .poster[_ngcontent-twl-c234]   hr[_ngcontent-twl-c234] {
+  border-top-color: #C0C0C0;
+}
+.preview[_ngcontent-twl-c234] {
+  justify-content: center;
+}
+.preview.mini-preview[_ngcontent-twl-c234] {
+  height: 99px !important;
+  max-width: 99px !important;
+  border: 1px solid #8F8F8F;
+  background: #E1E1E1;
+  border-radius: 5px;
+}
+.preview.mini-preview-vertical[_ngcontent-twl-c234] {
+  padding: 3px 0px;
+}
+.preview.mini-preview-horizontal[_ngcontent-twl-c234] {
+  padding: 30px 0px;
+}
+.modal-footer[_ngcontent-twl-c234] {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  background-color: #fff;
+  border-top: none;
+  padding: 16px;
+}
+.modal-footer[_ngcontent-twl-c234]   button[_ngcontent-twl-c234] {
+  margin: 0 8px;
+}
+.modal-footer[_ngcontent-twl-c234]   button[_ngcontent-twl-c234]:last-child {
+  margin: 0;
+}
+  .ngx-select__toggle {
+  border: 1px solid #8f8f8f !important;
+  height: 32px;
+  border-radius: 0.25rem;
+}
+  .ngx-select__item_active {
+  background-color: #E1E1E1 !important;
+  color: #494949 !important;
+}
+  .form-control:focus {
+  border: 2px solid #0B877D;
+  box-shadow: none !important;
+}
+  .custom-switch .custom-control-label {
+  color: #0B877D;
+}
+  .custom-switch .custom-control-label:after {
+  background-color: #fff;
+  border: 1px solid #dde6e9;
+  top: calc(0.2642857145rem + 1px);
+}
+  .custom-switch .custom-control-label:disabled {
+  color: #0B877D;
+}
+  .custom-switch .custom-control-input:focus ~ .custom-control-label::before {
+  box-shadow: none;
+}
+  .custom-switch .custom-control-input:focus:not(:checked) ~ .custom-control-label::before {
+  border: 1px solid #dde6e9;
+}
+  .custom-switch .custom-control-input:checked ~ .custom-control-label:after {
+  background-color: #fff !important;
+}
+  .custom-switch .custom-control-input:checked ~ .custom-control-label:before {
+  background-color: #0B877D !important;
+}</style><style>[_nghost-twl-c159] {
+  height: 100%;
+}
+a[_ngcontent-twl-c159]:hover {
+  text-decoration: underline !important;
+  color: #0B877D !important;
+}
+.blankslate[_ngcontent-twl-c159] {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}</style><style>h5[_ngcontent-twl-c150] {
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 24px;
+  color: #8F8F8F;
+  margin: 0;
+}
+.toggle-dropdown-more-filters[_ngcontent-twl-c150] {
+  height: 32px;
+  padding: 4px 8px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.toggle-dropdown-more-filters[_ngcontent-twl-c150]   h5[_ngcontent-twl-c150] {
+  margin: 0 8px 0 0;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 24px;
+  color: #494949;
+}
+.toggle-dropdown-more-filters.list-opened[_ngcontent-twl-c150], .toggle-dropdown-more-filters[_ngcontent-twl-c150]:hover {
+  background: #E1E1E1;
+}
+.search-box[_ngcontent-twl-c150]   .form-control[_ngcontent-twl-c150] {
+  width: 207px;
+  height: 32px;
+  background: #fff;
+  color: #494949;
+  border: 1px solid #8F8F8F;
+  border-radius: 5px;
+  padding: 6px 28px 6px 6px;
+}
+.search-box[_ngcontent-twl-c150]   .form-control[_ngcontent-twl-c150]:focus {
+  border: 2px solid #0B877D;
+  box-shadow: none !important;
+}
+.search-box[_ngcontent-twl-c150]   i[_ngcontent-twl-c150] {
+  position: relative;
+  left: 206px;
+  color: #8F8F8F;
+  font-weight: 300;
+  font-size: 16px;
+  line-height: 16px;
+  padding: 8px;
+}
+.search-box[_ngcontent-twl-c150]   i.fa-times[_ngcontent-twl-c150] {
+  cursor: pointer;
+  color: #0B877D;
+}
+.search-box[_ngcontent-twl-c150]   i[_ngcontent-twl-c150]:hover {
+  color: #494949;
+}
+.chips[_ngcontent-twl-c150] {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  margin-top: 12px;
+  border-top: 1px solid #E1E1E1;
+  padding-top: 8px;
+}
+.chips[_ngcontent-twl-c150]   .chip[_ngcontent-twl-c150] {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0px 8px;
+  gap: 4px;
+  height: 24px;
+  background: #fff;
+  border: 1px solid #494949;
+  border-radius: 12px;
+}
+.chips[_ngcontent-twl-c150]   .chip[_ngcontent-twl-c150]   small[_ngcontent-twl-c150] {
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 24px;
+  color: #494949;
+}
+.chips[_ngcontent-twl-c150]   .chip[_ngcontent-twl-c150]   span[_ngcontent-twl-c150] {
+  padding: 1px 0px 0px 4px;
+  cursor: pointer;
+}
+.chips[_ngcontent-twl-c150]   .clear-filters[_ngcontent-twl-c150] {
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 24px;
+  color: #0B877D;
+}
+.chips[_ngcontent-twl-c150]   .clear-filters[_ngcontent-twl-c150]:hover {
+  cursor: pointer;
+  text-decoration: underline;
+}
+  .dropdown-treeview input[type=checkbox] {
+  min-width: 16px;
+  min-height: 16px;
+  margin-right: 8px;
+  cursor: pointer;
+  accent-color: #0B877D;
+}
+  .dropdown-treeview .dropdown button {
+  height: 32px;
+  padding: 4px 8px !important;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 400;
+  line-height: 24px;
+  font-size: 14px;
+  font-family: "roboto-regular";
+  margin-right: 0 !important;
+  margin-top: -1px !important;
+  color: #494949 !important;
+}
+  .dropdown-treeview .dropdown button[aria-expanded=true],   .dropdown-treeview .dropdown button:hover {
+  background: #E1E1E1 !important;
+}
+  .dropdown-treeview .dropdown button i {
+  font-size: 12px;
+  color: #656565;
+}
+  .dropdown-treeview .dropdown button:focus {
+  box-shadow: none;
+}
+  .dropdown-treeview .dropdown-toggle::after {
+  display: none !important;
+}
+  .dropdown-treeview .dropdown-menu {
+  min-width: 200px;
+  width: auto;
+  border-radius: 8px;
+  padding: 4px;
+}
+  .dropdown-treeview .dropdown-container {
+  padding: 0 !important;
+}
+  .dropdown-treeview .form-control {
+  height: 32px;
+  background: #fff;
+  color: #494949;
+  border: 1px solid #8F8F8F;
+  border-radius: 5px;
+  padding: 6px 28px 6px 6px;
+}
+  .dropdown-treeview .form-control:focus {
+  border: 2px solid #0B877D;
+  box-shadow: none !important;
+}
+  .dropdown-treeview .treeview-container label,   .dropdown-treeview .treeview-header label {
+  font-weight: 400;
+  font-size: 14px;
+  font-family: "roboto-regular";
+  line-height: 24px;
+  margin: 0;
+  color: #494949;
+}
+  .dropdown-treeview .treeview-container .treeview-text,   .dropdown-treeview .treeview-header .treeview-text {
+  padding: 4px;
+}
+  .dropdown-treeview .treeview-container::-webkit-scrollbar {
+  width: 6px;
+  background: #edf1f2;
+}
+  .dropdown-treeview .treeview-container::-webkit-scrollbar-thumb {
+  background: #ccc;
+}
+  .dropdown-treeview .treeview-container .form-inline {
+  margin-bottom: 0 !important;
+  border-radius: 4px !important;
+  padding: 4px;
+}
+  .dropdown-treeview .treeview-container .form-inline:hover {
+  background-color: #E1E1E1;
+}
+  .dropdown-treeview .treeview-container .form-check-label {
+  cursor: pointer;
+}
+  .dropdown-treeview .treeview-header .row-all {
+  height: 32px;
+}
+  .dropdown-treeview .treeview-header .row-all .col-12 {
+  margin-bottom: 0 !important;
+  border-radius: 4px !important;
+  padding: 4px 19px;
+}
+  .dropdown-treeview .treeview-header .row-all .col-12 .form-check {
+  cursor: pointer !important;
+}
+  .dropdown-treeview .treeview-header .row-all .form-check-label {
+  cursor: pointer;
+}</style><style>[_nghost-twl-c142] {
+  display: contents;
+}
+[_ngcontent-twl-c142]::-webkit-scrollbar {
+  width: 6px;
+  height: 8px;
+  background: #edf1f2;
+}
+[_ngcontent-twl-c142]::-webkit-scrollbar-thumb {
+  background: #ccc;
+}
+input[type=checkbox][_ngcontent-twl-c142] {
+  min-width: 16px;
+  min-height: 16px;
+  cursor: pointer;
+  accent-color: #0B877D;
+}
+.table-responsive[_ngcontent-twl-c142] {
+  overflow-y: auto;
+}
+.table-responsive.product-search-table[_ngcontent-twl-c142] {
+  max-height: 350px;
+  border-top: 1px solid #C0C0C0;
+}
+.table-responsive[_ngcontent-twl-c142]   table[_ngcontent-twl-c142] {
+  background: #fff;
+  border-radius: 4px;
+}
+.table-responsive[_ngcontent-twl-c142]   table[_ngcontent-twl-c142]   th[_ngcontent-twl-c142] {
+  text-align: center;
+  border-top: none;
+  border-bottom: #C0C0C0;
+  padding: 5.6px 5.6px 8px 5.6px;
+}
+.table-responsive[_ngcontent-twl-c142]   table[_ngcontent-twl-c142]   th[_ngcontent-twl-c142]:first-child   span[_ngcontent-twl-c142] {
+  position: relative;
+  top: 1px;
+}
+.table-responsive[_ngcontent-twl-c142]   table[_ngcontent-twl-c142]   tr[_ngcontent-twl-c142] {
+  height: 80px;
+  cursor: pointer;
+}
+.table-responsive[_ngcontent-twl-c142]   table[_ngcontent-twl-c142]   tr.allow-hover.striped[_ngcontent-twl-c142] {
+  background: #FAFAFA;
+}
+.table-responsive[_ngcontent-twl-c142]   table[_ngcontent-twl-c142]   tr.allow-hover[_ngcontent-twl-c142]:hover, .table-responsive[_ngcontent-twl-c142]   table[_ngcontent-twl-c142]   tr.selected[_ngcontent-twl-c142] {
+  background-color: #E1E1E1 !important;
+}
+.table-responsive[_ngcontent-twl-c142]   table[_ngcontent-twl-c142]   thead[_ngcontent-twl-c142] {
+  background-color: #fff;
+  position: sticky;
+  z-index: 1;
+  top: 0;
+}
+.table-responsive[_ngcontent-twl-c142]   table[_ngcontent-twl-c142]   thead[_ngcontent-twl-c142], .table-responsive[_ngcontent-twl-c142]   table[_ngcontent-twl-c142]   tr[_ngcontent-twl-c142] {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+.loader[_ngcontent-twl-c142] {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 16px;
+  height: calc(100vh - 412px);
+}</style><style>.toggle-dropdown[_ngcontent-twl-c152] {
+  height: 32px;
+  padding: 4px 8px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.toggle-dropdown[_ngcontent-twl-c152]   h5[_ngcontent-twl-c152] {
+  margin: 0 8px 0 0;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 24px;
+  color: #494949;
+}
+.toggle-dropdown.date-opened[_ngcontent-twl-c152], .toggle-dropdown[_ngcontent-twl-c152]:hover {
+  background: #E1E1E1;
+}</style><style>[_nghost-twl-c143] {
+  display: contents;
+}</style><style>[_nghost-twl-c148] {
+  display: contents;
+}
+  .batch-item {
+  border-color: #C0C0C0;
+}
+  .batch-item:hover .batch-status-description,   .batch-item:hover .batch-status-validity,   .batch-item:hover .batch-progress-status span {
+  color: #0B877D;
+}
+  .batch-item:hover .batch-label-description,   .batch-item:hover .batch-label-date,   .batch-item:hover .batch-label-info {
+  color: #0B877D;
+}
+  .batch-item:hover .batch-label-date {
+  border-color: #0B877D;
+}
+.batch-progress-status[_ngcontent-twl-c148] {
+  width: 300px;
+}
+.progress-bar[_ngcontent-twl-c148] {
+  margin-bottom: 0px;
+}
+.progress[_ngcontent-twl-c148] {
+  background-color: #C0C0C0;
+  height: 8px;
+}
+.progress-warning[_ngcontent-twl-c148] {
+  background: #F19718;
+}
+.card-default[_ngcontent-twl-c148] {
+  padding: 12px 16px;
+}
+.batch-label-description[_ngcontent-twl-c148] {
+  margin-bottom: 0px;
+}
+.batch-label-date[_ngcontent-twl-c148] {
+  border: 1px solid #0B877D;
+  color: #148735;
+  border-radius: 5px;
+  margin-left: 16px;
+}
+.batch-label-date-warning[_ngcontent-twl-c148] {
+  border: 1px solid #A8670A;
+  color: #A8670A;
+}
+.batch-label-date[_ngcontent-twl-c148]   span[_ngcontent-twl-c148] {
+  padding: 8px;
+  font-size: 14px;
+}
+.batch-label-validity[_ngcontent-twl-c148]   span[_ngcontent-twl-c148] {
+  font-size: 12px;
+  gap: 6px;
+}
+.batch-label-return[_ngcontent-twl-c148]   button[_ngcontent-twl-c148] {
+  color: #0B877D !important;
+}
+a[_ngcontent-twl-c148]:hover {
+  text-decoration: underline !important;
+  color: #0B877D !important;
+}</style><style>.icon-mode[_ngcontent-twl-c166]:hover {
+  color: #0B877D !important;
+}</style><style>.h_iframe[_ngcontent-twl-c135] {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  flex-direction: column;
+}
+.h_iframe.thumbnail[_ngcontent-twl-c135] {
+  position: relative;
+  align-items: center;
+  justify-content: center;
+}
+.h_iframe.thumbnail[_ngcontent-twl-c135]   .full-screen[_ngcontent-twl-c135] {
+  margin-bottom: 0px;
+}
+.h_iframe.thumbnail[_ngcontent-twl-c135]:hover    > .full-screen-overlay[_ngcontent-twl-c135] {
+  display: flex;
+  position: absolute;
+  background-color: rgba(7, 89, 82, 0.7);
+  color: #fff;
+  width: 97px;
+  border-radius: 4px;
+  height: 97px;
+  align-items: center;
+  justify-content: center;
+}
+.h_iframe.thumbnail[_ngcontent-twl-c135]:hover    > .full-screen-overlay[_ngcontent-twl-c135]   span[_ngcontent-twl-c135] {
+  font-size: 14px;
+  display: flex;
+}
+.h_iframe.centralize-loader[_ngcontent-twl-c135] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.h_iframe[_ngcontent-twl-c135]   .refresh-template[_ngcontent-twl-c135] {
+  font-size: 18px;
+  color: #075952;
+}
+.h_iframe[_ngcontent-twl-c135]   .full-screen[_ngcontent-twl-c135] {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  margin-bottom: -25px;
+  justify-content: center;
+  align-items: center;
+}
+.h_iframe[_ngcontent-twl-c135]   .full-screen.template-page-preview[_ngcontent-twl-c135] {
+  margin-bottom: 47px;
+  padding: 4px 0;
+}
+.h_iframe[_ngcontent-twl-c135]   .full-screen.template-page-preview[_ngcontent-twl-c135]   iframe[_ngcontent-twl-c135] {
+  width: 100%;
+  height: 100%;
+}
+.h_iframe[_ngcontent-twl-c135]   .full-screen.template-page-preview[_ngcontent-twl-c135]   iframe.horizontal[_ngcontent-twl-c135] {
+  max-height: 100%;
+  padding: 1rem;
+}
+.h_iframe[_ngcontent-twl-c135]   .full-screen.active[_ngcontent-twl-c135] {
+  align-items: center;
+  justify-content: center !important;
+}
+.h_iframe[_ngcontent-twl-c135]   .full-screen.active[_ngcontent-twl-c135]   iframe[_ngcontent-twl-c135] {
+  max-height: 600px !important;
+  margin-top: 78px !important;
+}
+.h_iframe[_ngcontent-twl-c135]   .full-screen-close[_ngcontent-twl-c135] {
+  font-size: 50px;
+  position: absolute;
+  right: 100px;
+  bottom: 620px;
+  cursor: pointer;
+  color: white;
+}
+.h_iframe[_ngcontent-twl-c135]   .full-screen[_ngcontent-twl-c135]   iframe[_ngcontent-twl-c135] {
+  width: 100%;
+  height: 100%;
+}
+.h_iframe[_ngcontent-twl-c135]   .full-screen[_ngcontent-twl-c135]   iframe.horizontal[_ngcontent-twl-c135] {
+  max-height: 300px;
+  padding: 1rem;
+}
+.h_iframe[_ngcontent-twl-c135]   .full-screen-request[_ngcontent-twl-c135] {
+  font-size: 18px;
+  color: #075952;
+  cursor: pointer;
+}
+.h_iframe[_ngcontent-twl-c135]   .full-screen-request.full-screen-overlay[_ngcontent-twl-c135] {
+  display: none;
+}
+.h_iframe[_ngcontent-twl-c135]   .full-screen-request[_ngcontent-twl-c135]   span[_ngcontent-twl-c135] {
+  padding: 0.5rem;
+}</style><style>.default[_ngcontent-twl-c144]   span[_ngcontent-twl-c144] {
+  color: #494949;
+}
+.default[_ngcontent-twl-c144]   i[_ngcontent-twl-c144] {
+  color: #494949;
+  cursor: pointer;
+  caret-color: transparent;
+}
+.default[_ngcontent-twl-c144]   i.disabled[_ngcontent-twl-c144] {
+  cursor: auto;
+  color: #C0C0C0 !important;
+}
+.default[_ngcontent-twl-c144]   i.disabled[_ngcontent-twl-c144]:hover {
+  color: #C0C0C0 !important;
+  cursor: auto;
+}
+.default[_ngcontent-twl-c144]   i[_ngcontent-twl-c144]:hover {
+  color: #0B877D !important;
+}
+.primary[_ngcontent-twl-c144]   span[_ngcontent-twl-c144] {
+  color: #0B877D;
+}
+.primary[_ngcontent-twl-c144]   i[_ngcontent-twl-c144] {
+  color: #0B877D;
+  cursor: pointer;
+  caret-color: transparent;
+}
+.primary[_ngcontent-twl-c144]   i.disabled[_ngcontent-twl-c144] {
+  color: #C0C0C0 !important;
+  cursor: auto;
+}
+.primary[_ngcontent-twl-c144]   i.disabled[_ngcontent-twl-c144]:hover {
+  color: #C0C0C0 !important;
+  cursor: auto;
+}
+.primary[_ngcontent-twl-c144]   i[_ngcontent-twl-c144]:hover {
+  color: #075952;
+}
+input[_ngcontent-twl-c144] {
+  width: 35px;
+  height: 32px;
+  border: 1px solid #C0C0C0;
+  border-radius: 5px;
+  text-align: center;
+  background: linear-gradient(0deg, #FFFFFF, #FFFFFF), linear-gradient(0deg, #C0C0C0, #C0C0C0);
+}</style><style id="antigravity-scroll-lock-style">
+  html:root body.antigravity-scroll-lock {
+    overflow: hidden !important;
+  }
+</style></head>
+
+<body class="notranslate ng-tns-0-0 modal-open" style="padding-right: 6px;">
+    <app-root _nghost-twl-c122="" ng-version="10.2.4" class="layout-fixed"><router-outlet _ngcontent-twl-c122=""></router-outlet><app-layout _nghost-twl-c180=""><div _ngcontent-twl-c180="" class="california wrapper"><app-header _ngcontent-twl-c180="" class="topnavbar-wrapper" _nghost-twl-c183=""><nav _ngcontent-twl-c183="" role="navigation" class="navbar topnavbar" id="loja"><ul _ngcontent-twl-c183="" class="navbar-nav mr-auto flex-row"><li _ngcontent-twl-c183="" id="navbar-menu" class="nav-item"><a _ngcontent-twl-c183="" trigger-resize="" class="nav-link"><em _ngcontent-twl-c183="" class="fas fa-bars"></em></a><!----></li><!----><div _ngcontent-twl-c183="" class="navbar-logo"><div _ngcontent-twl-c183="" class="navbar-header"><a _ngcontent-twl-c183="" class="navbar-brand"><div _ngcontent-twl-c183="" class="brand-logo"><img _ngcontent-twl-c183="" src="assets/img/logo-topo.svg" alt="Pricefy"></div></a></div><a _ngcontent-twl-c183=""><span _ngcontent-twl-c183="" id="system-name" class="notranslate">Store</span></a></div><!----></ul><div _ngcontent-twl-c183="" class="header-lojas"><label _ngcontent-twl-c183="" class="label-padrao">Loja</label><app-single-store-filter _ngcontent-twl-c183="" disabled="lojas.length == 1" class="dropdown-header-lojas" _nghost-twl-c196=""><ngx-select _ngcontent-twl-c196="" optionvaluefield="id" optiontextfield="nome" _nghost-twl-c111="" class="ng-untouched ng-pristine"><div _ngcontent-twl-c111="" class="ngx-select dropdown" tabindex="-1"><div _ngcontent-twl-c111="" class="ngx-select__disabled"></div><div _ngcontent-twl-c111="" class="ngx-select__selected"><div _ngcontent-twl-c111="" class="ngx-select__toggle btn form-control"><!----><span _ngcontent-twl-c111="" class="ngx-select__selected-single pull-left float-left"><span _ngcontent-twl-c111="">1187 - CARIOCA SHOPPING</span><!----></span><!----><span _ngcontent-twl-c111="" class="ngx-select__toggle-buttons"><!----><i _ngcontent-twl-c111="" class="dropdown-toggle"></i><i _ngcontent-twl-c111="" class="ngx-select__toggle-caret caret"></i></span></div></div><!----><!----><!----><!----><!----><!----></div></ngx-select></app-single-store-filter></div><!----><!----><ul _ngcontent-twl-c183="" class="navbar-nav flex-row navbar-right"><li _ngcontent-twl-c183="" class="nav-item help-center"><a _ngcontent-twl-c183="" href="javascript:void(0)" placement="bottom" id="link-help-center" class="nav-link"><em _ngcontent-twl-c183="" class="far fa-light fa-circle-question"></em></a><!----></li><!----><li _ngcontent-twl-c183="" dropdown="" class="nav-item dropdown dropdown-list without-box-shadow"><a _ngcontent-twl-c183="" placement="bottom" dropdowntoggle="" class="nav-link dropdown-toggle dropdown-toggle-nocaret without-box-shadow" aria-haspopup="true"><span _ngcontent-twl-c183="" class="small-circle notranslate" style="--background: #D84104; --color: #FFFFFF;">1S</span></a><!----><!----></li><!----></ul></nav><!----></app-header><app-sidebar _ngcontent-twl-c180="" class="aside-container" _nghost-twl-c181=""><div _ngcontent-twl-c181="" class="aside-inner"><nav _ngcontent-twl-c181="" sidebar-anyclick-close="" class="sidebar"><ul _ngcontent-twl-c181="" class="sidebar-nav"><li _ngcontent-twl-c181=""><a _ngcontent-twl-c181="" href="#/" title="Início" route=""><!----><em _ngcontent-twl-c181="" class="fa-house-blank far"></em><!----><!----><!----><span _ngcontent-twl-c181="">Início</span></a><hr _ngcontent-twl-c181="" class="sidebar-separator-line"></li><!----><!----><!----><!----><!----><li _ngcontent-twl-c181=""><a _ngcontent-twl-c181="" title="Cartazes"><!----><em _ngcontent-twl-c181="" class="fa-file-invoice-dollar far"></em><!----><span _ngcontent-twl-c181="">Cartazes</span></a><hr _ngcontent-twl-c181="" class="sidebar-separator-line"><ul _ngcontent-twl-c181="" class="sidebar-nav sidebar-subnav"><li _ngcontent-twl-c181=""><!----><a _ngcontent-twl-c181="" href="#/posters-list/action/new-poster" onclick="onClickMenu(this.title)" title="Novo Cartaz" route="posters-list/action/new-poster"><!----><span _ngcontent-twl-c181="">Novo Cartaz</span></a><!----><!----><!----></li><li _ngcontent-twl-c181=""><!----><a _ngcontent-twl-c181="" href="#/posters-list" onclick="onClickMenu(this.title)" title="Cartazes não impressos" route="posters-list"><!----><span _ngcontent-twl-c181="">Cartazes não impressos</span></a><!----><!----><!----></li><!----><li _ngcontent-twl-c181=""></li></ul><!----></li><!----><!----><!----><!----><li _ngcontent-twl-c181="" class="active"><a _ngcontent-twl-c181="" title="Etiquetas"><!----><em _ngcontent-twl-c181="" class="fa-money-check-dollar far"></em><!----><span _ngcontent-twl-c181="">Etiquetas</span></a><hr _ngcontent-twl-c181="" class="sidebar-separator-line"><ul _ngcontent-twl-c181="" class="sidebar-nav sidebar-subnav opening"><li _ngcontent-twl-c181="" class="active"><!----><a _ngcontent-twl-c181="" href="#/labels-list/action/new-label" onclick="onClickMenu(this.title)" title="Nova Etiqueta" route="labels-list/action/new-label"><!----><span _ngcontent-twl-c181="">Nova Etiqueta</span></a><!----><!----><!----></li><li _ngcontent-twl-c181="" class="active"><!----><a _ngcontent-twl-c181="" href="#/labels-list" onclick="onClickMenu(this.title)" title="Etiquetas não impressas" route="labels-list"><!----><span _ngcontent-twl-c181="">Etiquetas não impressas</span></a><!----><!----><!----></li><!----><li _ngcontent-twl-c181=""></li></ul><!----></li><!----><!----><!----><!----><!----><!----><li _ngcontent-twl-c181=""><a _ngcontent-twl-c181="" href="#/print-history" title="Histórico impressões" route="print-history"><!----><em _ngcontent-twl-c181="" class="fa-clock-rotate-left far"></em><!----><!----><!----><span _ngcontent-twl-c181="">Histórico de Impressões</span></a></li><!----><!----><!----><!----><!----><!----><!----><!----></ul></nav></div><!----><!----><!----><!----><!----><!----><!----></app-sidebar><!----><app-offsidebar _ngcontent-twl-c180="" class="offsidebar" _nghost-twl-c184=""><tabset _ngcontent-twl-c184="" _nghost-twl-c72="" class="tab-container"><ul _ngcontent-twl-c72="" role="tablist" class="nav nav-justified nav-tabs" aria-label="Tabs"><li _ngcontent-twl-c72="" class="active nav-item"><a _ngcontent-twl-c72="" href="javascript:void(0);" role="tab" class="nav-link active" aria-controls="" aria-selected="true" id=""><span _ngcontent-twl-c72=""></span><em _ngcontent-twl-c184="" class="icon-equalizer fa-lg"></em><!----><!----></a></li><!----></ul><div _ngcontent-twl-c72="" class="tab-content"><tab _ngcontent-twl-c184="" role="tabpanel" aria-labelledby="" class="tab-pane active"><!----><h3 _ngcontent-twl-c184="" class="text-center text-thin mt-4">offsidebar.setting.SETTINGS</h3><div _ngcontent-twl-c184="" class="p-2"><h4 _ngcontent-twl-c184="" class="text-muted text-thin">Themes</h4><div _ngcontent-twl-c184="" class="row row-flush mb-2"><div _ngcontent-twl-c184="" class="col mb-2"><div _ngcontent-twl-c184="" class="setting-color"><label _ngcontent-twl-c184=""><input _ngcontent-twl-c184="" type="radio" name="setting-theme" value="A" class="ng-untouched ng-pristine ng-valid" style=""><span _ngcontent-twl-c184="" class="icon-check"></span><span _ngcontent-twl-c184="" class="split"><span _ngcontent-twl-c184="" class="color bg-info"></span><span _ngcontent-twl-c184="" class="color bg-info-light"></span></span><span _ngcontent-twl-c184="" class="color bg-white"></span></label></div></div><div _ngcontent-twl-c184="" class="col mb-2"><div _ngcontent-twl-c184="" class="setting-color"><label _ngcontent-twl-c184=""><input _ngcontent-twl-c184="" type="radio" name="setting-theme" value="B" class="ng-untouched ng-pristine ng-valid" style=""><span _ngcontent-twl-c184="" class="icon-check"></span><span _ngcontent-twl-c184="" class="split"><span _ngcontent-twl-c184="" class="color bg-green"></span><span _ngcontent-twl-c184="" class="color bg-green-light"></span></span><span _ngcontent-twl-c184="" class="color bg-white"></span></label></div></div><div _ngcontent-twl-c184="" class="col mb-2"><div _ngcontent-twl-c184="" class="setting-color"><label _ngcontent-twl-c184=""><input _ngcontent-twl-c184="" type="radio" name="setting-theme" value="C" class="ng-untouched ng-pristine ng-valid" style=""><span _ngcontent-twl-c184="" class="icon-check"></span><span _ngcontent-twl-c184="" class="split"><span _ngcontent-twl-c184="" class="color bg-purple"></span><span _ngcontent-twl-c184="" class="color bg-purple-light"></span></span><span _ngcontent-twl-c184="" class="color bg-white"></span></label></div></div><div _ngcontent-twl-c184="" class="col mb-2"><div _ngcontent-twl-c184="" class="setting-color"><label _ngcontent-twl-c184=""><input _ngcontent-twl-c184="" type="radio" name="setting-theme" value="D" class="ng-untouched ng-pristine ng-valid" style=""><span _ngcontent-twl-c184="" class="icon-check"></span><span _ngcontent-twl-c184="" class="split"><span _ngcontent-twl-c184="" class="color bg-danger"></span><span _ngcontent-twl-c184="" class="color bg-danger-light"></span></span><span _ngcontent-twl-c184="" class="color bg-white"></span></label></div></div></div><div _ngcontent-twl-c184="" class="row row-flush mb-2"><div _ngcontent-twl-c184="" class="col mb-2"><div _ngcontent-twl-c184="" class="setting-color"><label _ngcontent-twl-c184=""><input _ngcontent-twl-c184="" type="radio" name="setting-theme" value="E" class="ng-untouched ng-pristine ng-valid" style=""><span _ngcontent-twl-c184="" class="icon-check"></span><span _ngcontent-twl-c184="" class="split"><span _ngcontent-twl-c184="" class="color bg-info-dark"></span><span _ngcontent-twl-c184="" class="color bg-info"></span></span><span _ngcontent-twl-c184="" class="color bg-gray-dark"></span></label></div></div><div _ngcontent-twl-c184="" class="col mb-2"><div _ngcontent-twl-c184="" class="setting-color"><label _ngcontent-twl-c184=""><input _ngcontent-twl-c184="" type="radio" name="setting-theme" value="F" class="ng-untouched ng-pristine ng-valid" style=""><span _ngcontent-twl-c184="" class="icon-check"></span><span _ngcontent-twl-c184="" class="split"><span _ngcontent-twl-c184="" class="color bg-green-dark"></span><span _ngcontent-twl-c184="" class="color bg-green"></span></span><span _ngcontent-twl-c184="" class="color bg-gray-dark"></span></label></div></div><div _ngcontent-twl-c184="" class="col mb-2"><div _ngcontent-twl-c184="" class="setting-color"><label _ngcontent-twl-c184=""><input _ngcontent-twl-c184="" type="radio" name="setting-theme" value="G" class="ng-untouched ng-pristine ng-valid" style=""><span _ngcontent-twl-c184="" class="icon-check"></span><span _ngcontent-twl-c184="" class="split"><span _ngcontent-twl-c184="" class="color bg-purple-dark"></span><span _ngcontent-twl-c184="" class="color bg-purple"></span></span><span _ngcontent-twl-c184="" class="color bg-gray-dark"></span></label></div></div><div _ngcontent-twl-c184="" class="col mb-2"><div _ngcontent-twl-c184="" class="setting-color"><label _ngcontent-twl-c184=""><input _ngcontent-twl-c184="" type="radio" name="setting-theme" value="H" class="ng-untouched ng-pristine ng-valid" style=""><span _ngcontent-twl-c184="" class="icon-check"></span><span _ngcontent-twl-c184="" class="split"><span _ngcontent-twl-c184="" class="color bg-danger-dark"></span><span _ngcontent-twl-c184="" class="color bg-danger"></span></span><span _ngcontent-twl-c184="" class="color bg-gray-dark"></span></label></div></div></div></div><div _ngcontent-twl-c184="" class="p-2"><h4 _ngcontent-twl-c184="" class="text-muted text-thin">Layout</h4><div _ngcontent-twl-c184="" class="clearfix"><p _ngcontent-twl-c184="" class="float-left">Fixed</p><div _ngcontent-twl-c184="" class="float-right"><label _ngcontent-twl-c184="" class="switch"><input _ngcontent-twl-c184="" type="checkbox" class="ng-untouched ng-pristine ng-valid" style=""><span _ngcontent-twl-c184=""></span></label></div></div><div _ngcontent-twl-c184="" class="clearfix"><p _ngcontent-twl-c184="" class="float-left">Boxed</p><div _ngcontent-twl-c184="" class="float-right"><label _ngcontent-twl-c184="" class="switch"><input _ngcontent-twl-c184="" type="checkbox" class="ng-untouched ng-pristine ng-valid" style=""><span _ngcontent-twl-c184=""></span></label></div></div></div><div _ngcontent-twl-c184="" class="p-2"><h4 _ngcontent-twl-c184="" class="text-muted text-thin">Aside</h4><div _ngcontent-twl-c184="" class="clearfix"><p _ngcontent-twl-c184="" class="float-left">Collapsed</p><div _ngcontent-twl-c184="" class="float-right"><label _ngcontent-twl-c184="" class="switch"><input _ngcontent-twl-c184="" type="checkbox" class="ng-untouched ng-pristine ng-valid" style=""><span _ngcontent-twl-c184=""></span></label></div></div><div _ngcontent-twl-c184="" class="clearfix"><p _ngcontent-twl-c184="" class="float-left">Collapsed Text</p><div _ngcontent-twl-c184="" class="float-right"><label _ngcontent-twl-c184="" class="switch"><input _ngcontent-twl-c184="" type="checkbox" class="ng-untouched ng-pristine ng-valid" style=""><span _ngcontent-twl-c184=""></span></label></div></div><div _ngcontent-twl-c184="" class="clearfix"><p _ngcontent-twl-c184="" class="float-left">Float</p><div _ngcontent-twl-c184="" class="float-right"><label _ngcontent-twl-c184="" class="switch"><input _ngcontent-twl-c184="" type="checkbox" class="ng-untouched ng-pristine ng-valid" style=""><span _ngcontent-twl-c184=""></span></label></div></div><div _ngcontent-twl-c184="" class="clearfix"><p _ngcontent-twl-c184="" class="float-left">Hover</p><div _ngcontent-twl-c184="" class="float-right"><label _ngcontent-twl-c184="" class="switch"><input _ngcontent-twl-c184="" type="checkbox" class="ng-untouched ng-pristine ng-valid" style=""><span _ngcontent-twl-c184=""></span></label></div></div><div _ngcontent-twl-c184="" class="clearfix"><p _ngcontent-twl-c184="" class="float-left">Show Scrollbar</p><div _ngcontent-twl-c184="" class="float-right"><label _ngcontent-twl-c184="" class="switch"><input _ngcontent-twl-c184="" type="checkbox" class="ng-untouched ng-pristine ng-valid" style=""><span _ngcontent-twl-c184=""></span></label></div></div></div><!----><div _ngcontent-twl-c184="" class="p-2"><h4 _ngcontent-twl-c184="" class="text-muted text-thin">Language</h4><select _ngcontent-twl-c184="" class="form-control ng-untouched ng-pristine ng-valid"><option _ngcontent-twl-c184="" value="pt-br">Portuguese</option><option _ngcontent-twl-c184="" value="es-es">Spanish</option><option _ngcontent-twl-c184="" value="es-pe">Spanish</option><option _ngcontent-twl-c184="" value="en-us">English</option><!----></select></div></tab></div></tabset></app-offsidebar><section _ngcontent-twl-c180="" class="section-container"><div _ngcontent-twl-c180="" class="content-wrapper"><router-outlet _ngcontent-twl-c180=""></router-outlet><app-labels-list _nghost-twl-c233=""><div _ngcontent-twl-c233="" class="content-heading d-flex align-items-center justify-content-between flex-wrap"><div _ngcontent-twl-c233="" class="d-flex flex-column"><h1 _ngcontent-twl-c233="" class="font-bold leading-12 text-24 text-light-900 m-0">Etiquetas não impressas</h1></div><div _ngcontent-twl-c233="" class="d-flex align-items-center"><button _ngcontent-twl-c233="" type="button" class="btn btn-outline mr-3"><i _ngcontent-twl-c233="" class="fa-solid fa-mobile-screen-button leading-2 mr-2" style="width: 12px; height: 12px;"></i><h3 _ngcontent-twl-c233="" class="font-normal text-14 leading-6 m-0">Crie etiquetas pelo celular</h3></button><!----><button _ngcontent-twl-c233="" type="button" class="btn btn-default"><i _ngcontent-twl-c233="" class="fa-solid fa-plus leading-2 mr-2" style="width: 12px; height: 12px;"></i><h3 _ngcontent-twl-c233="" class="font-normal text-14 leading-6 m-0">Criar Etiqueta</h3></button><!----></div></div><div _ngcontent-twl-c233="" class="custom-container w-100"><app-permanent-version-warning _ngcontent-twl-c233="" class="w-100" _nghost-twl-c124=""><!----></app-permanent-version-warning><div _ngcontent-twl-c233="" class="card w-100 h-100"><!----><div _ngcontent-twl-c233="" class="tabs w-100 mb-3"><h4 _ngcontent-twl-c233="" class="active enabled"> Lotes de etiquetas <span _ngcontent-twl-c233="" class="badge rounded-100 bg-light-700 text-light-900 font-normal text-12 leading-2"> 113 </span><!----></h4><h4 _ngcontent-twl-c233="" class="enabled"> Etiquetas avulsas <!----></h4></div><!----><app-standard-list-filter _ngcontent-twl-c233="" _nghost-twl-c150="" class=""><div _ngcontent-twl-c150="" class="d-flex flex-column justify-content-start mt-3 mb-3"><div _ngcontent-twl-c150="" class="w-100 d-flex flex-wrap align-items-end justify-content-between"><div _ngcontent-twl-c150="" class="d-flex align-items-end"><h5 _ngcontent-twl-c150="" class="mb-1 mr-2">Filtrar por</h5><!----><div _ngcontent-twl-c150="" class="d-flex flex-wrap"><div _ngcontent-twl-c150="" class="form-group mb-0 mr-2"><app-datepicker-filter _ngcontent-twl-c150="" label="RECEIPT_DATE" placement="bottom" autocomplete="off" _nghost-twl-c152=""><div _ngcontent-twl-c152="" class="toggle-dropdown d-flex align-items-center justify-content-between"><h5 _ngcontent-twl-c152="">Data de recebimento</h5><i _ngcontent-twl-c152="" bsdatepicker="" onkeypress="return (event.charCode == 8 || event.charCode == 46)" class="fa d-flex fa-chevron-down"></i><!----></div></app-datepicker-filter></div><!----><!----><!----><!----><!----><!----><!----><!----><!----><!----><!----></div></div><div _ngcontent-twl-c150="" class="d-flex align-items-center search-box"><i _ngcontent-twl-c150="" class="fa-light fa-search"></i><input _ngcontent-twl-c150="" class="form-control ng-untouched ng-pristine ng-valid" placeholder="Buscar" style=""></div><!----></div><!----></div></app-standard-list-filter><!----><!----><app-standard-list _ngcontent-twl-c233="" _nghost-twl-c142="" class="d-none"><!----><!----></app-standard-list><app-standard-list _ngcontent-twl-c233="" _nghost-twl-c142="" class=""><div _ngcontent-twl-c142="" infinite-scroll="" class="table-responsive normal-table"><table _ngcontent-twl-c142="" class="table"><thead _ngcontent-twl-c142=""><!----></thead><tbody _ngcontent-twl-c142=""><tr _ngcontent-twl-c142="" list-item="" _nghost-twl-c143="" class="striped"><!----><app-batch-item _ngcontent-twl-c143="" _nghost-twl-c148=""><div _ngcontent-twl-c148="" class="card-default batch-item d-flex flex-column h-104 justify-content-between m-0 mb-2 gap-8"><!----><div _ngcontent-twl-c148="" class="d-flex align-items-center justify-content-between"><div _ngcontent-twl-c148="" class="d-flex flex-column"><div _ngcontent-twl-c148="" class="d-flex align-items-center justify-content-start mb-2"><h4 _ngcontent-twl-c148="" class="batch-label-description text-14">1187 LT PRECOS REG-PARC 2026/09/16 18:20:01 - Etiqueta (34x90mm)</h4><div _ngcontent-twl-c148="" class="batch-label-date batch-label-date-warning"><!----><!----><span _ngcontent-twl-c148="">17/09/2026</span><!----></div></div><p _ngcontent-twl-c148="" class="batch-label-info font-normal leading-5 text-16 color-light-900 m-0"> 13 Etiquetas | 1 Páginas | 13 Produtos </p></div><div _ngcontent-twl-c148="" class="d-flex align-items-center"><div _ngcontent-twl-c148="" class="w-100 d-flex justify-content-start"><a _ngcontent-twl-c148="" class="font-normal text-14 cursor-pointer text-primary"> Ver relatório do lote </a></div><app-print-button _ngcontent-twl-c148="" class="ml-3" _nghost-twl-c166=""><!----><button _ngcontent-twl-c166="" class="btn-outline"><!----><i _ngcontent-twl-c166="" class="fa fa-solid fa-download mr-2"></i> Download <!----><!----></button><!----></app-print-button></div></div><!----><!----></div></app-batch-item><!----><!----><!----><!----></tr><tr _ngcontent-twl-c142="" list-item="" _nghost-twl-c143=""><!----><app-batch-item _ngcontent-twl-c143="" _nghost-twl-c148=""><div _ngcontent-twl-c148="" class="card-default batch-item d-flex flex-column h-104 justify-content-between m-0 mb-2 gap-8"><!----><div _ngcontent-twl-c148="" class="d-flex align-items-center justify-content-between"><div _ngcontent-twl-c148="" class="d-flex flex-column"><div _ngcontent-twl-c148="" class="d-flex align-items-center justify-content-start mb-2"><h4 _ngcontent-twl-c148="" class="batch-label-description text-14">1187 LT PRECOS PROMO 2026/09/16 18:20:01 - Etiqueta (34x90mm)</h4><div _ngcontent-twl-c148="" class="batch-label-date batch-label-date-warning"><!----><!----><span _ngcontent-twl-c148="">17/09/2026</span><!----></div></div><p _ngcontent-twl-c148="" class="batch-label-info font-normal leading-5 text-16 color-light-900 m-0"> 170 Etiquetas | 11 Páginas | 170 Produtos </p></div><div _ngcontent-twl-c148="" class="d-flex align-items-center"><div _ngcontent-twl-c148="" class="w-100 d-flex justify-content-start"><a _ngcontent-twl-c148="" class="font-normal text-14 cursor-pointer text-primary"> Ver relatório do lote </a></div><app-print-button _ngcontent-twl-c148="" class="ml-3" _nghost-twl-c166=""><!----><button _ngcontent-twl-c166="" class="btn-outline"><!----><i _ngcontent-twl-c166="" class="fa fa-solid fa-download mr-2"></i> Download <!----><!----></button><!----></app-print-button></div></div><!----><!----></div></app-batch-item><!----><!----><!----><!----></tr><tr _ngcontent-twl-c142="" list-item="" _nghost-twl-c143="" class="striped"><!----><app-batch-item _ngcontent-twl-c143="" _nghost-twl-c148=""><div _ngcontent-twl-c148="" class="card-default batch-item d-flex flex-column h-104 justify-content-between m-0 mb-2 gap-8"><!----><div _ngcontent-twl-c148="" class="d-flex align-items-center justify-content-between"><div _ngcontent-twl-c148="" class="d-flex flex-column"><div _ngcontent-twl-c148="" class="d-flex align-items-center justify-content-start mb-2"><h4 _ngcontent-twl-c148="" class="batch-label-description text-14">1187 LT PRECOS PROMO-PARC 2026/09/16 18:20:01 - Etiqueta (34x90mm)</h4><div _ngcontent-twl-c148="" class="batch-label-date batch-label-date-warning"><!----><!----><span _ngcontent-twl-c148="">17/09/2026</span><!----></div></div><p _ngcontent-twl-c148="" class="batch-label-info font-normal leading-5 text-16 color-light-900 m-0"> 354 Etiquetas | 23 Páginas | 354 Produtos </p></div><div _ngcontent-twl-c148="" class="d-flex align-items-center"><div _ngcontent-twl-c148="" class="w-100 d-flex justify-content-start"><a _ngcontent-twl-c148="" class="font-normal text-14 cursor-pointer text-primary"> Ver relatório do lote </a></div><app-print-button _ngcontent-twl-c148="" class="ml-3" _nghost-twl-c166=""><!----><button _ngcontent-twl-c166="" class="btn-outline"><!----><i _ngcontent-twl-c166="" class="fa fa-solid fa-download mr-2"></i> Download <!----><!----></button><!----></app-print-button></div></div><!----><!----></div></app-batch-item><!----><!----><!----><!----></tr><tr _ngcontent-twl-c142="" list-item="" _nghost-twl-c143=""><!----><app-batch-item _ngcontent-twl-c143="" _nghost-twl-c148=""><div _ngcontent-twl-c148="" class="card-default batch-item d-flex flex-column h-104 justify-content-between m-0 mb-2 gap-8"><!----><div _ngcontent-twl-c148="" class="d-flex align-items-center justify-content-between"><div _ngcontent-twl-c148="" class="d-flex flex-column"><div _ngcontent-twl-c148="" class="d-flex align-items-center justify-content-start mb-2"><h4 _ngcontent-twl-c148="" class="batch-label-description text-14">1187 LT PRECOS REG-PARC 2026/09/14 22:15:01 - Etiqueta (34x90mm)</h4><div _ngcontent-twl-c148="" class="batch-label-date batch-label-date-warning"><!----><!----><span _ngcontent-twl-c148="">15/09/2026</span><!----></div></div><p _ngcontent-twl-c148="" class="batch-label-info font-normal leading-5 text-16 color-light-900 m-0"> 2 Etiquetas | 1 Páginas | 2 Produtos </p></div><div _ngcontent-twl-c148="" class="d-flex align-items-center"><div _ngcontent-twl-c148="" class="w-100 d-flex justify-content-start"><a _ngcontent-twl-c148="" class="font-normal text-14 cursor-pointer text-primary"> Ver relatório do lote </a></div><app-print-button _ngcontent-twl-c148="" class="ml-3" _nghost-twl-c166=""><!----><button _ngcontent-twl-c166="" class="btn-outline"><!----><i _ngcontent-twl-c166="" class="fa fa-solid fa-download mr-2"></i> Download <!----><!----></button><!----></app-print-button></div></div><!----><!----></div></app-batch-item><!----><!----><!----><!----></tr><tr _ngcontent-twl-c142="" list-item="" _nghost-twl-c143="" class="striped"><!----><app-batch-item _ngcontent-twl-c143="" _nghost-twl-c148=""><div _ngcontent-twl-c148="" class="card-default batch-item d-flex flex-column h-104 justify-content-between m-0 mb-2 gap-8"><!----><div _ngcontent-twl-c148="" class="d-flex align-items-center justify-content-between"><div _ngcontent-twl-c148="" class="d-flex flex-column"><div _ngcontent-twl-c148="" class="d-flex align-items-center justify-content-start mb-2"><h4 _ngcontent-twl-c148="" class="batch-label-description text-14">1187 LT PRECOS REG-PARC 2026/09/14 18:20:01 - Etiqueta (34x90mm)</h4><div _ngcontent-twl-c148="" class="batch-label-date batch-label-date-warning"><!----><!----><span _ngcontent-twl-c148="">15/09/2026</span><!----></div></div><p _ngcontent-twl-c148="" class="batch-label-info font-normal leading-5 text-16 color-light-900 m-0"> 13 Etiquetas | 1 Páginas | 13 Produtos </p></div><div _ngcontent-twl-c148="" class="d-flex align-items-center"><div _ngcontent-twl-c148="" class="w-100 d-flex justify-content-start"><a _ngcontent-twl-c148="" class="font-normal text-14 cursor-pointer text-primary"> Ver relatório do lote </a></div><app-print-button _ngcontent-twl-c148="" class="ml-3" _nghost-twl-c166=""><!----><button _ngcontent-twl-c166="" class="btn-outline"><!----><i _ngcontent-twl-c166="" class="fa fa-solid fa-download mr-2"></i> Download <!----><!----></button><!----></app-print-button></div></div><!----><!----></div></app-batch-item><!----><!----><!----><!----></tr><tr _ngcontent-twl-c142="" list-item="" _nghost-twl-c143=""><!----><app-batch-item _ngcontent-twl-c143="" _nghost-twl-c148=""><div _ngcontent-twl-c148="" class="card-default batch-item d-flex flex-column h-104 justify-content-between m-0 mb-2 gap-8"><!----><div _ngcontent-twl-c148="" class="d-flex align-items-center justify-content-between"><div _ngcontent-twl-c148="" class="d-flex flex-column"><div _ngcontent-twl-c148="" class="d-flex align-items-center justify-content-start mb-2"><h4 _ngcontent-twl-c148="" class="batch-label-description text-14">1187 LT PRECOS PROMO-PARC 2026/09/14 18:20:01 - Etiqueta (34x90mm)</h4><div _ngcontent-twl-c148="" class="batch-label-date batch-label-date-warning"><!----><!----><span _ngcontent-twl-c148="">15/09/2026</span><!----></div></div><p _ngcontent-twl-c148="" class="batch-label-info font-normal leading-5 text-16 color-light-900 m-0"> 4 Etiquetas | 1 Páginas | 4 Produtos </p></div><div _ngcontent-twl-c148="" class="d-flex align-items-center"><div _ngcontent-twl-c148="" class="w-100 d-flex justify-content-start"><a _ngcontent-twl-c148="" class="font-normal text-14 cursor-pointer text-primary"> Ver relatório do lote </a></div><app-print-button _ngcontent-twl-c148="" class="ml-3" _nghost-twl-c166=""><!----><button _ngcontent-twl-c166="" class="btn-outline"><!----><i _ngcontent-twl-c166="" class="fa fa-solid fa-download mr-2"></i> Download <!----><!----></button><!----></app-print-button></div></div><!----><!----></div></app-batch-item><!----><!----><!----><!----></tr><tr _ngcontent-twl-c142="" list-item="" _nghost-twl-c143="" class="striped"><!----><app-batch-item _ngcontent-twl-c143="" _nghost-twl-c148=""><div _ngcontent-twl-c148="" class="card-default batch-item d-flex flex-column h-104 justify-content-between m-0 mb-2 gap-8"><!----><div _ngcontent-twl-c148="" class="d-flex align-items-center justify-content-between"><div _ngcontent-twl-c148="" class="d-flex flex-column"><div _ngcontent-twl-c148="" class="d-flex align-items-center justify-content-start mb-2"><h4 _ngcontent-twl-c148="" class="batch-label-description text-14">1187 LT PRECOS REG 2026/09/14 18:20:01 - Etiqueta (34x90mm)</h4><div _ngcontent-twl-c148="" class="batch-label-date batch-label-date-warning"><!----><!----><span _ngcontent-twl-c148="">15/09/2026</span><!----></div></div><p _ngcontent-twl-c148="" class="batch-label-info font-normal leading-5 text-16 color-light-900 m-0"> 2 Etiquetas | 1 Páginas | 2 Produtos </p></div><div _ngcontent-twl-c148="" class="d-flex align-items-center"><div _ngcontent-twl-c148="" class="w-100 d-flex justify-content-start"><a _ngcontent-twl-c148="" class="font-normal text-14 cursor-pointer text-primary"> Ver relatório do lote </a></div><app-print-button _ngcontent-twl-c148="" class="ml-3" _nghost-twl-c166=""><!----><button _ngcontent-twl-c166="" class="btn-outline"><!----><i _ngcontent-twl-c166="" class="fa fa-solid fa-download mr-2"></i> Download <!----><!----></button><!----></app-print-button></div></div><!----><!----></div></app-batch-item><!----><!----><!----><!----></tr><tr _ngcontent-twl-c142="" list-item="" _nghost-twl-c143=""><!----><app-batch-item _ngcontent-twl-c143="" _nghost-twl-c148=""><div _ngcontent-twl-c148="" class="card-default batch-item d-flex flex-column h-104 justify-content-between m-0 mb-2 gap-8"><!----><div _ngcontent-twl-c148="" class="d-flex align-items-center justify-content-between"><div _ngcontent-twl-c148="" class="d-flex flex-column"><div _ngcontent-twl-c148="" class="d-flex align-items-center justify-content-start mb-2"><h4 _ngcontent-twl-c148="" class="batch-label-description text-14">1187 LT PRECOS REG 2026/09/13 22:15:01 - Etiqueta (34x90mm)</h4><div _ngcontent-twl-c148="" class="batch-label-date batch-label-date-warning"><!----><!----><span _ngcontent-twl-c148="">14/09/2026</span><!----></div></div><p _ngcontent-twl-c148="" class="batch-label-info font-normal leading-5 text-16 color-light-900 m-0"> 1 Etiquetas | 1 Páginas | 1 Produtos </p></div><div _ngcontent-twl-c148="" class="d-flex align-items-center"><div _ngcontent-twl-c148="" class="w-100 d-flex justify-content-start"><a _ngcontent-twl-c148="" class="font-normal text-14 cursor-pointer text-primary"> Ver relatório do lote </a></div><app-print-button _ngcontent-twl-c148="" class="ml-3" _nghost-twl-c166=""><!----><button _ngcontent-twl-c166="" class="btn-outline"><!----><i _ngcontent-twl-c166="" class="fa fa-solid fa-download mr-2"></i> Download <!----><!----></button><!----></app-print-button></div></div><!----><!----></div></app-batch-item><!----><!----><!----><!----></tr><tr _ngcontent-twl-c142="" list-item="" _nghost-twl-c143="" class="striped"><!----><app-batch-item _ngcontent-twl-c143="" _nghost-twl-c148=""><div _ngcontent-twl-c148="" class="card-default batch-item d-flex flex-column h-104 justify-content-between m-0 mb-2 gap-8"><!----><div _ngcontent-twl-c148="" class="d-flex align-items-center justify-content-between"><div _ngcontent-twl-c148="" class="d-flex flex-column"><div _ngcontent-twl-c148="" class="d-flex align-items-center justify-content-start mb-2"><h4 _ngcontent-twl-c148="" class="batch-label-description text-14">1187 LT PRECOS REG-PARC 2026/09/09 22:15:01 - Etiqueta (34x90mm)</h4><div _ngcontent-twl-c148="" class="batch-label-date batch-label-date-warning"><!----><!----><span _ngcontent-twl-c148="">10/09/2026</span><!----></div></div><p _ngcontent-twl-c148="" class="batch-label-info font-normal leading-5 text-16 color-light-900 m-0"> 82 Etiquetas | 6 Páginas | 82 Produtos </p></div><div _ngcontent-twl-c148="" class="d-flex align-items-center"><div _ngcontent-twl-c148="" class="w-100 d-flex justify-content-start"><a _ngcontent-twl-c148="" class="font-normal text-14 cursor-pointer text-primary"> Ver relatório do lote </a></div><app-print-button _ngcontent-twl-c148="" class="ml-3" _nghost-twl-c166=""><!----><button _ngcontent-twl-c166="" class="btn-outline"><!----><i _ngcontent-twl-c166="" class="fa fa-solid fa-download mr-2"></i> Download <!----><!----></button><!----></app-print-button></div></div><!----><!----></div></app-batch-item><!----><!----><!----><!----></tr><tr _ngcontent-twl-c142="" list-item="" _nghost-twl-c143=""><!----><app-batch-item _ngcontent-twl-c143="" _nghost-twl-c148=""><div _ngcontent-twl-c148="" class="card-default batch-item d-flex flex-column h-104 justify-content-between m-0 mb-2 gap-8"><!----><div _ngcontent-twl-c148="" class="d-flex align-items-center justify-content-between"><div _ngcontent-twl-c148="" class="d-flex flex-column"><div _ngcontent-twl-c148="" class="d-flex align-items-center justify-content-start mb-2"><h4 _ngcontent-twl-c148="" class="batch-label-description text-14">1187 LT PRECOS REG 2026/09/09 22:15:01 - Etiqueta (34x90mm)</h4><div _ngcontent-twl-c148="" class="batch-label-date batch-label-date-warning"><!----><!----><span _ngcontent-twl-c148="">10/09/2026</span><!----></div></div><p _ngcontent-twl-c148="" class="batch-label-info font-normal leading-5 text-16 color-light-900 m-0"> 18 Etiquetas | 2 Páginas | 18 Produtos </p></div><div _ngcontent-twl-c148="" class="d-flex align-items-center"><div _ngcontent-twl-c148="" class="w-100 d-flex justify-content-start"><a _ngcontent-twl-c148="" class="font-normal text-14 cursor-pointer text-primary"> Ver relatório do lote </a></div><app-print-button _ngcontent-twl-c148="" class="ml-3" _nghost-twl-c166=""><!----><button _ngcontent-twl-c166="" class="btn-outline"><!----><i _ngcontent-twl-c166="" class="fa fa-solid fa-download mr-2"></i> Download <!----><!----></button><!----></app-print-button></div></div><!----><!----></div></app-batch-item><!----><!----><!----><!----></tr><tr _ngcontent-twl-c142="" list-item="" _nghost-twl-c143="" class="striped"><!----><app-batch-item _ngcontent-twl-c143="" _nghost-twl-c148=""><div _ngcontent-twl-c148="" class="card-default batch-item d-flex flex-column h-104 justify-content-between m-0 mb-2 gap-8"><!----><div _ngcontent-twl-c148="" class="d-flex align-items-center justify-content-between"><div _ngcontent-twl-c148="" class="d-flex flex-column"><div _ngcontent-twl-c148="" class="d-flex align-items-center justify-content-start mb-2"><h4 _ngcontent-twl-c148="" class="batch-label-description text-14">1187 LT PRECOS REG-PARC 2026/09/09 18:20:01 - Etiqueta (34x90mm)</h4><div _ngcontent-twl-c148="" class="batch-label-date batch-label-date-warning"><!----><!----><span _ngcontent-twl-c148="">10/09/2026</span><!----></div></div><p _ngcontent-twl-c148="" class="batch-label-info font-normal leading-5 text-16 color-light-900 m-0"> 31 Etiquetas | 2 Páginas | 31 Produtos </p></div><div _ngcontent-twl-c148="" class="d-flex align-items-center"><div _ngcontent-twl-c148="" class="w-100 d-flex justify-content-start"><a _ngcontent-twl-c148="" class="font-normal text-14 cursor-pointer text-primary"> Ver relatório do lote </a></div><app-print-button _ngcontent-twl-c148="" class="ml-3" _nghost-twl-c166=""><!----><button _ngcontent-twl-c166="" class="btn-outline"><!----><i _ngcontent-twl-c166="" class="fa fa-solid fa-download mr-2"></i> Download <!----><!----></button><!----></app-print-button></div></div><!----><!----></div></app-batch-item><!----><!----><!----><!----></tr><tr _ngcontent-twl-c142="" list-item="" _nghost-twl-c143=""><!----><app-batch-item _ngcontent-twl-c143="" _nghost-twl-c148=""><div _ngcontent-twl-c148="" class="card-default batch-item d-flex flex-column h-104 justify-content-between m-0 mb-2 gap-8"><!----><div _ngcontent-twl-c148="" class="d-flex align-items-center justify-content-between"><div _ngcontent-twl-c148="" class="d-flex flex-column"><div _ngcontent-twl-c148="" class="d-flex align-items-center justify-content-start mb-2"><h4 _ngcontent-twl-c148="" class="batch-label-description text-14">1187 LT PRECOS PROMO 2026/09/09 18:20:01 - Etiqueta (34x90mm)</h4><div _ngcontent-twl-c148="" class="batch-label-date batch-label-date-warning"><!----><!----><span _ngcontent-twl-c148="">10/09/2026</span><!----></div></div><p _ngcontent-twl-c148="" class="batch-label-info font-normal leading-5 text-16 color-light-900 m-0"> 12 Etiquetas | 1 Páginas | 12 Produtos </p></div><div _ngcontent-twl-c148="" class="d-flex align-items-center"><div _ngcontent-twl-c148="" class="w-100 d-flex justify-content-start"><a _ngcontent-twl-c148="" class="font-normal text-14 cursor-pointer text-primary"> Ver relatório do lote </a></div><app-print-button _ngcontent-twl-c148="" class="ml-3" _nghost-twl-c166=""><!----><button _ngcontent-twl-c166="" class="btn-outline"><!----><i _ngcontent-twl-c166="" class="fa fa-solid fa-download mr-2"></i> Download <!----><!----></button><!----></app-print-button></div></div><!----><!----></div></app-batch-item><!----><!----><!----><!----></tr><tr _ngcontent-twl-c142="" list-item="" _nghost-twl-c143="" class="striped"><!----><app-batch-item _ngcontent-twl-c143="" _nghost-twl-c148=""><div _ngcontent-twl-c148="" class="card-default batch-item d-flex flex-column h-104 justify-content-between m-0 mb-2 gap-8"><!----><div _ngcontent-twl-c148="" class="d-flex align-items-center justify-content-between"><div _ngcontent-twl-c148="" class="d-flex flex-column"><div _ngcontent-twl-c148="" class="d-flex align-items-center justify-content-start mb-2"><h4 _ngcontent-twl-c148="" class="batch-label-description text-14">1187 LT PRECOS PROMO-PARC 2026/09/09 18:20:01 - Etiqueta (34x90mm)</h4><div _ngcontent-twl-c148="" class="batch-label-date batch-label-date-warning"><!----><!----><span _ngcontent-twl-c148="">10/09/2026</span><!----></div></div><p _ngcontent-twl-c148="" class="batch-label-info font-normal leading-5 text-16 color-light-900 m-0"> 68 Etiquetas | 5 Páginas | 68 Produtos </p></div><div _ngcontent-twl-c148="" class="d-flex align-items-center"><div _ngcontent-twl-c148="" class="w-100 d-flex justify-content-start"><a _ngcontent-twl-c148="" class="font-normal text-14 cursor-pointer text-primary"> Ver relatório do lote </a></div><app-print-button _ngcontent-twl-c148="" class="ml-3" _nghost-twl-c166=""><!----><button _ngcontent-twl-c166="" class="btn-outline"><!----><i _ngcontent-twl-c166="" class="fa fa-solid fa-download mr-2"></i> Download <!----><!----></button><!----></app-print-button></div></div><!----><!----></div></app-batch-item><!----><!----><!----><!----></tr><tr _ngcontent-twl-c142="" list-item="" _nghost-twl-c143=""><!----><app-batch-item _ngcontent-twl-c143="" _nghost-twl-c148=""><div _ngcontent-twl-c148="" class="card-default batch-item d-flex flex-column h-104 justify-content-between m-0 mb-2 gap-8"><!----><div _ngcontent-twl-c148="" class="d-flex align-items-center justify-content-between"><div _ngcontent-twl-c148="" class="d-flex flex-column"><div _ngcontent-twl-c148="" class="d-flex align-items-center justify-content-start mb-2"><h4 _ngcontent-twl-c148="" class="batch-label-description text-14">1187 LT PRECOS PROMO-PARC 2026/09/08 18:20:01 - Etiqueta (34x90mm)</h4><div _ngcontent-twl-c148="" class="batch-label-date batch-label-date-warning"><!----><!----><span _ngcontent-twl-c148="">08/09/2026</span><!----></div></div><p _ngcontent-twl-c148="" class="batch-label-info font-normal leading-5 text-16 color-light-900 m-0"> 2 Etiquetas | 1 Páginas | 2 Produtos </p></div><div _ngcontent-twl-c148="" class="d-flex align-items-center"><div _ngcontent-twl-c148="" class="w-100 d-flex justify-content-start"><a _ngcontent-twl-c148="" class="font-normal text-14 cursor-pointer text-primary"> Ver relatório do lote </a></div><app-print-button _ngcontent-twl-c148="" class="ml-3" _nghost-twl-c166=""><!----><button _ngcontent-twl-c166="" class="btn-outline"><!----><i _ngcontent-twl-c166="" class="fa fa-solid fa-download mr-2"></i> Download <!----><!----></button><!----></app-print-button></div></div><!----><!----></div></app-batch-item><!----><!----><!----><!----></tr><tr _ngcontent-twl-c142="" list-item="" _nghost-twl-c143="" class="striped"><!----><app-batch-item _ngcontent-twl-c143="" _nghost-twl-c148=""><div _ngcontent-twl-c148="" class="card-default batch-item d-flex flex-column h-104 justify-content-between m-0 mb-2 gap-8"><!----><div _ngcontent-twl-c148="" class="d-flex align-items-center justify-content-between"><div _ngcontent-twl-c148="" class="d-flex flex-column"><div _ngcontent-twl-c148="" class="d-flex align-items-center justify-content-start mb-2"><h4 _ngcontent-twl-c148="" class="batch-label-description text-14">1187 LT PRECOS REG-PARC 2026/09/08 18:20:01 - Etiqueta (34x90mm)</h4><div _ngcontent-twl-c148="" class="batch-label-date batch-label-date-warning"><!----><!----><span _ngcontent-twl-c148="">08/09/2026</span><!----></div></div><p _ngcontent-twl-c148="" class="batch-label-info font-normal leading-5 text-16 color-light-900 m-0"> 43 Etiquetas | 3 Páginas | 43 Produtos </p></div><div _ngcontent-twl-c148="" class="d-flex align-items-center"><div _ngcontent-twl-c148="" class="w-100 d-flex justify-content-start"><a _ngcontent-twl-c148="" class="font-normal text-14 cursor-pointer text-primary"> Ver relatório do lote </a></div><app-print-button _ngcontent-twl-c148="" class="ml-3" _nghost-twl-c166=""><!----><button _ngcontent-twl-c166="" class="btn-outline"><!----><i _ngcontent-twl-c166="" class="fa fa-solid fa-download mr-2"></i> Download <!----><!----></button><!----></app-print-button></div></div><!----><!----></div></app-batch-item><!----><!----><!----><!----></tr><tr _ngcontent-twl-c142="" list-item="" _nghost-twl-c143=""><!----><app-batch-item _ngcontent-twl-c143="" _nghost-twl-c148=""><div _ngcontent-twl-c148="" class="card-default batch-item d-flex flex-column h-104 justify-content-between m-0 mb-2 gap-8"><!----><div _ngcontent-twl-c148="" class="d-flex align-items-center justify-content-between"><div _ngcontent-twl-c148="" class="d-flex flex-column"><div _ngcontent-twl-c148="" class="d-flex align-items-center justify-content-start mb-2"><h4 _ngcontent-twl-c148="" class="batch-label-description text-14">1187 LT PRECOS REG 2026/09/08 18:20:01 - Etiqueta (34x90mm)</h4><div _ngcontent-twl-c148="" class="batch-label-date batch-label-date-warning"><!----><!----><span _ngcontent-twl-c148="">08/09/2026</span><!----></div></div><p _ngcontent-twl-c148="" class="batch-label-info font-normal leading-5 text-16 color-light-900 m-0"> 3 Etiquetas | 1 Páginas | 3 Produtos </p></div><div _ngcontent-twl-c148="" class="d-flex align-items-center"><div _ngcontent-twl-c148="" class="w-100 d-flex justify-content-start"><a _ngcontent-twl-c148="" class="font-normal text-14 cursor-pointer text-primary"> Ver relatório do lote </a></div><app-print-button _ngcontent-twl-c148="" class="ml-3" _nghost-twl-c166=""><!----><button _ngcontent-twl-c166="" class="btn-outline"><!----><i _ngcontent-twl-c166="" class="fa fa-solid fa-download mr-2"></i> Download <!----><!----></button><!----></app-print-button></div></div><!----><!----></div></app-batch-item><!----><!----><!----><!----></tr><tr _ngcontent-twl-c142="" list-item="" _nghost-twl-c143="" class="striped"><!----><app-batch-item _ngcontent-twl-c143="" _nghost-twl-c148=""><div _ngcontent-twl-c148="" class="card-default batch-item d-flex flex-column h-104 justify-content-between m-0 mb-2 gap-8"><!----><div _ngcontent-twl-c148="" class="d-flex align-items-center justify-content-between"><div _ngcontent-twl-c148="" class="d-flex flex-column"><div _ngcontent-twl-c148="" class="d-flex align-items-center justify-content-start mb-2"><h4 _ngcontent-twl-c148="" class="batch-label-description text-14">1187 LT PRECOS PROMO 2026/09/07 18:20:01 - Etiqueta (34x90mm)</h4><div _ngcontent-twl-c148="" class="batch-label-date batch-label-date-warning"><!----><!----><span _ngcontent-twl-c148="">08/09/2026</span><!----></div></div><p _ngcontent-twl-c148="" class="batch-label-info font-normal leading-5 text-16 color-light-900 m-0"> 8 Etiquetas | 1 Páginas | 8 Produtos </p></div><div _ngcontent-twl-c148="" class="d-flex align-items-center"><div _ngcontent-twl-c148="" class="w-100 d-flex justify-content-start"><a _ngcontent-twl-c148="" class="font-normal text-14 cursor-pointer text-primary"> Ver relatório do lote </a></div><app-print-button _ngcontent-twl-c148="" class="ml-3" _nghost-twl-c166=""><!----><button _ngcontent-twl-c166="" class="btn-outline"><!----><i _ngcontent-twl-c166="" class="fa fa-solid fa-download mr-2"></i> Download <!----><!----></button><!----></app-print-button></div></div><!----><!----></div></app-batch-item><!----><!----><!----><!----></tr><tr _ngcontent-twl-c142="" list-item="" _nghost-twl-c143=""><!----><app-batch-item _ngcontent-twl-c143="" _nghost-twl-c148=""><div _ngcontent-twl-c148="" class="card-default batch-item d-flex flex-column h-104 justify-content-between m-0 mb-2 gap-8"><!----><div _ngcontent-twl-c148="" class="d-flex align-items-center justify-content-between"><div _ngcontent-twl-c148="" class="d-flex flex-column"><div _ngcontent-twl-c148="" class="d-flex align-items-center justify-content-start mb-2"><h4 _ngcontent-twl-c148="" class="batch-label-description text-14">1187 LT PRECOS REG 2026/09/04 22:15:01 - Etiqueta (34x90mm)</h4><div _ngcontent-twl-c148="" class="batch-label-date batch-label-date-warning"><!----><!----><span _ngcontent-twl-c148="">05/09/2026</span><!----></div></div><p _ngcontent-twl-c148="" class="batch-label-info font-normal leading-5 text-16 color-light-900 m-0"> 1 Etiquetas | 1 Páginas | 1 Produtos </p></div><div _ngcontent-twl-c148="" class="d-flex align-items-center"><div _ngcontent-twl-c148="" class="w-100 d-flex justify-content-start"><a _ngcontent-twl-c148="" class="font-normal text-14 cursor-pointer text-primary"> Ver relatório do lote </a></div><app-print-button _ngcontent-twl-c148="" class="ml-3" _nghost-twl-c166=""><!----><button _ngcontent-twl-c166="" class="btn-outline"><!----><i _ngcontent-twl-c166="" class="fa fa-solid fa-download mr-2"></i> Download <!----><!----></button><!----></app-print-button></div></div><!----><!----></div></app-batch-item><!----><!----><!----><!----></tr><tr _ngcontent-twl-c142="" list-item="" _nghost-twl-c143="" class="striped"><!----><app-batch-item _ngcontent-twl-c143="" _nghost-twl-c148=""><div _ngcontent-twl-c148="" class="card-default batch-item d-flex flex-column h-104 justify-content-between m-0 mb-2 gap-8"><!----><div _ngcontent-twl-c148="" class="d-flex align-items-center justify-content-between"><div _ngcontent-twl-c148="" class="d-flex flex-column"><div _ngcontent-twl-c148="" class="d-flex align-items-center justify-content-start mb-2"><h4 _ngcontent-twl-c148="" class="batch-label-description text-14">1187 LT PRECOS REG-PARC 2026/07/12 18:20:01 - Etiqueta (34x90mm)</h4><div _ngcontent-twl-c148="" class="batch-label-date batch-label-date-warning"><!----><!----><span _ngcontent-twl-c148="">13/07/2026</span><!----></div></div><p _ngcontent-twl-c148="" class="batch-label-info font-normal leading-5 text-16 color-light-900 m-0"> 1 Etiquetas | 1 Páginas | 1 Produtos </p></div><div _ngcontent-twl-c148="" class="d-flex align-items-center"><div _ngcontent-twl-c148="" class="w-100 d-flex justify-content-start"><a _ngcontent-twl-c148="" class="font-normal text-14 cursor-pointer text-primary"> Ver relatório do lote </a></div><app-print-button _ngcontent-twl-c148="" class="ml-3" _nghost-twl-c166=""><!----><button _ngcontent-twl-c166="" class="btn-outline"><!----><i _ngcontent-twl-c166="" class="fa fa-solid fa-download mr-2"></i> Download <!----><!----></button><!----></app-print-button></div></div><!----><!----></div></app-batch-item><!----><!----><!----><!----></tr><tr _ngcontent-twl-c142="" list-item="" _nghost-twl-c143=""><!----><app-batch-item _ngcontent-twl-c143="" _nghost-twl-c148=""><div _ngcontent-twl-c148="" class="card-default batch-item d-flex flex-column h-104 justify-content-between m-0 mb-2 gap-8"><!----><div _ngcontent-twl-c148="" class="d-flex align-items-center justify-content-between"><div _ngcontent-twl-c148="" class="d-flex flex-column"><div _ngcontent-twl-c148="" class="d-flex align-items-center justify-content-start mb-2"><h4 _ngcontent-twl-c148="" class="batch-label-description text-14">1187 LT PRECOS REG 2026/07/09 18:20:01 - Etiqueta (34x90mm)</h4><div _ngcontent-twl-c148="" class="batch-label-date batch-label-date-warning"><!----><!----><span _ngcontent-twl-c148="">10/07/2026</span><!----></div></div><p _ngcontent-twl-c148="" class="batch-label-info font-normal leading-5 text-16 color-light-900 m-0"> 1 Etiquetas | 1 Páginas | 1 Produtos </p></div><div _ngcontent-twl-c148="" class="d-flex align-items-center"><div _ngcontent-twl-c148="" class="w-100 d-flex justify-content-start"><a _ngcontent-twl-c148="" class="font-normal text-14 cursor-pointer text-primary"> Ver relatório do lote </a></div><app-print-button _ngcontent-twl-c148="" class="ml-3" _nghost-twl-c166=""><!----><button _ngcontent-twl-c166="" class="btn-outline"><!----><i _ngcontent-twl-c166="" class="fa fa-solid fa-download mr-2"></i> Download <!----><!----></button><!----></app-print-button></div></div><!----><!----></div></app-batch-item><!----><!----><!----><!----></tr><!----><!----></tbody></table></div><!----><!----></app-standard-list><!----><!----><!----><!----><!----></div></div></app-labels-list><!----></div></section></div></app-layout><!----></app-root>
+<script src="runtime.a7e87a640e2000c100e6.js" defer=""></script><script src="polyfills-es5.919d6dec8d1a79dbb7da.js" nomodule="" defer=""></script><script src="polyfills.5e586deea13824b4bdbd.js" defer=""></script><script src="scripts.c1794be5f6d83091cc22.js" defer=""></script><script src="main.2dea220a25380a9bea87.js" defer=""></script>
+
+
+<iframe id="_hjSafeContext_51501280" title="_hjSafeContext" tabindex="-1" aria-hidden="true" src="about:blank" style="display: none !important; width: 1px !important; height: 1px !important; opacity: 0 !important; pointer-events: none !important;"></iframe><script async="" src="https://www.googletagmanager.com/gtag/js?id=G-MXDJ6ZHV17"></script><bs-modal-backdrop class="modal-backdrop fade in show"></bs-modal-backdrop><modal-container role="dialog" tabindex="-1" class="modal fade show" style="display: block;" aria-modal="true"><div role="document" class="modal-dialog d-none"><div class="modal-content"><app-modal-create-label _nghost-twl-c234=""><div _ngcontent-twl-c234="" class="modal-header"><span _ngcontent-twl-c234="" id="modal-title">Criar Nova Etiqueta</span><span _ngcontent-twl-c234="" class="p-2"><i _ngcontent-twl-c234="" class="fa fa-times"></i></span></div><div _ngcontent-twl-c234="" class="modal-body"><form _ngcontent-twl-c234="" novalidate="" class="ng-valid ng-dirty ng-touched"><div _ngcontent-twl-c234="" class="search-bar"><div _ngcontent-twl-c234="" class="type-select"><label _ngcontent-twl-c234="">Tipo</label><ngx-select _ngcontent-twl-c234="" formcontrolname="labelType" optionvaluefield="codigo" optiontextfield="rotulo" _nghost-twl-c111="" class="ng-untouched ng-pristine ng-valid"><div _ngcontent-twl-c111="" class="ngx-select dropdown" tabindex="0"><div _ngcontent-twl-c111=""></div><div _ngcontent-twl-c111="" class="ngx-select__selected"><div _ngcontent-twl-c111="" class="ngx-select__toggle btn form-control"><!----><span _ngcontent-twl-c111="" class="ngx-select__selected-single pull-left float-left"><span _ngcontent-twl-c111="">Preço</span><!----></span><!----><span _ngcontent-twl-c111="" class="ngx-select__toggle-buttons"><!----><i _ngcontent-twl-c111="" class="dropdown-toggle"></i><i _ngcontent-twl-c111="" class="ngx-select__toggle-caret caret"></i></span></div></div><!----><!----><!----><!----><!----><!----></div></ngx-select></div><div _ngcontent-twl-c234="" class="product-data"><div _ngcontent-twl-c234="" class="product-data-label"><label _ngcontent-twl-c234="">Digite uma família ou um produto</label><i _ngcontent-twl-c234="" placement="right top" class="fa-light fa-circle-info cursor-pointer"></i><!----><!----></div><input _ngcontent-twl-c234="" formcontrolname="searchInput" autocomplete="off" class="input-default w-100 ng-valid ng-dirty ng-touched" placeholder="Código ou GTIN (código de barras)" style=""><!----><!----></div><div _ngcontent-twl-c234="" class="add"><button _ngcontent-twl-c234="" class="btn-default"><i _ngcontent-twl-c234="" class="fa-solid fa-plus mr-2"></i> Criar </button><!----></div></div></form><section _ngcontent-twl-c234=""><!----><!----><div _ngcontent-twl-c234="" class="d-flex flex-column align-items-start h-100 w-100 gap-16"><!----><h3 _ngcontent-twl-c234="" class="font-bold text-16 leading-6 text-light-900 w-100 m-0"> Etiquetas criadas por você </h3><div _ngcontent-twl-c234="" class="posters" style="max-height: 330px;"><div _ngcontent-twl-c234="" class="poster w-100 d-flex align-items-center justify-content-between flex-column p-0"><div _ngcontent-twl-c234="" class="poster-info"><div _ngcontent-twl-c234="" class="d-flex col-md-2 preview mini-preview mini-preview-horizontal"><app-ravioli-previewer _ngcontent-twl-c234="" _nghost-twl-c135=""><div _ngcontent-twl-c135="" id="divPreview" class="h_iframe transition thumbnail"><!----><div _ngcontent-twl-c135="" class="full-screen" id="fullScreenDiv-0"><!----><iframe _ngcontent-twl-c135="" frameborder="0" scrolling="no" class="" src="assets/ravioli/previewer.html?client=web" id="0"></iframe></div><!----><div _ngcontent-twl-c135="" class="full-screen-request full-screen-overlay"><span _ngcontent-twl-c135=""><i _ngcontent-twl-c135="" class="fa-light fa-arrow-up-right-and-arrow-down-left-from-center"></i></span></div><!----></div></app-ravioli-previewer></div><div _ngcontent-twl-c234="" class="d-flex col-md-3 flex-column justify-content-center"><h4 _ngcontent-twl-c234="" class="font-bold text-14 mb-0 leading-6 text-light-900">SUNGA FRALDA REUTILI ONDA</h4><span _ngcontent-twl-c234="" class="font-normal leading-6 text-light-900 text-14 limited-span"> 5121312 | 7908103738055 </span></div><div _ngcontent-twl-c234="" class="d-flex col-md-2 flex-column align-items-start justify-content-center"><h4 _ngcontent-twl-c234="" class="font-bold text-14 leading-6 mb-0 text-light-900">Dinâmica </h4><span _ngcontent-twl-c234="" class="font-normal leading-6 text-light-900 text-14 limited-span">Parcelado</span></div><div _ngcontent-twl-c234="" class="d-flex col-md-2 flex-column align-items-start justify-content-center"><h4 _ngcontent-twl-c234="" class="font-bold text-14 leading-6 mb-0 text-light-900">Tipo</h4><span _ngcontent-twl-c234="" class="font-normal leading-6 text-light-900 text-14 limited-span">Preço</span></div><div _ngcontent-twl-c234="" class="d-flex col-md-2 align-items-center justify-content-center"><small _ngcontent-twl-c234="" class="font-normal text-14 leading-6 text-primary mr-1">Cópias:</small><app-plus-and-minus _ngcontent-twl-c234="" componentstyle="primary" _nghost-twl-c144=""><div _ngcontent-twl-c144="" class="d-flex align-items-center justify-content-center primary"><!----><i _ngcontent-twl-c144="" class="fa-light fa-square-minus text-20 disabled"></i><input _ngcontent-twl-c144="" class="text-14 leading-6 ml-2 mr-2 ng-untouched ng-pristine ng-valid" style=""><i _ngcontent-twl-c144="" class="fa-light fa-square-plus text-20"></i><!----><!----></div></app-plus-and-minus></div><div _ngcontent-twl-c234="" class="d-flex col-md-2 align-items-center justify-content-center"><i _ngcontent-twl-c234="" placement="top right" name="delete" class="fa-light fa-trash-can cursor-pointer"></i><!----></div></div><hr _ngcontent-twl-c234="" class="w-100 text-light-500"></div><!----></div></div><!----><!----></section></div><div _ngcontent-twl-c234="" class="modal-footer"><div _ngcontent-twl-c234="" class="custom-control custom-switch"><input _ngcontent-twl-c234="" type="checkbox" id="allowSound" class="custom-control-input ng-untouched ng-pristine ng-valid" style=""><label _ngcontent-twl-c234="" for="allowSound" class="custom-control-label font-normal text-16 leading-6 text-primary">Ligar som de bipagem</label></div><div _ngcontent-twl-c234="" class="d-flex align-items-center"><button _ngcontent-twl-c234="" class="btn-outline"><!----> Salvar </button><app-print-button _ngcontent-twl-c234="" _nghost-twl-c166=""><!----><button _ngcontent-twl-c166="" class="btn-default"><!----><i _ngcontent-twl-c166="" class="fa fa-solid fa-download mr-2"></i> Download <!----><!----></button><!----></app-print-button><!----></div><!----></div></app-modal-create-label></div></div></modal-container><div id="preact-border-shadow-host" popover="manual" style="border-width: medium; border-style: none; border-color: currentcolor; border-image: none; padding: 0px; margin: 0px; inset: 0px; position: fixed; width: 100vw; height: 100vh; background: transparent; pointer-events: none;"></div><modal-container role="dialog" tabindex="-1" class="modal fade show" aria-modal="true" style="display: block;"><div role="document" class="modal-dialog modal-dialog-600 modal-dialog-centered"><div class="modal-content"><app-modal-closing-confirmation _nghost-twl-c169=""><div _ngcontent-twl-c169="" class="modal-body d-flex flex-column align-items-center justify-content-center"><i _ngcontent-twl-c169="" class="fa-light fa-triangle-exclamation text-64 mb-2 mt-2 text-warning"></i><h1 _ngcontent-twl-c169="" class="text-24 font-bold leading-12 text-warning mb-0"> Etiquetas não serão salvas </h1><p _ngcontent-twl-c169="" class="font-normal text-light-900 leading-5 text-16 text-center"> Caso feche a criação sem salvar ou imprimir, as etiquetas<br _ngcontent-twl-c169=""> criadas serão perdidas. Deseja continuar essa ação? Ela não<br _ngcontent-twl-c169=""> poderá ser desfeita. <!----><!----><!----></p></div><div _ngcontent-twl-c169="" class="modal-footer d-flex align-items-center justify-content-end border-top-0"><button _ngcontent-twl-c169="" type="button" id="cancel-btn" class="btn-outline-warning mr-2"> Cancelar </button><button _ngcontent-twl-c169="" type="button" id="continue-btn" class="btn-default-warning"> Continuar </button></div></app-modal-closing-confirmation></div></div></modal-container></body></html>
