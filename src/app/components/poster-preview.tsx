@@ -40,21 +40,21 @@ export function PosterPreview({
   else if (description.length <= 14) descFontSize = '19.5pt';
   else descFontSize = '16.5pt';
 
-  // Bloco DE: R$ (GOTHICBI Bold Italic): aumentado em ~30%, line-height 1
-  let deNumFontSize = '38pt';
-  if (deInteger.length >= 5) deNumFontSize = '28pt';
-  else if (deInteger.length === 4) deNumFontSize = '32pt';
+  // Bloco DE: R$ (GOTHICBI Bold Italic): ajustado para caber perfeitamente valores altos (ex: 9999,99)
+  let deNumFontSize = '36pt';
+  if (deInteger.length >= 5) deNumFontSize = '24pt';
+  else if (deInteger.length === 4) deNumFontSize = '28pt';
 
-  // Bloco POR: R$ (GOTHICBI Bold Italic): ampliado para ocupar quase 100% da largura
-  let porNumFontSize = '52pt';
-  if (porInteger.length >= 6) porNumFontSize = '30pt';
-  else if (porInteger.length === 5) porNumFontSize = '35pt';
-  else if (porInteger.length === 4) porNumFontSize = '42pt';
+  // Bloco POR: R$ (GOTHICBI Bold Italic): reduzido em ~5-10% para garantir que POR: R$ e UN nunca cortem
+  let porNumFontSize = '49pt';
+  if (porInteger.length >= 6) porNumFontSize = '26pt';
+  else if (porInteger.length === 5) porNumFontSize = '30pt';
+  else if (porInteger.length === 4) porNumFontSize = '36pt';
 
   // Bloco de Parcelamento (GOTHICBI Bold Italic): valor da parcela maximizado
-  let instNumFontSize = '38pt';
-  if (instInteger.length >= 4) instNumFontSize = '28pt';
-  else if (instInteger.length === 3) instNumFontSize = '33pt';
+  let instNumFontSize = '36pt';
+  if (instInteger.length >= 4) instNumFontSize = '26pt';
+  else if (instInteger.length === 3) instNumFontSize = '31pt';
 
   const validityText = offerValidityStart || offerValidity
     ? `OFERTA VÁLIDA ${offerValidityStart ? `DE ${offerValidityStart} ` : ''}${offerValidity ? `A ${offerValidity}` : ''}`
@@ -186,7 +186,7 @@ export function PosterPreview({
               </div>
             )}
 
-            {/* Bloco POR: R$ + UN (GOTHICBI Bold Italic 52pt) - maior elemento da coluna esquerda */}
+            {/* Bloco POR: R$ + UN (GOTHICBI Bold Italic) - maior elemento da coluna esquerda */}
             <div
               style={{
                 display: 'flex',
@@ -195,12 +195,12 @@ export function PosterPreview({
                 width: '100%',
                 lineHeight: '0.88',
                 whiteSpace: 'nowrap',
-                gap: '3px',
+                gap: porInteger.length >= 4 ? '2px' : '3px',
               }}
             >
               <span
                 style={{
-                  fontSize: '11pt',
+                  fontSize: porInteger.length >= 4 ? '9.5pt' : '11pt',
                   fontFamily: 'Arial, sans-serif',
                   fontWeight: 'bold',
                   color: 'rgb(0, 0, 0)',
@@ -218,7 +218,7 @@ export function PosterPreview({
                   fontStyle: 'italic',
                   color: 'rgb(0, 0, 0)',
                   lineHeight: '0.88',
-                  letterSpacing: '-0.03em',
+                  letterSpacing: porInteger.length >= 4 ? '-0.035em' : '-0.03em',
                   flexShrink: 0,
                 }}
               >
@@ -226,7 +226,7 @@ export function PosterPreview({
               </span>
               <span
                 style={{
-                  fontSize: '10pt',
+                  fontSize: porInteger.length >= 4 ? '9pt' : '10pt',
                   fontFamily: 'Arial, sans-serif',
                   fontWeight: 'bold',
                   color: 'rgb(0, 0, 0)',
