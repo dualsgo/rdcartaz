@@ -31,30 +31,7 @@ export function PosterPreview({
   const showInstallments = maxInstallments > 1;
   const [instInteger, instDecimal] = formatCurrency(installmentValue).split(',');
 
-  // Título do Produto: aumento de 25% a 35% no font-size, font-weight 800, line-height 1.05, máx 2 linhas
-  let descFontSize = '15.5pt';
-  if (description.length > 45) descFontSize = '12pt';
-  else if (description.length > 32) descFontSize = '13.5pt';
-  else if (description.length > 22) descFontSize = '15pt';
-  else if (description.length <= 14) descFontSize = '19.5pt';
-  else descFontSize = '16.5pt';
-
-  // Bloco DE: R$ - aumento de ~30% nos números inteiros e centavos, line-height 1
-  let deNumFontSize = '38pt';
-  if (deInteger.length >= 5) deNumFontSize = '28pt';
-  else if (deInteger.length === 4) deNumFontSize = '32pt';
-
-  // Bloco POR: R$ + UN - aumentado drasticamente para ocupar quase 100% da largura da coluna esquerda
-  let porNumFontSize = '52pt';
-  if (porInteger.length >= 6) porNumFontSize = '30pt';
-  else if (porInteger.length === 5) porNumFontSize = '35pt';
-  else if (porInteger.length === 4) porNumFontSize = '42pt';
-
-  // Bloco de Parcelamento - maximizar valor da parcela
-  let instNumFontSize = '38pt';
-  if (instInteger.length >= 4) instNumFontSize = '28pt';
-  else if (instInteger.length === 3) instNumFontSize = '33pt';
-
+  // Formatação da validade da oferta
   const validityText = offerValidityStart || offerValidity
     ? `OFERTA VÁLIDA ${offerValidityStart ? `DE ${offerValidityStart} ` : ''}${offerValidity ? `A ${offerValidity}` : ''}`
     : 'OFERTA VÁLIDA ENQUANTO DURAREM OS ESTOQUES';
@@ -85,7 +62,7 @@ export function PosterPreview({
           boxSizing: 'border-box',
         }}
       >
-        {/* ── METADE ESQUERDA: Descrição, Preços (DE / POR) e Rodapé (SAP/EAN/REF) ── */}
+        {/* ── METADE ESQUERDA: Descrição, Preços (DE / POR) e Rodapé (COD / REF) ── */}
         <div
           style={{
             display: 'flex',
@@ -96,30 +73,29 @@ export function PosterPreview({
             overflow: 'hidden',
           }}
         >
-          {/* Espaçador superior para preservar a área do logo pré-impresso OFERTAS */}
+          {/* Espaçador superior para preservar o logo gráfico pré-impresso OFERTAS */}
           <div style={{ height: '2.75cm', flexShrink: 0 }} aria-hidden="true" />
 
-          {/* Título do Produto: 100% largura, posicionado logo abaixo do OFERTAS */}
+          {/* Título do Produto: Arial, 700, 8.5pt, uppercase */}
           <div
             style={{
               width: '100%',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              minHeight: '1.1cm',
-              maxHeight: '1.45cm',
+              minHeight: '1.0cm',
+              maxHeight: '1.4cm',
               overflow: 'hidden',
             }}
           >
             <h2
               style={{
-                fontSize: descFontSize,
-                fontFamily: 'Roboto, Arial, sans-serif',
-                fontWeight: 800,
+                fontFamily: 'Arial, sans-serif',
+                fontWeight: 700,
+                fontSize: '8.5pt',
                 color: '#000000',
                 textAlign: 'center',
-                lineHeight: '1.05',
-                letterSpacing: '-0.3px',
+                lineHeight: '1.15',
                 textTransform: 'uppercase',
                 margin: 0,
                 display: '-webkit-box',
@@ -133,7 +109,7 @@ export function PosterPreview({
             </h2>
           </div>
 
-          {/* Bloco de Preços (DE: R$ e POR: R$ + UN) */}
+          {/* Bloco de Preços (DE: R$ e POR: R$) */}
           <div
             style={{
               width: '100%',
@@ -141,40 +117,42 @@ export function PosterPreview({
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: '2px',
+              gap: '4px',
               marginTop: 'auto',
               marginBottom: 'auto',
             }}
           >
-            {/* Bloco DE: R$ com fonte ampliada e line-height 1 */}
+            {/* Bloco DE: R$ (6.5pt, Regular) + 499,99 (22pt, Trebuchet MS Bold Italic) alinhados ao topo */}
             {hasDiscount && (
               <div
                 style={{
                   display: 'flex',
-                  alignItems: 'baseline',
+                  alignItems: 'flex-start',
                   justifyContent: 'center',
                   gap: '4px',
                   width: '100%',
-                  lineHeight: '1',
                 }}
               >
                 <span
                   style={{
-                    fontSize: '11pt',
                     fontFamily: 'Arial, sans-serif',
-                    fontWeight: 'bold',
+                    fontWeight: 400,
+                    fontSize: '6.5pt',
+                    textTransform: 'uppercase',
                     color: '#000000',
-                    lineHeight: '1',
+                    lineHeight: '1.2',
+                    paddingTop: '2px',
+                    whiteSpace: 'nowrap',
                   }}
                 >
                   DE: R$
                 </span>
                 <span
                   style={{
-                    fontSize: deNumFontSize,
-                    fontFamily: 'GOTHICBI, "Century Gothic", sans-serif',
-                    fontWeight: 'bold',
+                    fontFamily: "'Trebuchet MS', Calibri, sans-serif",
+                    fontWeight: 700,
                     fontStyle: 'italic',
+                    fontSize: '22pt',
                     color: '#000000',
                     lineHeight: '1',
                     whiteSpace: 'nowrap',
@@ -185,60 +163,47 @@ export function PosterPreview({
               </div>
             )}
 
-            {/* Bloco POR: R$ + UN - maior elemento da coluna, ocupando quase 100% da largura */}
+            {/* Bloco POR: R$ (7pt, Regular) + 299,99 (36pt, Trebuchet MS Bold Italic) alinhados ao topo */}
             <div
               style={{
                 display: 'flex',
-                alignItems: 'baseline',
+                alignItems: 'flex-start',
                 justifyContent: 'center',
+                gap: '4px',
                 width: '100%',
-                lineHeight: '0.88',
-                whiteSpace: 'nowrap',
-                gap: '3px',
               }}
             >
               <span
                 style={{
-                  fontSize: '11pt',
                   fontFamily: 'Arial, sans-serif',
-                  fontWeight: 'bold',
+                  fontWeight: 400,
+                  fontSize: '7pt',
+                  textTransform: 'uppercase',
                   color: '#000000',
-                  lineHeight: '1',
-                  flexShrink: 0,
+                  lineHeight: '1.2',
+                  paddingTop: '3px',
+                  whiteSpace: 'nowrap',
                 }}
               >
                 POR: R$
               </span>
               <span
                 style={{
-                  fontSize: porNumFontSize,
-                  fontFamily: 'GOTHICBI, "Century Gothic", sans-serif',
-                  fontWeight: 'bold',
+                  fontFamily: "'Trebuchet MS', Calibri, sans-serif",
+                  fontWeight: 700,
                   fontStyle: 'italic',
+                  fontSize: '36pt',
                   color: '#000000',
-                  lineHeight: '0.88',
-                  letterSpacing: '-0.03em',
-                  flexShrink: 0,
+                  lineHeight: '1',
+                  whiteSpace: 'nowrap',
                 }}
               >
                 {porInteger},{porDecimal}
               </span>
-              <span
-                style={{
-                  fontSize: '10pt',
-                  fontFamily: 'Arial, sans-serif',
-                  fontWeight: 'bold',
-                  color: '#000000',
-                  lineHeight: '1',
-                  flexShrink: 0,
-                }}
-              >
-                UN
-              </span>
             </div>
           </div>
 
-          {/* Rodapé de Códigos: SAP / EAN / REF fixado na base com 100% de largura */}
+          {/* Rodapé de Códigos: COD: / REF: (4.5pt, Arial Regular 400 uppercase) */}
           <div
             style={{
               marginTop: 'auto',
@@ -247,6 +212,10 @@ export function PosterPreview({
               alignItems: 'baseline',
               justifyContent: 'space-between',
               fontFamily: 'Arial, sans-serif',
+              fontSize: '4.5pt',
+              fontWeight: 400,
+              textTransform: 'uppercase',
+              color: '#000000',
               whiteSpace: 'nowrap',
               lineHeight: '1',
               paddingBottom: '1mm',
@@ -254,28 +223,25 @@ export function PosterPreview({
           >
             {code && (
               <div style={{ display: 'flex', alignItems: 'baseline', gap: '2px' }}>
-                <span style={{ fontSize: '6.5pt', color: 'rgb(80, 80, 80)', fontWeight: 'bold' }}>SAP:</span>
-                <span style={{ fontSize: '7.8pt', color: '#000000', fontWeight: 'bold' }}>{code}</span>
-              </div>
-            )}
-
-            {ean && (
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: '2px' }}>
-                <span style={{ fontSize: '6.5pt', color: 'rgb(80, 80, 80)', fontWeight: 'bold' }}>EAN:</span>
-                <span style={{ fontSize: '7.8pt', color: '#000000', fontWeight: 'bold' }}>{ean}</span>
+                <span>COD: {code}</span>
               </div>
             )}
 
             {reference && (
               <div style={{ display: 'flex', alignItems: 'baseline', gap: '2px' }}>
-                <span style={{ fontSize: '6.5pt', color: 'rgb(80, 80, 80)', fontWeight: 'bold' }}>REF:</span>
-                <span style={{ fontSize: '7.8pt', color: '#000000', fontWeight: 'bold' }}>{reference}</span>
+                <span>REF: {reference}</span>
+              </div>
+            )}
+
+            {ean && !reference && (
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: '2px' }}>
+                <span>EAN: {ean}</span>
               </div>
             )}
           </div>
         </div>
 
-        {/* ── METADE DIREITA: Selo Circular, Bloco de Parcelamento e Aviso Legal ── */}
+        {/* ── METADE DIREITA: Selo Circular (% Desconto), Parcelamento e Aviso Legal ── */}
         <div
           style={{
             display: 'flex',
@@ -287,15 +253,14 @@ export function PosterPreview({
             overflow: 'hidden',
           }}
         >
-          {/* Selo Circular Preto (% De Desconto): 86% da coluna com aspect-ratio 1 / 1 */}
+          {/* Selo Circular Preto: 44pt (Arial 700 line-height 1) + 14pt De Desconto (Arial 700) */}
           {hasDiscount ? (
             <div
               style={{
-                width: '86%',
+                width: '85%',
                 aspectRatio: '1 / 1',
                 background: '#000000',
                 borderRadius: '50%',
-                fontFamily: 'Helvetica, Arial, sans-serif',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
@@ -304,40 +269,38 @@ export function PosterPreview({
                 overflow: 'hidden',
               }}
             >
-              {/* Porcentagem com fonte maximizada */}
               <span
                 style={{
-                  fontSize: discount >= 100 ? '48pt' : discount >= 10 ? '60pt' : '66pt',
                   fontFamily: 'Arial, sans-serif',
-                  fontWeight: 'bold',
+                  fontWeight: 700,
+                  fontSize: '44pt',
                   color: '#ffffff',
-                  lineHeight: '0.9',
+                  lineHeight: '1',
                   textAlign: 'center',
-                  letterSpacing: '-2px',
+                  letterSpacing: '-1px',
                 }}
               >
                 {discount}%
               </span>
-              {/* Rótulo "De Desconto" */}
               <span
                 style={{
-                  fontSize: '20pt',
-                  fontFamily: 'Roboto, Arial, sans-serif',
-                  fontWeight: 'bold',
+                  fontFamily: 'Arial, sans-serif',
+                  fontWeight: 700,
+                  fontSize: '14pt',
                   color: '#ffffff',
-                  lineHeight: '1',
                   textAlign: 'center',
                   marginTop: '2px',
+                  lineHeight: '1',
                 }}
               >
                 De Desconto
               </span>
             </div>
           ) : (
-            <div style={{ width: '86%', aspectRatio: '1 / 1' }} />
+            <div style={{ width: '85%', aspectRatio: '1 / 1' }} />
           )}
 
-          {/* Bloco de Parcelamento: Ocupa 100% da largura, valor maximizado com line-height 0.9 */}
+          {/* Bloco de Parcelamento: 10X sem juros (9pt Arial 700) + 29 (22pt) ,99 (12pt) */}
           {showInstallments ? (
             <div
               style={{
@@ -352,40 +315,18 @@ export function PosterPreview({
                 zIndex: 10,
               }}
             >
-              <div
+              <span
                 style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  textAlign: 'center',
                   fontFamily: 'Arial, sans-serif',
-                  fontWeight: 'bold',
+                  fontWeight: 700,
+                  fontSize: '9pt',
                   color: '#000000',
                   lineHeight: '1.1',
-                  textTransform: 'uppercase',
+                  whiteSpace: 'nowrap',
                 }}
               >
-                <span
-                  style={{
-                    fontSize: '10.5pt',
-                    letterSpacing: '0.2px',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  OU PARCELADO EM ATÉ
-                </span>
-                <span
-                  style={{
-                    fontSize: '13pt',
-                    fontWeight: 800,
-                    letterSpacing: '0.3px',
-                    whiteSpace: 'nowrap',
-                    marginTop: '1px',
-                  }}
-                >
-                  {maxInstallments} VEZES DE
-                </span>
-              </div>
+                {maxInstallments}X sem juros
+              </span>
 
               <div
                 style={{
@@ -394,57 +335,46 @@ export function PosterPreview({
                   justifyContent: 'center',
                   marginTop: '2px',
                   whiteSpace: 'nowrap',
-                  lineHeight: '0.9',
+                  lineHeight: '1',
                 }}
               >
                 <span
                   style={{
-                    fontSize: '12pt',
                     fontFamily: 'Arial, sans-serif',
-                    fontWeight: 'bold',
+                    fontWeight: 700,
+                    fontSize: '9pt',
                     color: '#000000',
                     marginRight: '2px',
+                    lineHeight: '1',
                   }}
                 >
                   R$
                 </span>
                 <span
                   style={{
-                    fontSize: instNumFontSize,
-                    fontFamily: 'GOTHICBI, "Century Gothic", sans-serif',
-                    fontWeight: 'bold',
+                    fontFamily: "'Trebuchet MS', Calibri, sans-serif",
+                    fontWeight: 700,
                     fontStyle: 'italic',
+                    fontSize: '22pt',
                     color: '#000000',
-                    lineHeight: '0.9',
+                    lineHeight: '1',
+                    verticalAlign: 'baseline',
                   }}
                 >
                   {instInteger}
                 </span>
                 <span
                   style={{
-                    fontSize: '21pt',
-                    fontFamily: 'GOTHICBI, "Century Gothic", sans-serif',
-                    fontWeight: 'bold',
+                    fontFamily: "'Trebuchet MS', Calibri, sans-serif",
+                    fontWeight: 700,
                     fontStyle: 'italic',
+                    fontSize: '12pt',
                     color: '#000000',
-                    lineHeight: '0.9',
-                    marginLeft: '1px',
+                    lineHeight: '1',
+                    verticalAlign: 'baseline',
                   }}
                 >
                   ,{instDecimal}
-                </span>
-                <span
-                  style={{
-                    fontSize: '9.5pt',
-                    fontFamily: 'Arial, sans-serif',
-                    fontWeight: 'bold',
-                    color: '#000000',
-                    lineHeight: '1',
-                    letterSpacing: '0.3px',
-                    marginLeft: '4px',
-                  }}
-                >
-                  CADA
                 </span>
               </div>
             </div>
@@ -452,17 +382,17 @@ export function PosterPreview({
             <div style={{ flex: 1 }} />
           )}
 
-          {/* Aviso Legal: Fixado na base, alinhado horizontalmente com o rodapé SAP/EAN/REF */}
+          {/* Aviso Legal: OFERTA VÁLIDA... (4.5pt, Arial Regular 400 uppercase) */}
           <div
             style={{
               marginTop: 'auto',
               width: '100%',
               textAlign: 'center',
-              fontSize: '6.5pt',
               fontFamily: 'Arial, sans-serif',
-              fontWeight: 'bold',
-              color: '#000000',
+              fontWeight: 400,
+              fontSize: '4.5pt',
               textTransform: 'uppercase',
+              color: '#000000',
               whiteSpace: 'nowrap',
               lineHeight: '1',
               paddingBottom: '1mm',
