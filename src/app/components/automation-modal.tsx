@@ -89,6 +89,16 @@ export function AutomationModal({ isOpen, onClose, onSelectFile }: AutomationMod
             </Button>
           </div>
 
+          <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 text-xs text-blue-900 space-y-1">
+            <p className="font-bold flex items-center gap-1.5 text-blue-950">
+              <span>📦</span>
+              <span>Priorização Automática por Estoque</span>
+            </p>
+            <p className="text-[11px] text-blue-800 leading-relaxed">
+              Relatórios de promoção com estoque são ordenados automaticamente para que os itens com <strong>maior estoque saiam nas primeiras páginas</strong>. No painel do lote, você também pode abrir o submenu <strong>Filtros</strong> para filtrar por fornecedor ou faixa de preço.
+            </p>
+          </div>
+
           <p className="text-[10px] text-center text-muted-foreground mt-4 italic">
             * Para etiquetas sem oferta, o sistema usará o valor da coluna "Novo Preço".
           </p>

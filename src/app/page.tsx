@@ -173,13 +173,71 @@ export default function Home() {
   const perPage = currentFormat.perPage;
   const orientation = currentFormat.orientation;
 
-  const filteredQueue = useMemo(() => {
-    if (queueFilter === 'all') return queue;
-    return queue.filter(item => {
-      const isOfferType = item.posterSubType === 'offer';
-      return queueFilter === 'offer' ? isOfferType : !isOfferType;
+  const [queueSort, setQueueSort] = useState<'stock-desc' | 'stock-asc' | 'discount-desc' | 'price-asc' | 'price-desc' | 'name-asc' | 'none'>('stock-desc');
+  const [supplierFilter, setSupplierFilter] = useState<string>('all');
+  const [stockFilter, setStockFilter] = useState<'all' | 'with-stock' | 'no-stock'>('all');
+  const [priceRangeFilter, setPriceRangeFilter] = useState<'all' | 'under-50' | '50-100' | 'over-100'>('all');
+
+  const availableSuppliers = useMemo(() => {
+    const set = new Set<string>();
+    queue.forEach(item => {
+      if (item.supplier && item.supplier.trim()) set.add(item.supplier.trim());
     });
-  }, [queue, queueFilter]);
+    return Array.from(set).sort((a, b) => a.localeCompare(b));
+  }, [queue]);
+
+  const hasStockData = useMemo(() => {
+    return queue.some(item => item.stock !== undefined && item.stock !== null && item.stock > 0);
+  }, [queue]);
+
+  const filteredQueue = useMemo(() => {
+    let result = [...queue];
+
+    if (queueFilter !== 'all') {
+      result = result.filter(item => {
+        const isOfferType = item.posterSubType === 'offer';
+        return queueFilter === 'offer' ? isOfferType : !isOfferType;
+      });
+    }
+
+    if (supplierFilter !== 'all') {
+      result = result.filter(item => item.supplier === supplierFilter);
+    }
+
+    if (stockFilter === 'with-stock') {
+      result = result.filter(item => (item.stock || 0) > 0);
+    } else if (stockFilter === 'no-stock') {
+      result = result.filter(item => (item.stock || 0) === 0);
+    }
+
+    if (priceRangeFilter !== 'all') {
+      result = result.filter(item => {
+        const p = parsePrice(item.priceFor);
+        if (priceRangeFilter === 'under-50') return p <= 50;
+        if (priceRangeFilter === '50-100') return p > 50 && p <= 100;
+        if (priceRangeFilter === 'over-100') return p > 100;
+        return true;
+      });
+    }
+
+    if (queueSort !== 'none') {
+      result.sort((a, b) => {
+        if (queueSort === 'stock-desc') return (b.stock || 0) - (a.stock || 0);
+        if (queueSort === 'stock-asc') return (a.stock || 0) - (b.stock || 0);
+        if (queueSort === 'price-asc') return parsePrice(a.priceFor) - parsePrice(b.priceFor);
+        if (queueSort === 'price-desc') return parsePrice(b.priceFor) - parsePrice(a.priceFor);
+        if (queueSort === 'name-asc') return a.description.localeCompare(b.description);
+        if (queueSort === 'discount-desc') {
+          const discA = parsePrice(a.priceFrom) > 0 ? ((parsePrice(a.priceFrom) - parsePrice(a.priceFor)) / parsePrice(a.priceFrom)) : 0;
+          const discB = parsePrice(b.priceFrom) > 0 ? ((parsePrice(b.priceFrom) - parsePrice(b.priceFor)) / parsePrice(b.priceFrom)) : 0;
+          return discB - discA;
+        }
+        return 0;
+      });
+    }
+
+    return result;
+  }, [queue, queueFilter, supplierFilter, stockFilter, priceRangeFilter, queueSort]);
 
   // Expande a fila considerando as quantidades de cada item para impressão
   const expandedQueue = useMemo(() => {
@@ -561,6 +619,14 @@ export default function Home() {
             }
 
             const proceedImport = (clearFirst: boolean) => {
+              const hasStock = filtered.some(item => (item.stock || 0) > 0);
+              if (hasStock) {
+                filtered.sort((a, b) => (b.stock || 0) - (a.stock || 0));
+                setQueueSort('stock-desc');
+              }
+              setSupplierFilter('all');
+              setStockFilter('all');
+              setPriceRangeFilter('all');
               setQueue(prev => clearFirst ? [...filtered] : [...prev, ...filtered]);
               setQueueFilter(importMode === 'offer' ? 'offer' : 'normal');
               setImportCount(filtered.length);
@@ -835,6 +901,23 @@ export default function Home() {
               onUpdateQuantity={handleUpdateQuantity}
               onClear={() => setQueue([])}
               onShowHidden={() => setQueueFilter('all')}
+              queueSort={queueSort}
+              onSortChange={(sort) => setQueueSort(sort as any)}
+              supplierFilter={supplierFilter}
+              onSupplierFilterChange={setSupplierFilter}
+              stockFilter={stockFilter}
+              onStockFilterChange={(stk) => setStockFilter(stk as any)}
+              priceRangeFilter={priceRangeFilter}
+              onPriceRangeFilterChange={(range) => setPriceRangeFilter(range as any)}
+              availableSuppliers={availableSuppliers}
+              hasStockData={hasStockData}
+              onResetFilters={() => {
+                setSupplierFilter('all');
+                setStockFilter('all');
+                setPriceRangeFilter('all');
+                setQueueSort('stock-desc');
+                setQueueFilter('all');
+              }}
               className="h-full"
             />
           </div>

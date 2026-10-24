@@ -15,6 +15,7 @@ export type PosterData = {
   offerValidity?: string; // data de fim da oferta (ex: "31/03/2026")
   supplier?: string;
   quantity?: number;
+  stock?: number;
 };
 
 export type PosterSettings = {
