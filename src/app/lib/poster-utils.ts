@@ -151,8 +151,8 @@ function processProductRow(row: Record<string, any>, mapping: Record<string, num
 
   const cleanSupplier = (name: string) => {
     if (!name) return '';
-    // Remove prefixo e números (CNPJ)
-    let clean = name.replace(/FORNECEDOR:/i, '').replace(/\d+/g, '').trim();
+    let clean = name.replace(/FORNECEDOR:\s*[\d.\-\/]+\s*[-–]?\s*/i, '').trim();
+    clean = clean.replace(/^\d+[\s\-–]+/, '').trim();
     return clean.substring(0, 15).trim().toUpperCase();
   };
 
@@ -175,29 +175,13 @@ function processProductRow(row: Record<string, any>, mapping: Record<string, num
     // É Promoção (J)
     poster.posterSubType = 'offer';
     poster.priceFor = formatCurrency(valPromo);
-    // O "De" será o Novo (I) se existir e for maior, senão o Anterior (H)
-    poster.priceFrom = (valNovo > valPromo) ? formatCurrency(valNovo) : formatCurrency(valAtual);
+    // O "De" será o Novo (I) se existir e for maior que o promocional, senão o Anterior (H)
+    poster.priceFrom = (valNovo > valPromo) ? formatCurrency(valNovo) : (valAtual > valPromo ? formatCurrency(valAtual) : formatCurrency(valAtual));
   } else if (valNovo > 0) {
-    // É Novo Preço (I)
-    // Se baixou em relação ao anterior (H) mas não tem valor em J:
-    // O usuário disse: "pode ser redução mas sem oferta nesse caso J estara zerado mas I sera menor que H"
-    if (valNovo < valAtual && valAtual > 0) {
-      // Se baixou, PODERIA ser oferta, mas o usuário indicou que nesse caso (J=0) 
-      // pode ser apenas uma redução de preço normal.
-      // Vou assumir que se baixou, ainda mostramos como oferta para destacar, 
-      // A MENOS que o sistema queira tratar como preço normal.
-      // Mas o pedido diz "usaremos valor de I se J estiver zerado".
-      poster.posterSubType = 'normal'; 
-      poster.priceFor = formatCurrency(valNovo);
-      poster.priceFrom = '';
-    } else {
-      // Se manteve ou subiu (aumento), é normal
-      poster.posterSubType = 'normal';
-      poster.priceFor = formatCurrency(valNovo);
-      poster.priceFrom = '';
-    }
+    poster.posterSubType = 'normal'; 
+    poster.priceFor = formatCurrency(valNovo);
+    poster.priceFrom = '';
   } else {
-    // É Preço Atual/Anterior (H)
     poster.posterSubType = 'normal';
     poster.priceFor = formatCurrency(valAtual);
     poster.priceFrom = '';
@@ -215,6 +199,14 @@ function processProductRow(row: Record<string, any>, mapping: Record<string, num
   return poster;
 }
 
+export function parseStock(val: any): number {
+  if (val === undefined || val === null || val === '') return 0;
+  if (typeof val === 'number') return val >= 1000 ? val / 1000 : val;
+  const str = String(val).trim().replace(/\./g, '').replace(',', '.');
+  const num = parseFloat(str) || 0;
+  return num >= 1000 ? num / 1000 : num;
+}
+
 /**
  * Cria um mapeamento de colunas baseado nos headers encontrados ou índices fixos
  */
@@ -228,42 +220,42 @@ function createMapping(headers: string[]): Record<string, number> {
     const normTerms = terms.map(t => normalize(t));
     const idx = headers.findIndex(h => {
       const normH = normalize(h);
-      return normTerms.some(t => normH.includes(t) || normH === t);
+      return normTerms.some(t => {
+        if (normH === t) return true;
+        if (t.length >= 4 && normH.includes(t)) return true;
+        const tokens = normH.split(/[\s.\/_-]+/);
+        return tokens.includes(t);
+      });
     });
     
     if (idx !== -1) return idx;
     return hasHeaders ? -1 : defaultIdx;
   };
   
-  // Custom logic for supplier to avoid matching 'cod. forn'
   const findSupplierIdx = () => {
     const idx = headers.findIndex(h => {
       const normH = normalize(h);
       if (normH.includes('cod. forn') || normH.includes('cód. forn')) return false;
       return normH.includes('fornecedor');
     });
-    return idx !== -1 ? idx : (hasHeaders ? -1 : -1);
+    return idx !== -1 ? idx : -1;
   };
 
-  // Mapeamento baseado na descrição do usuário:
-  // Cod. Int = SAP
-  // EAN = EAN/BARRAS
-  // Cód. Forn. = REFERENCIA
-  // Mercadoria = DESCRIÇÃO
   return {
-    sap:        findIdx(['sap', 'interno', 'código', 'codigo', 'cod. int', 'cód. int'], 2),
-    ean:        findIdx(['ean', 'barras'], 3),
-    mercadoria: findIdx(['mercadoria', 'descrição', 'descricao', 'produto', 'nome'], 5),
-    ref:        findIdx(['referencia', 'referência', 'ref', 'cod. forn', 'cód. forn'], 4),
-    precoAtual: findIdx(['anterior', 'atual', 'preço', 'preÃ§o'], 7),
-    novoPreco:  findIdx(['novo'], 8),
-    promocao:   findIdx(['promo', 'ção', 'Ã§Ã£o', 'promoção'], 9),
+    sap:        findIdx(['sap', 'interno', 'código', 'codigo', 'cod. int', 'cód. int'], 0),
+    ean:        findIdx(['ean', 'barras'], 1),
+    mercadoria: findIdx(['mercadoria', 'descrição', 'descricao', 'produto', 'nome'], 2),
+    ref:        findIdx(['referencia', 'referência', 'ref', 'cod. forn', 'cód. forn'], 3),
+    estoque:    findIdx(['estoque', 'est'], 4),
+    precoAtual: findIdx(['anterior', 'atual', 'preço atual', 'preco atual', 'preço', 'preco'], 5),
+    novoPreco:  findIdx(['novo', 'novo preço', 'novo preco'], -1),
+    promocao:   findIdx(['promoção', 'promocao', 'promo'], 6),
     supplier:   findSupplierIdx(),
   };
 }
 
 /**
- * Analisa um arquivo CSV
+ * Analisa um arquivo CSV com desduplicação automática
  */
 export function parseProductCSV(content: string, settings?: PosterSettings): any[] {
   const lines = content.split(/\r?\n/).filter(line => line.trim().length > 0);
@@ -274,7 +266,7 @@ export function parseProductCSV(content: string, settings?: PosterSettings): any
   const headers = firstLine.split(separator).map(h => h.trim());
   const mapping = createMapping(headers);
   
-  const results: any[] = [];
+  const itemsMap = new Map<string, any>();
   for (let i = 1; i < lines.length; i++) {
     const cols = lines[i].split(separator).map(c => c.trim());
     if (cols.length < 2) continue;
@@ -283,89 +275,191 @@ export function parseProductCSV(content: string, settings?: PosterSettings): any
     cols.forEach((val, idx) => { rowObj[idx] = val; });
     
     const poster = processProductRow(rowObj, mapping, '', settings);
-    if (poster) results.push(poster);
+    if (poster && (poster.code || poster.ean)) {
+      const key = poster.code || poster.ean;
+      if (!itemsMap.has(key)) {
+        itemsMap.set(key, poster);
+      }
+    }
   }
-  return results;
+  return Array.from(itemsMap.values());
 }
 
 /**
- * Analisa um arquivo Excel (XLS/XLSX)
+ * Analisa relatórios Excel (XLS/XLSX ou HTML mascarado de XLS como "relatorio-promocao-com-estoque")
+ * com suporte completo a múltiplas tabelas, múltiplas abas e desduplicação inteligente de códigos repetidos.
  */
 export function parseProductExcel(buffer: ArrayBuffer, settings?: PosterSettings): any[] {
-  let data: any[][] = [];
+  const itemsMap = new Map<string, any>();
 
-  // Muitos sistemas exportam relatórios em HTML com extensão .xls.
-  // O SheetJS converte "259,99" para "25999" (pois entende a vírgula como milhar no padrão americano).
-  // Para evitar isso, interceptamos arquivos HTML e lemos os textos originais.
+  // 1. Tenta interpretar como HTML (muitos relatórios do ERP Pleno são HTML exportados como .xls)
   try {
-    const text = new TextDecoder("windows-1252").decode(buffer);
-    if (text.toLowerCase().includes('<html') || text.toLowerCase().includes('<table')) {
+    let htmlText = '';
+    const testDecoder = new TextDecoder('utf-8');
+    const sample = testDecoder.decode(buffer.slice(0, 1024));
+    
+    if (sample.toLowerCase().includes('charset=utf-8') || sample.toLowerCase().includes('charset="utf-8"')) {
+      htmlText = testDecoder.decode(buffer);
+    } else {
+      const winText = new TextDecoder('windows-1252').decode(buffer);
+      htmlText = winText.toLowerCase().includes('<html') || winText.toLowerCase().includes('<table') ? winText : testDecoder.decode(buffer);
+    }
+
+    if (htmlText.toLowerCase().includes('<table') || htmlText.toLowerCase().includes('<html')) {
       const parser = new DOMParser();
-      const doc = parser.parseFromString(text, 'text/html');
-      const rows = Array.from(doc.querySelectorAll('tr'));
-      data = rows.map(tr => Array.from(tr.querySelectorAll('th, td')).map(td => {
-        // ERPs geralmente escondem o texto completo no atributo x:str
-        // e deixam o texto truncado (ex: "JW DINO") no conteúdo visual (textContent).
-        // Já para os preços, o x:num costuma ter os centavos distorcidos (3999), 
-        // então pegamos o textContent ("39,99") ignorando o x:num.
-        const xStr = td.getAttribute('x:str');
-        if (xStr) return xStr.trim();
-        return (td.textContent || '').trim();
-      }));
+      const doc = parser.parseFromString(htmlText, 'text/html');
+      const tables = Array.from(doc.querySelectorAll('table'));
+
+      if (tables.length > 0) {
+        for (const table of tables) {
+          // Extrai o fornecedor da tabela (ex: class="header-fornecedor")
+          let tableSupplier = '';
+          const supplierEl = table.querySelector('.header-fornecedor') || table.querySelector('thead th');
+          if (supplierEl && supplierEl.textContent && supplierEl.textContent.toUpperCase().includes('FORNECEDOR')) {
+            const raw = supplierEl.textContent.trim();
+            let clean = raw.replace(/FORNECEDOR:\s*[\d.\-\/]+\s*[-–]?\s*/i, '').trim();
+            clean = clean.replace(/^\d+[\s\-–]+/, '').trim();
+            tableSupplier = clean.substring(0, 15).trim().toUpperCase();
+          }
+
+          // Identifica cabeçalhos e mapeamento das colunas
+          const headerRows = Array.from(table.querySelectorAll('tr')).filter(tr => {
+            const text = normalize(tr.textContent || '');
+            return text.includes('cod. int') || text.includes('mercadoria') || tr.classList.contains('headers-itens');
+          });
+
+          let tableMapping = createMapping([]);
+          if (headerRows.length > 0) {
+            const thCells = Array.from(headerRows[0].querySelectorAll('th, td')).map(cell => (cell.textContent || '').trim());
+            tableMapping = createMapping(thCells);
+          }
+
+          // Itera sobre as linhas de produto
+          const rows = Array.from(table.querySelectorAll('tbody tr, tr'));
+          for (const row of rows) {
+            if (row.querySelector('.header-fornecedor') || row.classList.contains('headers-itens')) continue;
+            
+            const cells = Array.from(row.querySelectorAll('td'));
+            if (cells.length < 3) continue;
+
+            const rowData: Record<number, any> = {};
+            cells.forEach((cell, idx) => {
+              const xStr = cell.getAttribute('x:str');
+              rowData[idx] = xStr ? xStr.trim() : (cell.textContent || '').trim();
+            });
+
+            const mercadoria = String(rowData[tableMapping.mercadoria] || '').trim();
+            if (!mercadoria || mercadoria.toLowerCase().includes('mercadoria') || mercadoria.toLowerCase().includes('total')) continue;
+
+            const sap = String(rowData[tableMapping.sap] || '').trim();
+            const ean = String(rowData[tableMapping.ean] || '').trim();
+            if (!sap && !ean) continue;
+
+            const key = sap || ean;
+            const estoque = parseStock(rowData[tableMapping.estoque]);
+            const ref = String(rowData[tableMapping.ref] || '').trim();
+
+            // Desduplicação inteligente: se o mesmo produto já foi encontrado (ex: repetido em múltiplos setores)
+            if (itemsMap.has(key)) {
+              const existing = itemsMap.get(key);
+              if (estoque > 0) {
+                existing.stock = (existing.stock || 0) + estoque;
+              }
+              if (!existing.supplier && tableSupplier) existing.supplier = tableSupplier;
+              if (!existing.reference && ref) existing.reference = ref;
+              continue; // Não adiciona cartaz redundante
+            }
+
+            const poster = processProductRow(rowData, tableMapping, tableSupplier, settings);
+            if (poster) {
+              poster.stock = estoque;
+              itemsMap.set(key, poster);
+            }
+          }
+        }
+
+        if (itemsMap.size > 0) {
+          return Array.from(itemsMap.values());
+        }
+      }
     }
   } catch (e) {
-    // Ignora erro de decoder
+    console.error('HTML table parsing fallback to SheetJS:', e);
   }
 
-  // Se não for HTML (ou falhar), usa o SheetJS normalmente
-  if (data.length === 0) {
+  // 2. Fallback para arquivos binários XLS / XLSX via SheetJS (com suporte a TODAS as abas e desduplicação)
+  try {
     const workbook = XLSX.read(buffer, { type: 'array' });
-    const firstSheetName = workbook.SheetNames[0];
-    const worksheet = workbook.Sheets[firstSheetName];
-    data = XLSX.utils.sheet_to_json(worksheet, { header: 1, raw: false }) as any[][];
+    
+    for (const sheetName of workbook.SheetNames) {
+      const worksheet = workbook.Sheets[sheetName];
+      const sheetData = XLSX.utils.sheet_to_json(worksheet, { header: 1, raw: false }) as any[][];
+      if (!sheetData || sheetData.length === 0) continue;
+
+      let currentSupplier = '';
+      let mapping = createMapping([]);
+
+      for (let i = 0; i < sheetData.length; i++) {
+        const cols = sheetData[i];
+        if (!cols || cols.length === 0) continue;
+
+        const firstCol = String(cols[0] || '').trim();
+
+        // Linha de Fornecedor mesclada
+        if (firstCol.toUpperCase().includes('FORNECEDOR') && (!cols[1] && !cols[2])) {
+          let clean = firstCol.replace(/FORNECEDOR:\s*[\d.\-\/]+\s*[-–]?\s*/i, '').trim();
+          clean = clean.replace(/^\d+[\s\-–]+/, '').trim();
+          currentSupplier = clean.substring(0, 15).trim().toUpperCase();
+          continue;
+        }
+
+        // Linha de cabeçalho (critérios seguros para não colidir com nomes de brinquedos)
+        const isHeader = cols.some(c => {
+          const s = normalize(String(c || ''));
+          return s.includes('cod. int') || s.includes('codigo int') || s.includes('mercadoria') || s.includes('preco atual') || s.includes('promocao');
+        });
+
+        if (isHeader) {
+          mapping = createMapping(cols.map(c => String(c || '').trim()));
+          continue;
+        }
+
+        if (firstCol && firstCol.length >= 3) {
+          const rowObj: Record<number, any> = {};
+          cols.forEach((val, idx) => { rowObj[idx] = val; });
+
+          const mercadoria = String(rowObj[mapping.mercadoria] || '').trim();
+          if (!mercadoria || mercadoria.toLowerCase().includes('mercadoria')) continue;
+
+          const sap = String(rowObj[mapping.sap] || '').trim();
+          const ean = String(rowObj[mapping.ean] || '').trim();
+          if (!sap && !ean) continue;
+
+          const key = sap || ean;
+          const estoque = parseStock(rowObj[mapping.estoque]);
+
+          if (itemsMap.has(key)) {
+            const existing = itemsMap.get(key);
+            if (estoque > 0) {
+              existing.stock = (existing.stock || 0) + estoque;
+            }
+            if (!existing.supplier && currentSupplier) existing.supplier = currentSupplier;
+            continue;
+          }
+
+          const poster = processProductRow(rowObj, mapping, currentSupplier, settings);
+          if (poster) {
+            poster.stock = estoque;
+            itemsMap.set(key, poster);
+          }
+        }
+      }
+    }
+  } catch (e) {
+    console.error('SheetJS parse error:', e);
   }
-  
-  if (data.length < 1) return [];
 
-  let currentSupplier = '';
-  let mapping = createMapping([]); // Default mapping
-  const results: any[] = [];
-
-  for (let i = 0; i < data.length; i++) {
-    const cols = data[i];
-    if (!cols || cols.length === 0) continue;
-
-    const firstCol = String(cols[0] || '').trim();
-
-    // 1. Detectar linha de Fornecedor (Mesclada A-G)
-    if (firstCol.toUpperCase().includes('FORNECEDOR') && (!cols[1] && !cols[2])) {
-      currentSupplier = firstCol;
-      continue;
-    }
-
-    // 2. Detectar se é uma linha de header (procura palavras-chave em qualquer coluna)
-    const isHeader = cols.some(c => {
-      const s = normalize(String(c || ''));
-      return s.includes('sap') || s.includes('codigo') || s.includes('interno') || s.includes('mercadoria') || s.includes('ean') || s.includes('forn');
-    });
-
-    if (isHeader) {
-      const headers = cols.map(h => String(h || '').trim());
-      mapping = createMapping(headers);
-      continue;
-    }
-
-    // 3. Processar como produto
-    if (firstCol && firstCol.length >= 3) {
-      const rowObj: Record<number, any> = {};
-      cols.forEach((val, idx) => { rowObj[idx] = val; });
-
-      const poster = processProductRow(rowObj, mapping, currentSupplier, settings);
-      if (poster) results.push(poster);
-    }
-  }
-
-  return results;
+  return Array.from(itemsMap.values());
 }
 
 /**

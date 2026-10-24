@@ -515,8 +515,21 @@ export default function Home() {
           let filtered: any[] = [];
           if (importMode === 'offer') {
             filtered = imported.filter((item: any) => item.posterSubType === 'offer');
+            // Se o arquivo tiver apenas produtos sem preço DE, carrega todos como ofertas
+            if (filtered.length === 0 && imported.length > 0) {
+              filtered = imported;
+            }
           } else {
             filtered = imported.filter((item: any) => item.posterSubType === 'normal');
+            // Se o operador escolheu "Gerar Etiquetas (Branco)", mas o relatório era de promoções,
+            // converte para preço normal usando o preço final (POR) para gerar as etiquetas de gôndola brancas
+            if (filtered.length === 0 && imported.length > 0) {
+              filtered = imported.map((item: any) => ({
+                ...item,
+                posterSubType: 'normal',
+                priceFrom: '',
+              }));
+            }
           }
 
           if (filtered.length > 0) {
