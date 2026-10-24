@@ -1,15 +1,11 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { PosterForm } from '@/app/components/poster-form';
-import { PosterPreview } from '@/app/components/poster-preview';
-import { PosterPreviewEtiquetaOficial } from '@/app/components/poster-preview-etiqueta-oficial';
-import { PosterPreviewVitrine } from '@/app/components/poster-preview-vitrine';
-import { PosterPreviewAereo } from '@/app/components/poster-preview-aereo';
-import { PosterPreviewTotem } from '@/app/components/poster-preview-totem';
-
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { PosterForm, type PosterFormHandle, type AutoAddSource } from '@/app/components/poster-form';
+import { SinglePosterPreview, PagePreview, PageGrid } from '@/app/components/print-preview';
+import { FormatSelector } from '@/app/components/format-selector';
+import { QueuePanel } from '@/app/components/queue-panel';
 import { DisclaimerModal } from '@/app/components/disclaimer-modal';
-
 import { AboutPanel } from '@/app/components/about-panel';
 import { DatabasePanel } from '@/app/components/database-panel';
 import { SettingsDialog } from '@/app/components/settings-dialog';
@@ -17,52 +13,14 @@ import { ImportModal } from '@/app/components/import-modal';
 import { AutomationModal } from '@/app/components/automation-modal';
 import { SecurityModal } from '@/app/components/security-modal';
 import type { PosterData, PosterSettings, PosterType } from '@/app/lib/types';
-
-
+import { POSTER_FORMATS, VISIBLE_FORMATS, getPosterFormat } from '@/app/lib/poster-formats';
 import { parseProductCSV, parseProductExcel, parsePrice } from '@/app/lib/poster-utils';
+import { useHotkeys } from '@/hooks/use-hotkeys';
+import { Kbd } from '@/components/ui/kbd';
 
-import { Printer, Plus, Trash2, FileStack, PackageOpen, Info, Database, Upload, Edit3, LayoutGrid, FileDown, CheckCircle2 } from 'lucide-react';
+import { Printer, Plus, FileStack, PackageOpen, Info, Database, Edit3, LayoutGrid, FileDown, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
-
-// The PosterType definition was moved to '@/app/lib/types'
-// type PosterType = 'reliquias' | 'ofertas-imperdiveis' | 'aereo' | 'avaria' | 'etiqueta' | 'totem' | 'leve-pague-a4' | 'leve-pague-a6' | 'combo-a4' | 'combo-a6';
-
-const PER_PAGE: Record<PosterType, number> = {
-  reliquias: 1,      // A4 Folha Inteira (1 cartaz por folha A4)
-  'reliquias-a6': 4, // A6 (4 cartazes por folha A4)
-  'etiqueta-oficial': 16,
-  vitrine: 16,
-  aereo: 2,
-  totem: 1,
-};
-
-
-
-// Dimensões do cartaz individual para o preview (px)
-const SINGLE_DIMS: Record<PosterType, { w: number; h: number }> = {
-  reliquias:            { w: 514, h: 340 },
-  'reliquias-a6':       { w: 514, h: 340 },
-  'etiqueta-oficial':   { w: 340, h: 128 }, // 90mm x 34mm
-  vitrine:              { w: 340, h: 128 }, // 90mm x 34mm
-  aereo:                { w: 660, h: 496 },  // 174mm x 131mm @ 96dpi (4 linhas de gôndola)
-  totem:                { w: 794, h: 1123 }, // A4 @ 96dpi
-};
-
-
-
-// Orientação de impressão por tipo de cartaz
-const POSTER_ORIENTATION: Record<PosterType, 'portrait' | 'landscape'> = {
-  reliquias:            'landscape',
-  'reliquias-a6':       'landscape',
-  'etiqueta-oficial':   'portrait',
-  vitrine:              'portrait',
-  aereo:                'portrait',
-  totem:                'portrait',
-};
-
-
 
 const initialPosterData = (): PosterData => ({
   description: 'DESCRIÇÃO DO PRODUTO',
@@ -81,398 +39,6 @@ const initialPosterData = (): PosterData => ({
   quantity: 1,
 });
 
-/* ─────────────────────────── SinglePosterPreview ─────────────────────────── */
-// Mostra um cartaz individual em fundo cinza (simulação de papel).
-function SinglePosterPreview({
-  data,
-  posterType,
-  isReady,
-  settings,
-}: {
-  data: PosterData;
-  posterType: PosterType;
-  isReady: boolean;
-  settings: PosterSettings;
-}) {
-  const outerRef = useRef<HTMLDivElement>(null);
-  const [scale, setScale] = useState(1);
-  const [ready, setReady] = useState(false);
-  
-  // Safety check to prevent crash if dimensions are missing
-  const dims = SINGLE_DIMS[posterType] || { w: 491, h: 340 };
-  const { w, h } = dims;
-
-  // Para o aéreo, o preview mostra apenas a área de conteúdo (75%),
-  // ocultando o espaço em branco do topo sem alterar a impressão.
-  const blankFraction  = posterType === 'aereo' ? 0.22 : 0;
-  const previewH       = Math.round(h * (1 - blankFraction));
-  const blankOffsetPx  = Math.round(h * blankFraction);
-
-  useEffect(() => {
-    // Recalcula escala quando o tipo muda ou dimensões mudam
-    setReady(false);
-
-    const outer = outerRef.current;
-    if (!outer) return;
-
-    const apply = () => {
-      const cw = outer.clientWidth;
-      const ch = outer.clientHeight;
-      if (cw === 0 || ch === 0) return;
-      setScale(Math.min(cw / w, ch / previewH) * 0.96);
-
-      setReady(true);
-    };
-
-    apply();
-    const ro = new ResizeObserver(apply);
-    ro.observe(outer);
-    return () => ro.disconnect();
-  }, [posterType, w, h]);
-
-  // O outerRef SEMPRE existe no DOM para que o ResizeObserver funcione.
-  // O conteúdo interno muda conforme isReady.
-  return (
-    <div
-      ref={outerRef}
-      style={{
-        width: '100%',
-        height: '100%',
-        overflow: 'hidden',
-        backgroundColor: '#b0b8c4',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-    >
-      {!isReady ? (
-        <div
-          className="flex flex-col items-center justify-center gap-3 text-muted-foreground p-6"
-          style={{ backgroundColor: 'transparent' }}
-        >
-          <PackageOpen className="h-10 w-10 opacity-30" />
-          <p className="text-sm font-medium">Busque um produto para ver o cartaz</p>
-          <p className="text-xs opacity-60 text-center">Use o campo de busca ao lado para localizar ou cadastrar o produto</p>
-        </div>
-      ) : (
-        <div
-          style={{
-            width: `${w}px`,
-            height: `${previewH}px`,
-            flexShrink: 0,
-            transformOrigin: 'center center',
-            transform: `scale(${scale})`,
-            visibility: ready ? 'visible' : 'hidden',
-            backgroundColor: 'white',
-            boxShadow: '0 8px 32px -4px rgb(0 0 0 / 0.35)',
-            overflow: 'hidden',
-            position: 'relative',
-          }}
-        >
-          {/* Cartaz deslocado para cima para esconder o branco inicial */}
-          <div style={{ marginTop: blankOffsetPx > 0 ? `-${blankOffsetPx}px` : undefined, width: '100%', height: `${h}px` }}>
-            {posterType === 'reliquias' && (
-              <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <div style={{ width: '13.6cm', height: '9.0cm' }}>
-                  <PosterPreview {...data} isImperdiveis={false} settings={settings} />
-                </div>
-              </div>
-            )}
-            {posterType === 'reliquias-a6' && (
-              <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <div style={{ width: '13.6cm', height: '9.0cm', transform: 'scale(0.9)', transformOrigin: 'center center' }}>
-                  <PosterPreview {...data} isImperdiveis={false} settings={settings} />
-                </div>
-              </div>
-            )}
-            {posterType === 'etiqueta-oficial' && <PosterPreviewEtiquetaOficial {...data} settings={settings} />}
-            {posterType === 'vitrine' && <PosterPreviewVitrine {...data} settings={settings} />}
-            {posterType === 'aereo' && <PosterPreviewAereo {...data} settings={settings} />}
-            {posterType === 'totem' && <PosterPreviewTotem {...data} settings={settings} />}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-/* ─────────────────────────── PagePreview (Scaled Batch) ─────────────────── */
-function PagePreview({ 
-  pages, 
-  posterType, 
-  perPage, 
-  settings 
-}: { 
-  pages: PosterData[][]; 
-  posterType: PosterType; 
-  perPage: number; 
-  settings: PosterSettings;
-}) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [scale, setScale] = useState(0.4);
-  const totalPages = pages.length;
-  const orientation = POSTER_ORIENTATION[posterType] || 'landscape';
-  const isPortrait = orientation === 'portrait';
-  const targetW = (isPortrait ? 210 : 297) * 3.78;
-  const targetH = (isPortrait ? 297 : 210) * 3.78;
-
-  useEffect(() => {
-    if (!containerRef.current) return;
-    const observer = new ResizeObserver((entries) => {
-      const { width, height } = entries[0].contentRect;
-      const newScale = Math.min(width / targetW, height / targetH) * 0.95;
-      setScale(Math.max(0.1, newScale));
-    });
-    observer.observe(containerRef.current);
-    return () => observer.disconnect();
-  }, [targetW, targetH]);
-
-
-
-  return (
-    <div ref={containerRef} className="w-full h-full bg-muted/40 overflow-y-auto custom-scrollbar p-8">
-      <div className="flex flex-col items-center gap-12 pb-12">
-        {pages.map((pageItems, idx) => (
-          <div key={idx} className="relative group">
-            {/* Page Number Badge */}
-            <div className="absolute -top-6 left-0 bg-primary text-primary-foreground text-[10px] font-black px-2 py-0.5 rounded shadow-sm opacity-60 group-hover:opacity-100 transition-opacity">
-              PÁGINA {idx + 1} DE {totalPages}
-            </div>
-            
-            <div 
-              className="bg-white shadow-2xl origin-top shrink-0"
-              style={{ 
-                width: isPortrait ? '210mm' : '297mm', 
-                height: isPortrait ? '297mm' : '210mm',
-                transform: `scale(${scale})`,
-                marginBottom: `calc(${isPortrait ? '297mm' : '210mm'} * (${scale} - 1))` // Compensa o espaço vazio deixado pelo scale
-              }}
-            >
-
-              <PageGrid 
-                items={pageItems} 
-                posterType={posterType} 
-                perPage={perPage} 
-                settings={settings} 
-              />
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-/* ─────────────────────────── renderPageGrid ──────────────────────────────── */
-function PageGrid({
-  items,
-  posterType,
-  perPage,
-  settings
-}: {
-  items: PosterData[];
-  posterType: PosterType;
-  perPage: number;
-  settings: PosterSettings;
-}) {
-  const pageBgClass = 'bg-white';
-  const allSlots = Array.from({ length: perPage }).map((_, i) => items[i] || null);
-  const isPortrait = posterType !== 'reliquias' && posterType !== 'reliquias-a6';
-
-  // Overlay das perfurações físicas do papel (sempre 16 gôndolas de ponta a ponta + margens)
-  const renderPerforations = () => {
-    if (isPortrait) {
-      return (
-        <div className="absolute inset-0 pointer-events-none print:hidden z-50">
-          {/* Margens (bordas destacáveis) */}
-          <div className="absolute top-0 bottom-0 left-[16mm] border-l border-dashed border-black/40" />
-          <div className="absolute top-0 bottom-0 right-[14mm] border-r border-dashed border-black/40" />
-          <div className="absolute left-0 right-0 top-[14.2mm] border-t border-dashed border-black/40" />
-          <div className="absolute left-0 right-0 bottom-[10.8mm] border-b border-dashed border-black/40" />
-          
-          {/* Linha vertical central */}
-          <div className="absolute top-0 bottom-0 left-[106mm] border-l border-dashed border-black/40" />
-          
-          {/* 7 Linhas horizontais centrais */}
-          {[1, 2, 3, 4, 5, 6, 7].map(i => (
-            <div key={i} className="absolute left-0 right-0 border-t border-dashed border-black/40" style={{ top: `${14.2 + 34 * i}mm` }} />
-          ))}
-        </div>
-      );
-    } else {
-      return (
-        <div className="absolute inset-0 pointer-events-none print:hidden z-50">
-          {/* Margens (bordas destacáveis rotacionadas) */}
-          <div className="absolute left-0 right-0 top-[16mm] border-t border-dashed border-black/40" />
-          <div className="absolute left-0 right-0 bottom-[14mm] border-b border-dashed border-black/40" />
-          <div className="absolute top-0 bottom-0 left-[14.2mm] border-l border-dashed border-black/40" />
-          <div className="absolute top-0 bottom-0 right-[10.8mm] border-r border-dashed border-black/40" />
-
-          {/* Linha horizontal central */}
-          <div className="absolute left-0 right-0 top-[106mm] border-t border-dashed border-black/40" />
-          
-          {/* 7 Linhas verticais centrais */}
-          {[1, 2, 3, 4, 5, 6, 7].map(i => (
-            <div key={i} className="absolute top-0 bottom-0 border-l border-dashed border-black/40" style={{ left: `${14.2 + 34 * i}mm` }} />
-          ))}
-        </div>
-      );
-    }
-  };
-
-  if (posterType === 'aereo') {
-    return (
-      <div 
-        className={cn("w-full h-full relative", pageBgClass)}
-        style={{ 
-        display: 'grid', 
-        gridTemplateColumns: '174mm', 
-        gridTemplateRows: 'repeat(2, 131mm)', 
-        gap: '5mm', 
-        justifyContent: 'center',
-        alignContent: 'start',
-        paddingTop: '15mm', 
-        paddingBottom: '11mm', 
-        paddingLeft: '13mm', 
-        paddingRight: '13mm', 
-        boxSizing: 'border-box', 
-      }}>
-        {allSlots.map((d, i) => (
-          <div 
-            key={i} 
-            className="relative flex items-center justify-center box-border overflow-hidden print:border-none"
-            style={{ width: '174mm', height: '131mm' }}
-          >
-            {d ? (
-              <div style={{ width: '174mm', height: '131mm' }}>
-                <PosterPreviewAereo {...d} settings={settings} />
-              </div>
-            ) : (
-              <div style={{ width: '174mm', height: '131mm', backgroundColor: 'transparent' }} />
-            )}
-          </div>
-        ))}
-        {renderPerforations()}
-      </div>
-    );
-  }
-
-  if (posterType === 'totem') {
-    return (
-      <div className={cn("w-full h-full pt-[0.3cm] relative", pageBgClass)}>
-        {items[0] && <PosterPreviewTotem {...items[0]} settings={settings} />}
-        {renderPerforations()}
-      </div>
-    );
-  }
-
-  if (posterType === 'etiqueta-oficial' || posterType === 'vitrine') {
-    return (
-      <div 
-        className={cn("w-full h-full relative", pageBgClass)}
-        style={{ 
-        display: 'grid', 
-        gridTemplateColumns: '90mm 90mm', 
-        gridTemplateRows: 'repeat(8, 34.0mm)',
-        columnGap: '0', 
-        rowGap: '0',
-        justifyContent: 'center',
-        paddingTop: '14.2mm', 
-        paddingBottom: '10.8mm', 
-        paddingLeft: '16mm', 
-        paddingRight: '14mm', 
-        boxSizing: 'border-box', 
-      }}>
-        {allSlots.map((d, i) => (
-          <div 
-            key={i} 
-            className="relative overflow-hidden pt-[1mm] box-border print:border-none"
-            style={{ width: '90mm', height: '34.0mm' }}
-          >
-            {d && (
-              posterType === 'vitrine' 
-                ? <PosterPreviewVitrine {...d} settings={settings} /> 
-                : <PosterPreviewEtiquetaOficial {...d} settings={settings} />
-            )}
-          </div>
-        ))}
-        {renderPerforations()}
-      </div>
-    );
-  }
-
-  // Relíquias A4 (Folha Inteira - 1 cartaz por folha A4 paisagem)
-  if (posterType === 'reliquias') {
-    const d = items[0];
-    return (
-      <div 
-        className={cn("w-full h-full relative flex items-center justify-center overflow-hidden", pageBgClass)}
-        style={{
-          width: '297mm',
-          height: '210mm',
-          boxSizing: 'border-box',
-        }}
-      >
-        {d && (
-          <div 
-            style={{ 
-              width: '13.6cm', 
-              height: '9.0cm', 
-              transform: 'scale(2)', 
-              transformOrigin: 'center center',
-              flexShrink: 0,
-            }}
-          >
-            <PosterPreview {...d} isImperdiveis={false} settings={settings} />
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  return (
-    <div 
-      className={cn("w-full h-full relative", pageBgClass)}
-      style={{
-      display: 'grid',
-      gridTemplateColumns: 'repeat(2, 13.6cm)',
-      gridTemplateRows: 'repeat(2, 9.0cm)',
-      justifyContent: 'center',
-      alignContent: 'center',
-      paddingTop: '16mm',
-      paddingBottom: '14mm',
-      paddingLeft: '14.2mm',
-      paddingRight: '10.8mm',
-      boxSizing: 'border-box',
-    }}>
-      {allSlots.map((d, i) => (
-        <div 
-          key={i} 
-          className="flex items-center justify-center overflow-hidden box-border print:border-none"
-          style={{ width: '13.6cm', height: '9.0cm' }}
-        >
-          {d && (
-            <div 
-              style={{ 
-                width: '13.6cm', 
-                height: '9.0cm', 
-                transform: 'scale(0.9)', 
-                transformOrigin: 'center center', 
-                overflow: 'hidden' 
-              }}
-            >
-              <PosterPreview {...d} isImperdiveis={false} settings={settings} />
-            </div>
-          )}
-        </div>
-      ))}
-      {renderPerforations()}
-    </div>
-  );
-}
-
-
-/* ─────────────────────────── Home ───────────────────────────────────────── */
 export default function Home() {
   const [posterType, setPosterType] = useState<PosterType>('reliquias');
   const [queue, setQueue] = useState<PosterData[]>([]);
@@ -489,6 +55,7 @@ export default function Home() {
   const [showAutomation, setShowAutomation] = useState(false);
   const [importMode, setImportMode] = useState<'offer' | 'normal'>('offer');
   const [showAddSuccess, setShowAddSuccess] = useState(false);
+  const [continuousScan, setContinuousScan] = useState(false);
 
   const [queueFilter, setQueueFilter] = useState<'all' | 'offer' | 'normal'>('all');
   const [settings, setSettings] = useState<PosterSettings>({
@@ -496,21 +63,11 @@ export default function Home() {
     minInstallmentAmount: 29.99,
   });
 
-  const [isMobile, setIsMobile] = useState(false);
   const [sessionProducts, setSessionProducts] = useState<Record<string, any>>({});
   const hasSessionData = Object.keys(sessionProducts).length > 0;
   const [hasOldQueue, setHasOldQueue] = useState(false);
   const isInitialMount = useRef(true);
-
-  useEffect(() => {
-    const checkMobile = () => {
-      const ua = navigator.userAgent;
-      return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua) || 
-             (/Macintosh|MacIntel/i.test(ua) && navigator.maxTouchPoints > 1);
-    };
-    setIsMobile(checkMobile());
-  }, []);
-
+  const formRef = useRef<PosterFormHandle>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [securityModal, setSecurityModal] = useState<{
@@ -529,8 +86,7 @@ export default function Home() {
     message: '',
   });
 
-
-  // Load settings and queue
+  // Load settings, queue and preferences
   useEffect(() => {
     const savedSettings = localStorage.getItem('poster-settings-v2');
     if (savedSettings) {
@@ -541,7 +97,6 @@ export default function Home() {
       if (oldSettings) {
         try {
           const parsed = JSON.parse(oldSettings);
-          // Se o usuário já usava 10x mantém 10x, se usava o padrão antigo 6x atualiza para o novo padrão 10x
           if (parsed.maxInstallments === 10) newMax = 10;
           else if (parsed.maxInstallments === 6) newMax = 10;
         } catch { /* ignore */ }
@@ -550,6 +105,7 @@ export default function Home() {
       setSettings(initialSettings);
       localStorage.setItem('poster-settings-v2', JSON.stringify(initialSettings));
     }
+
     const savedQueue = localStorage.getItem('poster-queue');
     if (savedQueue) {
       try { 
@@ -563,10 +119,19 @@ export default function Home() {
         setQueue(parsedQueue); 
       } catch { /* ignore */ }
     }
+
+    const savedScanMode = localStorage.getItem('poster-continuous-scan');
+    if (savedScanMode !== null) {
+      setContinuousScan(savedScanMode === 'true');
+    }
   }, []);
 
+  const handleContinuousScanChange = (val: boolean) => {
+    setContinuousScan(val);
+    localStorage.setItem('poster-continuous-scan', String(val));
+  };
+
   // Monitora edição do formulário para voltar ao modo individual
-  // Ignora o reset inicial ou reset após adicionar
   const lastResetRef = useRef<string>(JSON.stringify(initialPosterData()));
   useEffect(() => {
     const currentStr = JSON.stringify(currentPoster);
@@ -575,7 +140,7 @@ export default function Home() {
     }
   }, [currentPoster]);
 
-  // Save queue whenever it changes
+  // Salva a fila sempre que for alterada
   useEffect(() => {
     localStorage.setItem('poster-queue', JSON.stringify(queue));
     if (isInitialMount.current) {
@@ -584,8 +149,6 @@ export default function Home() {
       localStorage.setItem('poster-queue-updated', Date.now().toString());
     }
   }, [queue]);
-
-
 
   const saveSettings = (newSettings: PosterSettings) => {
     setSettings(newSettings);
@@ -606,17 +169,17 @@ export default function Home() {
     setSessionProducts({});
   };
 
-  const perPage    = PER_PAGE[posterType as PosterType] || 4;
-  
+  const currentFormat = getPosterFormat(posterType);
+  const perPage = currentFormat.perPage;
+  const orientation = currentFormat.orientation;
+
   const filteredQueue = useMemo(() => {
-    let result = queue;
-    if (queueFilter === 'all') return result;
-    return result.filter(item => {
+    if (queueFilter === 'all') return queue;
+    return queue.filter(item => {
       const isOfferType = item.posterSubType === 'offer';
       return queueFilter === 'offer' ? isOfferType : !isOfferType;
     });
   }, [queue, queueFilter]);
-
 
   // Expande a fila considerando as quantidades de cada item para impressão
   const expandedQueue = useMemo(() => {
@@ -662,7 +225,7 @@ export default function Home() {
 
   const totalPages = printPages.length;
 
-  // Update print CSS immediately when poster type changes
+  // Atualiza o CSS de impressão dinamicamente quando o formato muda
   useEffect(() => {
     const styleId = 'print-page-style';
     let style = document.getElementById(styleId) as HTMLStyleElement | null;
@@ -671,7 +234,7 @@ export default function Home() {
       style.id = styleId;
       document.head.appendChild(style);
     }
-    const o = POSTER_ORIENTATION[posterType as PosterType] || 'landscape';
+    const o = orientation;
     style.innerHTML = `
       @media print {
         @page { size: A4 ${o}; margin: 0 !important; }
@@ -697,23 +260,120 @@ export default function Home() {
         }
       }
     `;
-  }, [posterType]);
+  }, [orientation]);
 
   const handlePosterTypeChange = (newType: PosterType) => {
     setPosterType(newType);
-
-    // Se o formulário já tem um produto preenchido/carregado, preserva os dados ao trocar de formato
     if (isProductReady || (currentPoster.description && currentPoster.description !== 'DESCRIÇÃO DO PRODUTO')) {
+      const format = getPosterFormat(newType);
       setCurrentPoster(prev => ({
         ...prev,
-        posterSubType: ['reliquias', 'reliquias-a6', 'totem'].includes(newType) ? 'offer' : prev.posterSubType,
+        posterSubType: format.offerOnly ? 'offer' : prev.posterSubType,
       }));
     }
   };
 
+  const handlePrint = useCallback(() => {
+    if (queue.length === 0 && !isProductReady) return;
 
+    const executePrint = () => {
+      const now = new Date();
+      const day = String(now.getDate()).padStart(2, '0');
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const year = String(now.getFullYear()).slice(-2);
+      const dateStr = `${day}${month}${year}`;
+      const filename = `cartazes${dateStr}`;
 
-  const handleAddToQueue = () => {
+      const originalTitle = document.title;
+      document.title = filename;
+      
+      setTimeout(() => {
+        window.print();
+        setTimeout(() => {
+          document.title = originalTitle;
+        }, 500);
+      }, 150);
+    };
+
+    const orientationLabel = orientation === 'landscape' ? 'PAISAGEM' : 'RETRATO';
+
+    setSecurityModal({
+      isOpen: true,
+      type: 'warning',
+      title: 'Confirme os ajustes de impressão',
+      message: `Para o cartaz sair no tamanho correto, você PRECISA CONFERIR se nas configurações de impressão/PDF a MARGEM e a ESCALA estão em "PADRÃO" (100%) e o FORMATO está em "${orientationLabel}".`,
+      confirmText: 'CONFIRMAR E IMPRIMIR',
+      cancelText: 'CANCELAR',
+      onConfirm: () => {
+        setSecurityModal(prev => ({ ...prev, isOpen: false }));
+        executePrint();
+      }
+    });
+  }, [queue.length, isProductReady, orientation]);
+
+  const proceedAddToQueue = useCallback((dataToAdd?: PosterData, clearFirst: boolean = false): boolean => {
+    const poster = dataToAdd || currentPoster;
+    setQueue((prev: PosterData[]) => {
+      const baseQueue = clearFirst ? [] : prev;
+      return [...baseQueue, { ...poster, quantity: 1 }];
+    });
+    
+    // Reseta o formulário preservando algumas preferências do usuário
+    const resetData = {
+      ...initialPosterData(),
+      posterSubType: poster.posterSubType,
+      paymentOption: poster.paymentOption,
+      defectType: poster.defectType,
+      customDefectDiscount: poster.customDefectDiscount,
+      quantity: 1
+    };
+    
+    lastResetRef.current = JSON.stringify(resetData);
+    setCurrentPoster(resetData);
+    setIsProductReady(false);
+    setSelectedQueueIndex(null);
+    setPreviewMode('page');
+    
+    // Remonta o formulário para renovar o ciclo e aplicar auto-focus na busca
+    if (!dataToAdd) {
+      setFormKey((k: number) => k + 1);
+    }
+
+    setShowAddSuccess(true);
+    setTimeout(() => setShowAddSuccess(false), 1500);
+    return true;
+  }, [currentPoster]);
+
+  const checkOldQueueAndProceed = useCallback((dataToAdd?: PosterData) => {
+    const lastUpdate = Number(localStorage.getItem('poster-queue-updated') || Date.now());
+    const isStale = (Date.now() - lastUpdate) > 1000 * 60 * 5; // 5 minutos
+
+    if (queue.length > 0 && (hasOldQueue || isStale)) {
+      setSecurityModal({
+        isOpen: true,
+        type: 'warning',
+        title: 'Cartazes Antigos na Lista',
+        message: 'Detectamos que já existem cartazes na sua lista. Você deseja adicionar este novo cartaz junto com os antigos ou limpar a lista anterior?',
+        confirmText: 'LIMPAR E ADICIONAR',
+        cancelText: 'MANTER E ADICIONAR',
+        onConfirm: () => {
+          setSecurityModal(prev => ({ ...prev, isOpen: false }));
+          setHasOldQueue(false);
+          proceedAddToQueue(dataToAdd, true);
+        },
+        onCancel: () => {
+          setSecurityModal(prev => ({ ...prev, isOpen: false }));
+          setHasOldQueue(false);
+          proceedAddToQueue(dataToAdd, false);
+        }
+      });
+      return false;
+    }
+    proceedAddToQueue(dataToAdd);
+    return true;
+  }, [queue.length, hasOldQueue, proceedAddToQueue]);
+
+  const handleAddToQueue = useCallback(() => {
     if (!isProductReady) return;
 
     const valDe = parsePrice(currentPoster.priceFrom);
@@ -751,6 +411,8 @@ export default function Home() {
           type: 'warning',
           title: 'Desconto Muito Alto',
           message: `Este produto está com um desconto de ${Math.round(discount * 100)}%. Você confirma que o preço final de R$ ${currentPoster.priceFor} está correto?`,
+          confirmText: 'CONFIRMAR PREÇO',
+          cancelText: 'CORRIGIR',
           onConfirm: () => {
             setSecurityModal(prev => ({ ...prev, isOpen: false }));
             checkOldQueueAndProceed();
@@ -761,70 +423,58 @@ export default function Home() {
     }
 
     checkOldQueueAndProceed();
-  };
+  }, [isProductReady, currentPoster, checkOldQueueAndProceed]);
 
-  const checkOldQueueAndProceed = () => {
-    const lastUpdate = Number(localStorage.getItem('poster-queue-updated') || Date.now());
-    const isStale = (Date.now() - lastUpdate) > 1000 * 60 * 5; // 5 minutes
+  // Handler para adição automática disparada pelo leitor de código de barras ou scanner
+  const handleAutoAdd = useCallback((data: PosterData, source: AutoAddSource): boolean => {
+    const valPor = parsePrice(data.priceFor);
+    if (valPor <= 0) return false;
+    return checkOldQueueAndProceed(data);
+  }, [checkOldQueueAndProceed]);
 
-    if (queue.length > 0 && (hasOldQueue || isStale)) {
-      setSecurityModal({
-        isOpen: true,
-        type: 'warning',
-        title: 'Cartazes Antigos na Lista',
-        message: 'Detectamos que já existem cartazes na sua lista. Você deseja adicionar este novo cartaz junto com os antigos ou limpar a lista anterior?',
-        confirmText: 'LIMPAR E ADICIONAR',
-        cancelText: 'MANTER E ADICIONAR',
-        onConfirm: () => {
-          setSecurityModal(prev => ({ ...prev, isOpen: false }));
-          setHasOldQueue(false);
-          proceedAddToQueue(undefined, true);
-        },
-        onCancel: () => {
-          setSecurityModal(prev => ({ ...prev, isOpen: false }));
-          setHasOldQueue(false);
-          proceedAddToQueue(undefined, false);
+  // Atalhos Globais de Teclado (F2, Alt+1..4, Ctrl+Enter, Ctrl+P, Escape)
+  const hotkeys = useMemo(() => {
+    const map: Record<string, (e: KeyboardEvent) => void> = {
+      f2: (e) => {
+        e.preventDefault();
+        formRef.current?.focusSearch();
+      },
+      'ctrl+enter': (e) => {
+        e.preventDefault();
+        if (isProductReady) handleAddToQueue();
+      },
+      'ctrl+p': (e) => {
+        e.preventDefault();
+        handlePrint();
+      },
+      escape: (e) => {
+        if (selectedQueueIndex !== null) {
+          e.preventDefault();
+          setSelectedQueueIndex(null);
+          setCurrentPoster(initialPosterData());
+          setIsProductReady(false);
+          formRef.current?.focusSearch();
+        } else if (isProductReady) {
+          e.preventDefault();
+          setCurrentPoster(initialPosterData());
+          setIsProductReady(false);
+          setFormKey(k => k + 1);
         }
-      });
-      return;
-    }
-    proceedAddToQueue();
-  };
-
-  const proceedAddToQueue = (dataToAdd?: PosterData, clearFirst: boolean = false) => {
-    const poster = dataToAdd || currentPoster;
-    setQueue((prev: PosterData[]) => {
-      const baseQueue = clearFirst ? [] : prev;
-      return [...baseQueue, { ...poster, quantity: 1 }];
-    });
-    
-    // Reseta o formulário preservando algumas preferências do usuário
-    const resetData = {
-      ...initialPosterData(),
-      posterSubType: poster.posterSubType,
-      paymentOption: poster.paymentOption,
-      defectType: poster.defectType,
-      customDefectDiscount: poster.customDefectDiscount,
-      quantity: 1
+      },
     };
-    
-    lastResetRef.current = JSON.stringify(resetData);
-    setCurrentPoster(resetData);
-    setIsProductReady(false);
-    setPreviewMode('page'); // Muda automático para a visão da página ao adicionar
-    
-    // Só remonta o formulário se não for adição automática via scanner (mantendo o scanner aberto em lote)
-    if (!dataToAdd) {
-      setFormKey((k: number) => k + 1);
-    }
 
-    // Feedback de sucesso no botão
-    setShowAddSuccess(true);
-    setTimeout(() => setShowAddSuccess(false), 1500);
-  };
+    // Alt+1 até Alt+N para trocar formato de impressão
+    VISIBLE_FORMATS.forEach((fmt, idx) => {
+      map[`alt+${idx + 1}`] = (e) => {
+        e.preventDefault();
+        handlePosterTypeChange(fmt.id);
+      };
+    });
 
+    return map;
+  }, [isProductReady, handleAddToQueue, handlePrint, selectedQueueIndex]);
 
-
+  useHotkeys(hotkeys, { enabled: !securityModal.isOpen && !showAbout && !showDatabase && !showAutomation });
 
   const handleUpdateQuantity = (index: number, delta: number) => {
     setQueue((prev: PosterData[]) => prev.map((item, i) => {
@@ -862,7 +512,6 @@ export default function Home() {
             imported = parseProductCSV(content, settings);
           }
 
-          // Filtra baseado no modo selecionado pelo usuário
           let filtered: any[] = [];
           if (importMode === 'offer') {
             filtered = imported.filter((item: any) => item.posterSubType === 'offer');
@@ -871,7 +520,6 @@ export default function Home() {
           }
 
           if (filtered.length > 0) {
-            // Buscar informações na base de dados (Fornecedor, Referência)
             const keysToLookup = Array.from(new Set(filtered.map(item => item.code || item.ean).filter(Boolean)));
             if (keysToLookup.length > 0) {
               const res = await fetch('/api/produto/bulk-lookup', {
@@ -912,7 +560,7 @@ export default function Home() {
             };
 
             const lastUpdate = Number(localStorage.getItem('poster-queue-updated') || Date.now());
-            const isStale = (Date.now() - lastUpdate) > 1000 * 60 * 5; // 5 minutes
+            const isStale = (Date.now() - lastUpdate) > 1000 * 60 * 5;
 
             if (queue.length > 0 && (hasOldQueue || isStale)) {
               setSecurityModal({
@@ -951,91 +599,34 @@ export default function Home() {
     if (isExcel) {
       reader.readAsArrayBuffer(file);
     } else {
-      reader.readAsText(file, 'ISO-8859-1'); // Comum em CSVs do Excel Brasil
+      reader.readAsText(file, 'ISO-8859-1');
     }
   };
 
-  const handlePrint = () => {
-    const executePrint = () => {
-      const now = new Date();
-      const day = String(now.getDate()).padStart(2, '0');
-      const month = String(now.getMonth() + 1).padStart(2, '0');
-      const year = String(now.getFullYear()).slice(-2);
-      const dateStr = `${day}${month}${year}`;
-      const filename = `cartazes${dateStr}`;
-
-      const originalTitle = document.title;
-      document.title = filename;
-      
-      // Pequena espera para o navegador registrar a mudança de título e o modal fechar completamente
-      setTimeout(() => {
-        window.print();
-        // Restaura o título após a abertura do diálogo de impressão
-        setTimeout(() => {
-          document.title = originalTitle;
-        }, 500);
-      }, 150);
-    };
-
-    const orientationLabel = orientation === 'landscape' ? 'PAISAGEM' : 'RETRATO';
-
-    setSecurityModal({
-      isOpen: true,
-      type: 'warning',
-      title: 'Confirme os ajustes de impressão',
-      message: `Para o cartaz sair no tamanho correto, você PRECISA CONFERIR se nas configurações de impressão/PDF a MARGEM e a ESCALA estão em "PADRÃO" (100%) e o FORMATO está em "${orientationLabel}".`,
-      confirmText: 'CONFIRMAR E IMPRIMIR',
-      cancelText: 'CANCELAR',
-      onConfirm: () => {
-        setSecurityModal(prev => ({ ...prev, isOpen: false }));
-        executePrint();
-      }
-    });
-  };
-
-  /* Print content: one div per page, each with page-break */
   const renderPrintContent = () => {
-    const orientation = POSTER_ORIENTATION[posterType as PosterType];
     const pagesToPrint = printPages.length > 0 ? printPages : (isProductReady ? [[currentPoster]] : []);
-
     if (pagesToPrint.length === 0) return null;
 
-    return pagesToPrint.map((pageItems, pageIdx: number) => {
-      return (
-        <div
-          key={pageIdx}
-          className="print-page bg-white"
-          style={{
-            width:          orientation === 'landscape' ? '297mm'  : '210mm',
-            height:         orientation === 'landscape' ? '210mm'  : '297mm',
-            pageBreakAfter: pageIdx < pagesToPrint.length - 1 ? 'always' : 'auto',
-            breakAfter:     pageIdx < pagesToPrint.length - 1 ? 'page'   : 'auto',
-          }}
-        >
-          <PageGrid items={pageItems} posterType={posterType as PosterType} perPage={perPage} settings={settings} />
-        </div>
-      );
-    });
+    return pagesToPrint.map((pageItems, pageIdx: number) => (
+      <div
+        key={pageIdx}
+        className="print-page bg-white"
+        style={{
+          width:          orientation === 'landscape' ? '297mm'  : '210mm',
+          height:         orientation === 'landscape' ? '210mm'  : '297mm',
+          pageBreakAfter: pageIdx < pagesToPrint.length - 1 ? 'always' : 'auto',
+          breakAfter:     pageIdx < pagesToPrint.length - 1 ? 'page'   : 'auto',
+        }}
+      >
+        <PageGrid items={pageItems} posterType={posterType} perPage={perPage} settings={settings} />
+      </div>
+    ));
   };
-
-  const orientation = POSTER_ORIENTATION[posterType as PosterType];
-
-  const typeOptions = [
-    { id: 'reliquias',             label: 'Relíquias A4 (Folha Inteira)' },
-    { id: 'reliquias-a6',          label: 'Relíquias A6 (4 por Folha)' },
-    // { id: 'aereo',                 label: 'Aéreo'              },   // OCULTO - não exibir para usuários
-    { id: 'etiqueta-oficial',      label: 'Gôndola'            },
-    { id: 'vitrine',               label: 'Vitrine'            },
-    // { id: 'totem',                 label: 'Totem'              },   // OCULTO - não exibir para usuários
-  ] as const;
-
-
 
   return (
     <div className="flex flex-col h-[100dvh] w-full overflow-hidden bg-background text-foreground font-sans selection:bg-primary selection:text-white overscroll-none print:block print:h-auto print:min-h-0">
-
-
-      {/* Modais */}
+      
+      {/* Modais da Aplicação */}
       <DisclaimerModal />
       <AboutPanel open={showAbout} onClose={() => setShowAbout(false)} />
       <DatabasePanel 
@@ -1053,451 +644,319 @@ export default function Home() {
           fileInputRef.current?.click();
         }} 
       />
-
       <SecurityModal 
         {...securityModal} 
         onClose={() => setSecurityModal(prev => ({ ...prev, isOpen: false }))} 
       />
 
-      {/* ── Header ── */}
-      <header className="no-print shrink-0 px-4 py-3 border-b bg-card">
-        <div className="flex justify-between items-center flex-wrap gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-sm">P%</span>
+      {/* ── HEADER COMPACTO E LIMPO (SEM SELETOR REDUNDANTE) ── */}
+      <header className="no-print shrink-0 px-4 py-2.5 border-b bg-card z-20">
+        <div className="flex justify-between items-center gap-4">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center shrink-0 shadow-sm">
+              <span className="text-primary-foreground font-black text-sm tracking-tighter">RD</span>
             </div>
-            <h1 className="font-headline text-lg sm:text-2xl font-bold uppercase truncate max-w-[200px] sm:max-w-none">
-              <span className="sm:hidden">RD CARTAZ</span>
-              <span className="hidden sm:inline">RD CARTAZ - Cartazes Relíquias da Diversão</span>
-            </h1>
+            <div className="min-w-0">
+              <h1 className="font-headline text-base sm:text-lg font-black uppercase tracking-tight leading-none truncate">
+                RD CARTAZ
+              </h1>
+              <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest hidden sm:inline">
+                Relíquias da Diversão
+              </span>
+            </div>
             {hasSessionData && (
-              <div className="flex items-center gap-1.5 px-2 py-1 bg-blue-50 border border-blue-100 rounded-md animate-pulse">
+              <div className="flex items-center gap-1.5 px-2 py-0.5 bg-blue-50 border border-blue-100 rounded-md animate-pulse shrink-0 ml-1">
                 <Database className="h-3 w-3 text-blue-500" />
-                <span className="text-[10px] font-black text-blue-600 uppercase tracking-tight">Preços da Sessão Ativos</span>
+                <span className="text-[10px] font-black text-blue-600 uppercase tracking-tight">Sessão Ativa</span>
               </div>
             )}
           </div>
-          <div className="flex items-center gap-4 w-full md:w-auto mt-2 md:mt-0 justify-between">
-            {/* Mobile select */}
 
-            {/* Desktop and Mobile button group */}
-            <div className="flex bg-muted p-1 rounded-xl gap-1 shadow-inner overflow-x-auto max-w-[calc(100vw-32px)] sm:max-w-none no-scrollbar">
-               {typeOptions.map(opt => (
-                 <button
-                   key={opt.id}
-                   onClick={() => handlePosterTypeChange(opt.id as PosterType)}
-                   className={cn(
-                     'px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-[13px] font-bold transition-all duration-200 whitespace-nowrap shrink-0',
-                     posterType === opt.id
-                       ? 'bg-background text-primary shadow-sm scale-[1.02]'
-                       : 'text-muted-foreground hover:bg-black/5'
-                   )}
-                 >
-                   {opt.label}
-                 </button>
-               ))}
-            </div>
-
-
-              <AboutPanel open={showAbout} onClose={() => setShowAbout(false)} />
-              <button
-                onClick={() => setShowAbout(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[13px] font-semibold text-muted-foreground hover:text-foreground hover:bg-muted transition-all border border-border/50 hover:border-border"
-                title="Sobre esta ferramenta"
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowAbout(true)}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-bold text-muted-foreground hover:text-foreground hover:bg-muted transition-colors border border-transparent hover:border-border"
+              title="Sobre esta ferramenta"
+            >
+              <Info className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Sobre</span>
+            </button>
+            <SettingsDialog 
+              settings={settings} 
+              onSave={saveSettings} 
+              onOpenDatabase={() => setShowDatabase(true)} 
+              onImportSessionData={handleImportSessionData}
+              onClearSessionData={handleClearSessionData}
+              hasSessionData={hasSessionData}
+            />
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleImportFile}
+              accept=".csv, .xls, .xlsx"
+              className="hidden"
+            />
+            <div className="hidden sm:flex items-center gap-2 ml-1">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handlePrint}
+                disabled={queue.length === 0 && !isProductReady}
+                className="h-9 px-3 text-xs font-bold transition-transform active:scale-95"
               >
-                <Info className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">Sobre</span>
-              </button>
-              <SettingsDialog 
-                settings={settings} 
-                onSave={saveSettings} 
-                onOpenDatabase={() => setShowDatabase(true)} 
-                onImportSessionData={handleImportSessionData}
-                onClearSessionData={handleClearSessionData}
-                hasSessionData={hasSessionData}
-              />
-              <input
-                type="file"
-                ref={fileInputRef}
-                onChange={handleImportFile}
-                accept=".csv, .xls, .xlsx"
-                className="hidden"
-              />
-              <div className="hidden md:flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  onClick={handlePrint}
-                  disabled={queue.length === 0 && !isProductReady}
-                  className="transition-transform active:scale-95 px-3"
-                >
-                  <FileDown className="mr-1.5 h-4 w-4" />
-                  Salvar PDF
-                </Button>
-                <Button
-                  onClick={handlePrint}
-                  disabled={queue.length === 0 && !isProductReady}
-                  className="transition-transform active:scale-95 px-3"
-                >
-                  <Printer className="mr-1.5 h-4 w-4" />
-                  Imprimir {totalPages > 0 ? `(${totalPages}p)` : (isProductReady ? '(1p)' : '')}
-                </Button>
-              </div>
+                <FileDown className="mr-1.5 h-3.5 w-3.5" />
+                Salvar PDF
+              </Button>
+              <Button
+                size="sm"
+                onClick={handlePrint}
+                disabled={queue.length === 0 && !isProductReady}
+                className="h-9 px-3.5 text-xs font-black uppercase tracking-wider transition-transform active:scale-95 shadow-sm"
+              >
+                <Printer className="mr-1.5 h-3.5 w-3.5" />
+                Imprimir {totalPages > 0 ? `(${totalPages}p)` : (isProductReady ? '(1p)' : '')}
+                <Kbd className="ml-2 hidden lg:inline-flex bg-primary-foreground/20 text-primary-foreground border-white/20 shadow-none">
+                  Ctrl+P
+                </Kbd>
+              </Button>
+            </div>
           </div>
         </div>
       </header>
 
-      {/* ── Print output (hidden on screen) ── */}
+      {/* ── Print output (oculto na tela, visível na impressão física) ── */}
       <div className="print-container" style={{ display: 'none' }}>
         {renderPrintContent()}
       </div>
 
-      {/* ── Main Area ── */}
+      {/* ── MAIN WORKSPACE (SPLIT-SCREEN RESPONSIVO) ── */}
       <main className="no-print flex-1 flex flex-col min-h-0 overflow-hidden relative">
-        <div className="flex-1 flex flex-col lg:grid lg:grid-cols-12 min-h-0 h-full overflow-hidden">
+        <div className="flex-1 flex flex-col lg:flex-row min-h-0 h-full overflow-hidden">
 
-
-          {/* ── COLUMN 1: FORM (EDIT) ── */}
-          <div className={cn(
-            "lg:col-span-3 flex flex-col border-r border-border bg-card lg:min-h-0 h-full overflow-hidden",
+          {/* ══════════ COLUNA 1: FORMULÁRIO DE INPUT & CONTROLE ══════════ */}
+          <aside className={cn(
+            "w-full lg:w-[390px] xl:w-[410px] shrink-0 flex flex-col border-r border-border bg-card lg:min-h-0 h-full overflow-hidden z-10",
             activeTab !== 'edit' && "hidden lg:flex"
           )}>
-            <div className="flex-1 overflow-y-auto custom-scrollbar p-4">
-
-              <div className="space-y-4">
-                <PosterForm
-                  key={`form-${formKey}`}
-                  data={currentPoster}
-                  setData={setCurrentPoster}
-                  posterType={posterType}
-                  settings={settings}
-                  onLookupStatusChange={setIsProductReady}
-                  onImportBatch={() => setShowAutomation(true)}
-                  sessionProducts={sessionProducts}
-                  onAutoAdd={(data) => proceedAddToQueue(data)}
-                  onPosterTypeChange={handlePosterTypeChange}
-                />
-
-                <Button
-                  onClick={handleAddToQueue}
-                  disabled={!isProductReady || showAddSuccess}
-                  className={cn(
-                    'w-full h-14 text-base font-black uppercase tracking-widest gap-2 transition-all shadow-lg',
-                    showAddSuccess 
-                      ? 'bg-green-600 hover:bg-green-600 scale-[1.02] shadow-green-200' 
-                      : isProductReady 
-                        ? 'bg-primary hover:bg-primary/90 shadow-primary/20 scale-[1.01]' 
-                        : 'bg-muted text-muted-foreground'
-                  )}
-                >
-                  {showAddSuccess ? (
-                    <>
-                      <CheckCircle2 className="h-6 w-6 animate-in zoom-in duration-300" />
-                      Adicionado!
-                    </>
-                  ) : (
-                    <>
-                      <Plus className="h-6 w-6" />
-                      Adicionar ao Lote
-                    </>
-                  )}
-                </Button>
-
-              </div>
+            {/* Seletor Único de Formato integrado ao painel de controle */}
+            <div className="shrink-0 p-4 pb-2 border-b bg-muted/10">
+              <FormatSelector 
+                value={posterType} 
+                onChange={handlePosterTypeChange} 
+              />
             </div>
+
+            {/* Conteúdo rolável do formulário de produto e preços */}
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-3">
+              <PosterForm
+                ref={formRef}
+                key={`form-${formKey}`}
+                data={currentPoster}
+                setData={setCurrentPoster}
+                posterType={posterType}
+                settings={settings}
+                onLookupStatusChange={setIsProductReady}
+                onImportBatch={() => setShowAutomation(true)}
+                sessionProducts={sessionProducts}
+                onAutoAdd={handleAutoAdd}
+                onSubmit={handleAddToQueue}
+                continuousScan={continuousScan}
+                onContinuousScanChange={handleContinuousScanChange}
+                autoFocus={true}
+              />
+            </div>
+
+            {/* Botão de Adicionar fixo no rodapé do painel de input */}
+            <div className="shrink-0 p-4 pt-2 border-t bg-card">
+              <Button
+                id="add-to-queue-btn"
+                onClick={handleAddToQueue}
+                disabled={!isProductReady || showAddSuccess}
+                className={cn(
+                  'w-full h-13 text-sm font-black uppercase tracking-wider gap-2 transition-all shadow-md',
+                  showAddSuccess 
+                    ? 'bg-emerald-600 hover:bg-emerald-600 scale-[1.01] shadow-emerald-200' 
+                    : isProductReady 
+                      ? 'bg-primary hover:bg-primary/90 shadow-primary/20 scale-[1.01]' 
+                      : 'bg-muted text-muted-foreground'
+                )}
+              >
+                {showAddSuccess ? (
+                  <>
+                    <CheckCircle2 className="h-5 w-5 animate-in zoom-in duration-300" />
+                    Adicionado ao Lote!
+                  </>
+                ) : (
+                  <>
+                    <Plus className="h-5 w-5" />
+                    <span>Adicionar ao Lote</span>
+                    <Kbd className="ml-auto hidden lg:inline-flex bg-primary-foreground/20 text-primary-foreground border-white/20 shadow-none">
+                      Ctrl+Enter
+                    </Kbd>
+                  </>
+                )}
+              </Button>
+            </div>
+          </aside>
+
+          {/* ══════════ COLUNA 2: LOTE ATUAL (DESKTOP >= 1280px OU ABA MOBILE) ══════════ */}
+          {/* Em telas XL (>= 1280px), o lote fica como coluna dedicada no meio */}
+          <div className={cn(
+            "w-full xl:w-[340px] shrink-0 border-r border-border bg-muted/5 min-h-0 h-full overflow-hidden",
+            activeTab === 'queue' ? "flex flex-col" : "hidden xl:flex xl:flex-col"
+          )}>
+            <QueuePanel
+              queue={queue}
+              filteredQueue={filteredQueue}
+              printPages={printPages}
+              posterType={posterType}
+              perPage={perPage}
+              selectedIndex={selectedQueueIndex}
+              onSelect={(realIdx, item) => {
+                setSelectedQueueIndex(realIdx);
+                setCurrentPoster({ ...item });
+                setIsProductReady(true);
+                setPreviewMode('single');
+              }}
+              onRemove={handleRemoveFromQueue}
+              onUpdateQuantity={handleUpdateQuantity}
+              onClear={() => setQueue([])}
+              onShowHidden={() => setQueueFilter('all')}
+              className="h-full"
+            />
           </div>
 
-          {/* ── COLUMN 2: QUEUE (LOTE) ── */}
+          {/* ══════════ COLUNA 3: PRÉVIA EM TEMPO REAL (+ LOTE EM TELAS 1024-1279px) ══════════ */}
           <div className={cn(
-            "lg:col-span-3 flex flex-col border-r border-border bg-muted/5 lg:min-h-0 h-full overflow-hidden",
-            activeTab !== 'queue' && "hidden lg:flex"
+            "flex-1 flex flex-col min-h-0 h-full overflow-hidden bg-muted/20",
+            activeTab !== 'preview' && "hidden lg:flex"
           )}>
-
-            <div className="shrink-0 px-4 py-3 border-b bg-muted/20 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <FileStack className="h-4 w-4 text-primary" />
-                <span className="text-xs font-bold uppercase tracking-wider">Lote Atual</span>
-                <span className="bg-primary text-primary-foreground text-[10px] px-1.5 py-0.5 rounded-full font-bold">
-                  {filteredQueue.length}
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                {queue.length > filteredQueue.length && (
-                  <span className="text-[9px] font-bold text-orange-600 bg-orange-50 px-1 rounded border border-orange-200" title="Itens 'Preço Normal' estão ocultos neste modelo">
-                    {queue.length - filteredQueue.length} OCULTOS
+            {/* Área superior: Visualizador do Cartaz / Página */}
+            <div className="flex-1 flex flex-col min-h-0 p-3 sm:p-4 gap-2 overflow-hidden">
+              <div className="flex items-center justify-between shrink-0 flex-wrap gap-2">
+                <div className="flex items-center gap-2">
+                  <LayoutGrid className="h-4 w-4 text-primary" />
+                  <span className="text-[11px] font-black uppercase tracking-wider text-muted-foreground">
+                    Visualização em Tempo Real
                   </span>
-                )}
-                {queue.length > 0 && (
-                  <button
-                    onClick={() => setQueue([])}
-                    className="text-[10px] text-destructive hover:underline font-bold uppercase"
-                  >
-                    Limpar
-                  </button>
-                )}
-              </div>
-            </div>
-
-            <div className="flex-1 overflow-y-auto custom-scrollbar">
-              {filteredQueue.length === 0 ? (
-                <div className="h-full flex flex-col items-center justify-center p-8 text-center opacity-40">
-                  <PackageOpen className="h-10 w-10 mb-2" />
-                  <p className="text-xs font-medium uppercase tracking-tighter">
-                    {queue.length > 0 ? 'Nenhum item compatível' : 'O lote está vazio'}
-                  </p>
                 </div>
-              ) : (
-                <div className="pb-4">
-                  {(() => {
-                    let currentPos = 0;
-                    let lastPage = 0;
-                    
-                    return filteredQueue.map((item: PosterData, index: number) => {
-                      const realIndex = queue.indexOf(item);
-                      const startPage = Math.floor(currentPos / perPage) + 1;
-                      const endPage = Math.floor((currentPos + (item.quantity || 1) - 1) / perPage) + 1;
-                      const showHeader = startPage !== lastPage;
-                      lastPage = startPage;
-                      
-                      currentPos += (item.quantity || 1);
-                      
-                      return (
-                        <React.Fragment key={index}>
-                          {showHeader && (
-                            <div className="bg-muted/30 px-4 py-1.5 border-y border-border/50 sticky top-0 z-10 backdrop-blur-sm">
-                              <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest flex items-center gap-2">
-                                <span className="w-1.5 h-1.5 rounded-full bg-primary" />
-                                Página {startPage}
-                              </p>
-                            </div>
-                          )}
-                          <div 
-                            onClick={() => {
-                              setSelectedQueueIndex(realIndex);
-                              setCurrentPoster({ ...item });
-                              setIsProductReady(true);
-                              setPreviewMode('single');
-                            }}
-                            className={cn(
-                              "flex items-center gap-3 px-4 py-3 hover:bg-white transition-colors group border-b border-border/30 last:border-b-0 relative cursor-pointer",
-                              selectedQueueIndex === realIndex && "bg-primary/5 border-l-2 border-l-primary"
-                            )}
-                            title="Clique para visualizar ou editar este cartaz"
-                          >
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleRemoveFromQueue(realIndex);
-                                if (selectedQueueIndex === realIndex) setSelectedQueueIndex(null);
-                              }}
-                              className="shrink-0 p-1.5 text-muted-foreground hover:text-destructive hover:bg-red-50 rounded-lg transition-all opacity-0 group-hover:opacity-100"
-                              title="Remover item"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </button>
 
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 mb-0.5">
-                                <p className="text-[11px] font-bold text-gray-900 truncate uppercase leading-none">
-                                  {item.description}
-                                </p>
-                                {startPage !== endPage && (
-                                  <span className="text-[8px] font-bold text-blue-600 bg-blue-50 px-1 rounded border border-blue-100 whitespace-nowrap">
-                                    PAG {startPage}-{endPage}
-                                  </span>
-                                )}
-                              </div>
-                              <p className="text-[9px] text-muted-foreground font-mono flex items-center gap-2">
-                                <span>{item.code}</span>
-                                <span className="w-1 h-1 bg-border rounded-full" />
-                                <span className={cn(item.posterSubType === 'offer' ? "text-orange-600 font-bold" : "text-blue-600 font-bold")}>
-                                  {item.posterSubType === 'offer' ? 'OFERTA' : 'NORMAL'}
-                                </span>
-                              </p>
-                            </div>
-                            
-                            <div className="shrink-0 flex items-center bg-background border rounded-md p-0.5">
-                              <button 
-                                onClick={() => handleUpdateQuantity(realIndex, -1)}
-                                className="w-6 h-6 flex items-center justify-center text-xs hover:bg-muted rounded transition-colors"
-                              >
-                                -
-                              </button>
-                              <span className="w-8 text-center text-[10px] font-black">{item.quantity || 1}</span>
-                              <button 
-                                onClick={() => handleUpdateQuantity(realIndex, 1)}
-                                className="w-6 h-6 flex items-center justify-center text-xs hover:bg-muted rounded transition-colors"
-                              >
-                                +
-                              </button>
-                            </div>
-                          </div>
-                        </React.Fragment>
-                      );
-                    });
-                  })()}
+                <div className="flex items-center gap-2">
+                  <div className="flex bg-muted p-1 rounded-xl shadow-inner border border-border/50">
+                    <button 
+                      onClick={() => setPreviewMode('single')}
+                      className={cn(
+                        "px-3 py-1.5 text-[10px] font-black rounded-lg transition-all",
+                        previewMode === 'single' ? "bg-background text-primary shadow-sm scale-105" : "text-muted-foreground hover:bg-black/5"
+                      )}
+                    >
+                      INDIVIDUAL
+                    </button>
+                    <button 
+                      onClick={() => setPreviewMode('page')}
+                      className={cn(
+                        "px-3 py-1.5 text-[10px] font-black rounded-lg transition-all",
+                        previewMode === 'page' ? "bg-background text-primary shadow-sm scale-105" : "text-muted-foreground hover:bg-black/5"
+                      )}
+                    >
+                      PÁGINA COMPLETA
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Viewport da Prévia */}
+              <div className="flex-1 min-h-0 relative border rounded-xl border-border/50 overflow-hidden bg-white shadow-inner">
+                <div className="absolute inset-0">
+                  {previewMode === 'single' ? (
+                    <SinglePosterPreview
+                      data={isProductReady ? currentPoster : (selectedQueueIndex !== null && queue[selectedQueueIndex] ? queue[selectedQueueIndex] : (queue.length > 0 ? queue[queue.length - 1] : currentPoster))}
+                      posterType={posterType}
+                      isReady={isProductReady || queue.length > 0}
+                      settings={settings}
+                    />
+                  ) : (
+                    <PagePreview
+                      pages={printPages.length > 0 ? printPages : (isProductReady ? [[currentPoster]] : [])}
+                      posterType={posterType}
+                      perPage={perPage}
+                      settings={settings}
+                    />
+                  )}
+                </div>
+              </div>
+
+              {/* Rodapé da Prévia com status */}
+              <div className="flex items-center justify-center gap-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70 py-1">
+                {queue.length > 0 ? (
+                  <>
+                    <span>Total: {queue.length} {queue.length === 1 ? 'Item' : 'Itens'}</span>
+                    <span className="w-1 h-1 bg-border rounded-full" />
+                    <span>
+                      Impressão: {totalPages} {totalPages === 1 ? 'Folha' : 'Folhas'}
+                      {` (${currentFormat.caption})`}
+                    </span>
+                  </>
+                ) : isProductReady ? (
+                  <span className="text-primary bg-primary/10 px-3 py-0.5 rounded-full">
+                    {currentFormat.description}
+                  </span>
+                ) : null}
+              </div>
+
+              {/* Mobile Save Button & Instruções */}
+              {(queue.length > 0 || isProductReady) && (
+                <div className="lg:hidden space-y-2.5 mt-1">
+                  <Button
+                    onClick={handlePrint}
+                    disabled={queue.length === 0 && !isProductReady}
+                    className="w-full h-13 bg-blue-600 hover:bg-blue-700 text-white font-black uppercase tracking-widest gap-2 shadow-lg active:scale-95 transition-all"
+                  >
+                    <FileDown className="h-5 w-5" />
+                    Salvar PDF para Imprimir {totalPages > 0 ? `(${totalPages}p)` : ''}
+                  </Button>
+                  
+                  <div className="p-3 bg-blue-50 rounded-xl border border-blue-100 flex items-start gap-2.5">
+                    <Info className="h-4 w-4 text-blue-700 shrink-0 mt-0.5" />
+                    <p className="text-[11px] text-blue-800 leading-snug">
+                      Ao clicar em <b>Salvar PDF</b>, o arquivo será baixado no seu celular. Para imprimir, envie este arquivo para o WhatsApp ou E-mail da loja.
+                    </p>
+                  </div>
                 </div>
               )}
             </div>
 
-
-          </div>
-
-          {/* ── COLUMN 3: PREVIEW ── */}
-          <div className={cn(
-            "lg:col-span-6 flex flex-col p-2 sm:p-4 gap-2 lg:overflow-hidden bg-muted/20 h-full",
-            activeTab !== 'preview' && "hidden lg:flex"
-          )}>
-            <div className="flex items-center justify-between shrink-0 mb-1 flex-wrap gap-2">
-              <div className="flex items-center gap-2">
-                <LayoutGrid className="h-4 w-4 text-primary" />
-                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                  Visualização de Impressão
-                </p>
-              </div>
-
-              <div className="flex items-center gap-2 flex-wrap">
-                <div className="flex bg-muted p-1 rounded-xl shadow-inner gap-1 border border-border/50">
-                  <button
-                    onClick={() => handlePosterTypeChange('reliquias')}
-                    className={cn(
-                      "px-2.5 py-1.5 text-[10px] font-black rounded-lg transition-all whitespace-nowrap",
-                      posterType === 'reliquias'
-                        ? "bg-background text-primary shadow-sm scale-105"
-                        : "text-muted-foreground hover:bg-black/5"
-                    )}
-                    title="1 cartaz por folha A4 (Folha Inteira)"
-                  >
-                    FOLHA INTEIRA (A4)
-                  </button>
-                  <button
-                    onClick={() => handlePosterTypeChange('reliquias-a6')}
-                    className={cn(
-                      "px-2.5 py-1.5 text-[10px] font-black rounded-lg transition-all whitespace-nowrap",
-                      posterType === 'reliquias-a6'
-                        ? "bg-background text-primary shadow-sm scale-105"
-                        : "text-muted-foreground hover:bg-black/5"
-                    )}
-                    title="4 cartazes por folha A4 (tamanho A6)"
-                  >
-                    4 POR FOLHA (A6)
-                  </button>
-                  <button
-                    onClick={() => handlePosterTypeChange('etiqueta-oficial')}
-                    className={cn(
-                      "px-2.5 py-1.5 text-[10px] font-black rounded-lg transition-all whitespace-nowrap",
-                      posterType === 'etiqueta-oficial'
-                        ? "bg-background text-primary shadow-sm scale-105"
-                        : "text-muted-foreground hover:bg-black/5"
-                    )}
-                    title="Gôndola (16 por folha)"
-                  >
-                    GÔNDOLA
-                  </button>
-                  <button
-                    onClick={() => handlePosterTypeChange('vitrine')}
-                    className={cn(
-                      "px-2.5 py-1.5 text-[10px] font-black rounded-lg transition-all whitespace-nowrap",
-                      posterType === 'vitrine'
-                        ? "bg-background text-primary shadow-sm scale-105"
-                        : "text-muted-foreground hover:bg-black/5"
-                    )}
-                    title="Vitrine (16 por folha)"
-                  >
-                    VITRINE
-                  </button>
-                </div>
-
-                <div className="flex bg-muted p-1 rounded-xl shadow-inner border border-border/50">
-                  <button 
-                    onClick={() => setPreviewMode('single')}
-                    className={cn(
-                      "px-3 py-1.5 text-[10px] font-black rounded-lg transition-all",
-                      previewMode === 'single' ? "bg-background text-primary shadow-sm scale-105" : "text-muted-foreground hover:bg-black/5"
-                    )}
-                  >
-                    INDIVIDUAL
-                  </button>
-                  <button 
-                    onClick={() => setPreviewMode('page')}
-                    className={cn(
-                      "px-3 py-1.5 text-[10px] font-black rounded-lg transition-all",
-                      previewMode === 'page' ? "bg-background text-primary shadow-sm scale-105" : "text-muted-foreground hover:bg-black/5"
-                    )}
-                  >
-                    PÁGINA COMPLETA
-                  </button>
-                </div>
-              </div>
+            {/* Em telas intermediárias (1024px a 1279px), o Lote aparece acoplado na parte inferior da coluna da direita */}
+            <div className="hidden lg:flex xl:hidden h-[240px] border-t border-border flex-col min-h-0 bg-card">
+              <QueuePanel
+                queue={queue}
+                filteredQueue={filteredQueue}
+                printPages={printPages}
+                posterType={posterType}
+                perPage={perPage}
+                selectedIndex={selectedQueueIndex}
+                onSelect={(realIdx, item) => {
+                  setSelectedQueueIndex(realIdx);
+                  setCurrentPoster({ ...item });
+                  setIsProductReady(true);
+                  setPreviewMode('single');
+                }}
+                onRemove={handleRemoveFromQueue}
+                onUpdateQuantity={handleUpdateQuantity}
+                onClear={() => setQueue([])}
+                onShowHidden={() => setQueueFilter('all')}
+                className="h-full"
+              />
             </div>
-
-            <div className="flex-1 min-h-0 relative border rounded-xl border-border/50 overflow-hidden bg-white shadow-inner">
-              <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
-                {previewMode === 'single' ? (
-                  <SinglePosterPreview
-                    data={isProductReady ? currentPoster : (selectedQueueIndex !== null && queue[selectedQueueIndex] ? queue[selectedQueueIndex] : (queue.length > 0 ? queue[queue.length - 1] : currentPoster))}
-                    posterType={posterType}
-                    isReady={isProductReady || queue.length > 0}
-                    settings={settings}
-                  />
-                ) : (
-                  <PagePreview
-                    pages={printPages.length > 0 ? printPages : (isProductReady ? [[currentPoster]] : [])}
-                    posterType={posterType}
-                    perPage={perPage}
-                    settings={settings}
-                  />
-                )}
-              </div>
-            </div>
-
-            <div className="flex items-center justify-center gap-4 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 py-2">
-               {queue.length > 0 ? (
-                 <>
-                   <span>Total: {queue.length} {queue.length === 1 ? 'Item' : 'Itens'}</span>
-                   <span className="w-1 h-1 bg-border rounded-full" />
-                   <span>
-                     Impressão: {totalPages} {totalPages === 1 ? 'Página' : 'Páginas'}
-                     {posterType === 'reliquias' ? ' (A4 Inteira)' : (posterType === 'reliquias-a6' ? ' (A6 - 4/folha)' : '')}
-                   </span>
-                 </>
-               ) : isProductReady ? (
-                 <span className="text-primary bg-primary/10 px-3 py-1 rounded-full">
-                   {posterType === 'reliquias' ? 'Modo A4 Inteira: 1 cartaz por folha A4' : (posterType === 'reliquias-a6' ? 'Modo A6: 4 cartazes por folha A4' : 'Prévia')}
-                 </span>
-               ) : null}
-            </div>
-             
-             {/* Mobile Save Button & Instructions */}
-             {(queue.length > 0 || isProductReady) && (
-               <div className="lg:hidden space-y-3 mt-2">
-                 <Button
-                   onClick={handlePrint}
-                   disabled={queue.length === 0 && !isProductReady}
-                   className="w-full h-14 bg-blue-600 hover:bg-blue-700 text-white font-black uppercase tracking-widest gap-2 shadow-lg active:scale-95 transition-all"
-                 >
-                   <FileDown className="h-6 w-6" />
-                   Salvar PDF para Imprimir {totalPages > 0 ? `(${totalPages}p)` : ''}
-                 </Button>
-                 
-                 <div className="p-4 bg-blue-50 rounded-xl border border-blue-100 space-y-2">
-                   <div className="flex items-center gap-2 text-blue-700">
-                     <Info className="h-4 w-4" />
-                     <span className="text-[10px] font-bold uppercase">Como imprimir do celular?</span>
-                   </div>
-                   <p className="text-[11px] text-blue-800 leading-relaxed">
-                     Ao clicar em <b>Salvar PDF</b>, o arquivo será baixado no seu celular. Para imprimir, envie este arquivo para o <b>WhatsApp</b> ou <b>E-mail</b> do computador que está conectado à impressora da loja.
-                   </p>
-                 </div>
-               </div>
-             )}
           </div>
 
         </div>
       </main>
 
-      <div className="lg:hidden sticky bottom-0 left-0 right-0 h-[70px] bg-white border-t border-border z-[100] flex items-center justify-around px-2 shadow-[0_-4px_12px_rgba(0,0,0,0.05)] shrink-0">
-
+      {/* ── BARRA DE NAVEGAÇÃO INFERIOR (EXCLUSIVA MOBILE < 1024px) ── */}
+      <nav aria-label="Navegação mobile" className="lg:hidden sticky bottom-0 left-0 right-0 h-[68px] bg-white border-t border-border z-[100] flex items-center justify-around px-2 shadow-[0_-4px_12px_rgba(0,0,0,0.05)] shrink-0">
         <button
+          type="button"
           onClick={() => setActiveTab('edit')}
           className={cn(
             "flex flex-col items-center justify-center gap-1 w-full h-full transition-all duration-200",
@@ -1514,6 +973,7 @@ export default function Home() {
         </button>
 
         <button
+          type="button"
           onClick={() => setActiveTab('queue')}
           className={cn(
             "flex flex-col items-center justify-center gap-1 w-full h-full transition-all duration-200",
@@ -1535,6 +995,7 @@ export default function Home() {
         </button>
 
         <button
+          type="button"
           onClick={() => setActiveTab('preview')}
           className={cn(
             "flex flex-col items-center justify-center gap-1 w-full h-full transition-all duration-200",
@@ -1549,9 +1010,9 @@ export default function Home() {
           </div>
           <span className="text-[10px] font-black uppercase tracking-tighter">Prévia</span>
         </button>
-      </div>
+      </nav>
 
-      {/* Modal de Feedback de Importação */}
+      {/* Modal de Feedback de Importação em Lote */}
       <ImportModal 
         status={importStatus} 
         mode={importMode}
