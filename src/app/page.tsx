@@ -18,7 +18,7 @@ import { parseProductCSV, parseProductExcel, parsePrice } from '@/app/lib/poster
 import { useHotkeys } from '@/hooks/use-hotkeys';
 import { Kbd } from '@/components/ui/kbd';
 
-import { Printer, Plus, FileStack, PackageOpen, Info, Database, Edit3, LayoutGrid, FileDown, CheckCircle2 } from 'lucide-react';
+import { Printer, Plus, FileStack, PackageOpen, Info, Database, Edit3, LayoutGrid, FileDown, CheckCircle2, ScanBarcode } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -120,15 +120,23 @@ export default function Home() {
       } catch { /* ignore */ }
     }
 
-    const savedScanMode = localStorage.getItem('poster-continuous-scan');
-    if (savedScanMode !== null) {
-      setContinuousScan(savedScanMode === 'true');
-    }
   }, []);
 
+  // Bipagem Contínua: ativa SOMENTE quando o arquivo Preços Temporários (Sem Giro) estiver ativo
+  useEffect(() => {
+    if (hasSessionData) {
+      setContinuousScan(true);
+    } else {
+      setContinuousScan(false);
+    }
+  }, [hasSessionData]);
+
   const handleContinuousScanChange = (val: boolean) => {
+    if (val && !hasSessionData) {
+      setContinuousScan(false);
+      return;
+    }
     setContinuousScan(val);
-    localStorage.setItem('poster-continuous-scan', String(val));
   };
 
   // Monitora edição do formulário para voltar ao modo individual
@@ -163,10 +171,12 @@ export default function Home() {
       if (item.ean) map[item.ean] = item;
     });
     setSessionProducts(map);
+    setContinuousScan(true);
   };
 
   const handleClearSessionData = () => {
     setSessionProducts({});
+    setContinuousScan(false);
   };
 
   const currentFormat = getPosterFormat(posterType);
@@ -744,9 +754,12 @@ export default function Home() {
               </span>
             </div>
             {hasSessionData && (
-              <div className="flex items-center gap-1.5 px-2 py-0.5 bg-blue-50 border border-blue-100 rounded-md animate-pulse shrink-0 ml-1">
-                <Database className="h-3 w-3 text-blue-500" />
-                <span className="text-[10px] font-black text-blue-600 uppercase tracking-tight">Sessão Ativa</span>
+              <div className="flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 border border-emerald-200 rounded-lg shrink-0 ml-1 shadow-sm animate-in fade-in">
+                <ScanBarcode className="h-3.5 w-3.5 text-emerald-600 animate-pulse" />
+                <div className="flex flex-col leading-none">
+                  <span className="text-[10px] font-black text-emerald-700 uppercase tracking-tight">Sem Giro Ativo</span>
+                  <span className="text-[8px] font-bold text-emerald-600 uppercase tracking-widest">Bipagem Contínua ON</span>
+                </div>
               </div>
             )}
           </div>

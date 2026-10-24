@@ -181,6 +181,7 @@ export const PosterForm = forwardRef<PosterFormHandle, PosterFormProps>(function
 
   const [scanStatus, setScanStatus] = useState<ScanStatus>(null);
   const [isMobileDevice, setIsMobileDevice] = useState(false);
+  const hasSessionData = Object.keys(sessionProducts || {}).length > 0;
 
   useEffect(() => {
     const checkMobile = () => {
@@ -425,7 +426,7 @@ export const PosterForm = forwardRef<PosterFormHandle, PosterFormProps>(function
     const hasPrice = displayToCents(found.priceFor || '') > 0;
 
     if (fromScanner) {
-      if (continuousScan && hasPrice && onAutoAdd?.(found, 'wedge')) {
+      if (hasSessionData && continuousScan && hasPrice && onAutoAdd?.(found, 'wedge')) {
         playBeep('success');
         return; // o formulário é remontado e o foco volta para a busca
       }
@@ -434,7 +435,7 @@ export const PosterForm = forwardRef<PosterFormHandle, PosterFormProps>(function
 
     const needsPriceFrom = found.posterSubType === 'offer' && displayToCents(found.priceFrom || '') === 0;
     setPendingFocus(needsPriceFrom ? 'from' : 'for');
-  }, [handleLookup, continuousScan, onAutoAdd]);
+  }, [handleLookup, continuousScan, hasSessionData, onAutoAdd]);
 
   const handleScan = useCallback(async (code: string) => {
     if (code.length >= 10) {
@@ -781,19 +782,45 @@ export const PosterForm = forwardRef<PosterFormHandle, PosterFormProps>(function
           </div>
         ) : null}
 
-        {/* Bipagem contínua — só faz sentido com leitor USB (desktop) */}
+        {/* Bipagem contínua — ATIVA SOMENTE QUANDO O ARQUIVO Preços Temporários / Relatório Sem Giro ESTIVER ATIVO */}
         {onContinuousScanChange && !isMobileDevice && (
-          <div className="flex items-center justify-between gap-3 rounded-lg border border-dashed px-3 py-2">
-            <Label htmlFor="continuous-scan" className="flex items-center gap-2 cursor-pointer min-w-0">
-              <ScanBarcode className={cn('h-4 w-4 shrink-0', continuousScan ? 'text-emerald-600' : 'text-muted-foreground')} />
+          <div className={cn(
+            "flex items-center justify-between gap-3 rounded-lg border px-3 py-2 transition-all",
+            hasSessionData 
+              ? "bg-emerald-50/70 border-emerald-300 shadow-sm" 
+              : "bg-muted/30 border-dashed border-border opacity-70"
+          )}>
+            <Label 
+              htmlFor="continuous-scan" 
+              className={cn("flex items-center gap-2 min-w-0", hasSessionData ? "cursor-pointer" : "cursor-not-allowed")}
+            >
+              <ScanBarcode className={cn('h-4 w-4 shrink-0', (hasSessionData && continuousScan) ? 'text-emerald-600 animate-pulse' : 'text-muted-foreground')} />
               <span className="min-w-0">
-                <span className="block text-[11px] font-black uppercase tracking-tight">Bipagem contínua</span>
-                <span className="block text-[10px] font-medium text-muted-foreground leading-tight">
-                  Leitor USB adiciona direto ao lote quando o produto já tem preço
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className="block text-[11px] font-black uppercase tracking-tight">Bipagem contínua</span>
+                  {hasSessionData ? (
+                    <span className="text-[9px] font-black text-emerald-700 bg-emerald-100 px-1.5 py-0.2 rounded uppercase tracking-wider">
+                      Sem Giro Ativo
+                    </span>
+                  ) : (
+                    <span className="text-[9px] font-bold text-muted-foreground bg-muted px-1.5 py-0.2 rounded uppercase tracking-wider border">
+                      Requer Sem Giro
+                    </span>
+                  )}
+                </div>
+                <span className="block text-[10px] font-medium text-muted-foreground leading-tight mt-0.5">
+                  {hasSessionData
+                    ? 'Leitor USB adiciona direto ao lote com preços do Relatório Sem Giro'
+                    : 'Ativada automaticamente ao carregar o arquivo Preços Temporários (Sem Giro)'}
                 </span>
               </span>
             </Label>
-            <Switch id="continuous-scan" checked={continuousScan} onCheckedChange={onContinuousScanChange} />
+            <Switch 
+              id="continuous-scan" 
+              checked={hasSessionData && continuousScan} 
+              disabled={!hasSessionData}
+              onCheckedChange={onContinuousScanChange} 
+            />
           </div>
         )}
       </section>
