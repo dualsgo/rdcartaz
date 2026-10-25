@@ -93,14 +93,13 @@ export function PosterPreview({
           style={{
             display: 'flex',
             flexDirection: 'column',
-            justifyContent: 'space-between',
             height: '100%',
             boxSizing: 'border-box',
             overflow: 'hidden',
           }}
         >
           {/* Espaçador superior para preservar a área do logotipo pré-impresso OFERTAS */}
-          <div style={{ height: '2.75cm', flexShrink: 0 }} aria-hidden="true" />
+          <div style={{ height: '2.65cm', flexShrink: 0 }} aria-hidden="true" />
 
           {/* Descrição do Produto (Roboto Bold) - ocupa 100% da largura logo abaixo do OFERTAS */}
           <div
@@ -109,8 +108,9 @@ export function PosterPreview({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              minHeight: '1.1cm',
-              maxHeight: '1.45cm',
+              minHeight: '0.95cm',
+              maxHeight: '1.35cm',
+              flexShrink: 0,
               overflow: 'hidden',
             }}
           >
@@ -136,17 +136,17 @@ export function PosterPreview({
             </h2>
           </div>
 
-          {/* Bloco de Preços (DE: R$ e POR: R$ + UN) */}
+          {/* Bloco de Preços (DE: R$ e POR: R$ + UN) - ocupa com eficiência todo o espaço livre */}
           <div
             style={{
+              flex: 1,
               width: '100%',
+              minHeight: 0,
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: '2px',
-              marginTop: 'auto',
-              marginBottom: 'auto',
+              gap: hasDiscount ? '4px' : '0',
             }}
           >
             {/* Bloco DE: R$ (Arial 11pt + GOTHICBI Bold Italic 38pt) com line-height 1 */}
@@ -246,6 +246,7 @@ export function PosterPreview({
           <div
             style={{
               marginTop: 'auto',
+              flexShrink: 0,
               width: '100%',
               display: 'flex',
               alignItems: 'baseline',
