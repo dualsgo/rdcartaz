@@ -115,7 +115,7 @@ export function SinglePosterPreview({
             )}
             {posterType === 'reliquias-a6' && (
               <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <div style={{ width: '13.6cm', height: '9.0cm', transform: 'scale(0.9)', transformOrigin: 'center center' }}>
+                <div style={{ width: '13.6cm', height: '9.0cm', transform: 'scale(0.95)', transformOrigin: 'center center' }}>
                   <PosterPreview {...data} isImperdiveis={false} settings={settings} />
                 </div>
               </div>
@@ -389,7 +389,7 @@ export function PageGrid({
               style={{ 
                 width: '13.6cm', 
                 height: '9.0cm', 
-                transform: 'scale(0.9)', 
+                transform: 'scale(0.95)', 
                 transformOrigin: 'center center', 
                 overflow: 'hidden' 
               }}
