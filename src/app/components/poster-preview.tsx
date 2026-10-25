@@ -40,16 +40,18 @@ export function PosterPreview({
   else if (description.length <= 14) descFontSize = '19.5pt';
   else descFontSize = '16.5pt';
 
-  // Bloco DE: R$ (GOTHICBI Bold Italic): ajustado para caber perfeitamente valores altos (ex: 9999,99)
-  let deNumFontSize = '36pt';
-  if (deInteger.length >= 5) deNumFontSize = '24pt';
-  else if (deInteger.length === 4) deNumFontSize = '28pt';
+  // Bloco DE: R$ (GOTHICBI Bold Italic): ajustado para caber perfeitamente no quadrante sem cortar
+  let deNumFontSize = '30pt';
+  if (deInteger.length >= 5) deNumFontSize = '20pt';
+  else if (deInteger.length === 4) deNumFontSize = '24pt';
+  else if (deInteger.length === 3) deNumFontSize = '27pt';
 
-  // Bloco POR: R$ (GOTHICBI Bold Italic): reduzido em ~5-10% para garantir que POR: R$ e UN nunca cortem
-  let porNumFontSize = '49pt';
-  if (porInteger.length >= 6) porNumFontSize = '26pt';
-  else if (porInteger.length === 5) porNumFontSize = '30pt';
-  else if (porInteger.length === 4) porNumFontSize = '36pt';
+  // Bloco POR: R$ (GOTHICBI Bold Italic): ajustado para que POR: R$, o valor e UN caibam com margem de segurança
+  let porNumFontSize = '42pt';
+  if (porInteger.length >= 6) porNumFontSize = '22pt';
+  else if (porInteger.length === 5) porNumFontSize = '26pt';
+  else if (porInteger.length === 4) porNumFontSize = '30pt';
+  else if (porInteger.length === 3) porNumFontSize = '36pt';
 
   // Bloco de Parcelamento (GOTHICBI Bold Italic): valor da parcela maximizado
   let instNumFontSize = '36pt';
@@ -161,11 +163,12 @@ export function PosterPreview({
               >
                 <span
                   style={{
-                    fontSize: '11pt',
+                    fontSize: deInteger.length >= 3 ? '9pt' : '10pt',
                     fontFamily: 'Arial, sans-serif',
                     fontWeight: 'bold',
                     color: 'rgb(0, 0, 0)',
                     lineHeight: '1',
+                    flexShrink: 0,
                   }}
                 >
                   DE: R$
@@ -195,12 +198,12 @@ export function PosterPreview({
                 width: '100%',
                 lineHeight: '0.88',
                 whiteSpace: 'nowrap',
-                gap: porInteger.length >= 4 ? '2px' : '3px',
+                gap: porInteger.length >= 3 ? '2px' : '3px',
               }}
             >
               <span
                 style={{
-                  fontSize: porInteger.length >= 4 ? '9.5pt' : '11pt',
+                  fontSize: porInteger.length >= 3 ? '8.5pt' : '10pt',
                   fontFamily: 'Arial, sans-serif',
                   fontWeight: 'bold',
                   color: 'rgb(0, 0, 0)',
@@ -218,7 +221,7 @@ export function PosterPreview({
                   fontStyle: 'italic',
                   color: 'rgb(0, 0, 0)',
                   lineHeight: '0.88',
-                  letterSpacing: porInteger.length >= 4 ? '-0.035em' : '-0.03em',
+                  letterSpacing: porInteger.length >= 3 ? '-0.035em' : '-0.025em',
                   flexShrink: 0,
                 }}
               >
@@ -226,7 +229,7 @@ export function PosterPreview({
               </span>
               <span
                 style={{
-                  fontSize: porInteger.length >= 4 ? '9pt' : '10pt',
+                  fontSize: porInteger.length >= 3 ? '8pt' : '9.5pt',
                   fontFamily: 'Arial, sans-serif',
                   fontWeight: 'bold',
                   color: 'rgb(0, 0, 0)',
