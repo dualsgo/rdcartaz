@@ -40,18 +40,18 @@ export function PosterPreview({
   else if (description.length <= 14) descFontSize = '19.5pt';
   else descFontSize = '16.5pt';
 
-  // Bloco DE: R$ (GOTHICBI Bold Italic): ajustado para caber perfeitamente no quadrante sem cortar
-  let deNumFontSize = '30pt';
-  if (deInteger.length >= 5) deNumFontSize = '20pt';
-  else if (deInteger.length === 4) deNumFontSize = '24pt';
-  else if (deInteger.length === 3) deNumFontSize = '27pt';
+  // Bloco DE: R$ (GOTHICBI Bold Italic): preenchimento otimizado da largura sem transbordar
+  let deNumFontSize = '34pt';
+  if (deInteger.length >= 5) deNumFontSize = '27pt';
+  else if (deInteger.length === 4) deNumFontSize = '29pt';
+  else if (deInteger.length === 3) deNumFontSize = '31pt';
 
-  // Bloco POR: R$ (GOTHICBI Bold Italic): ajustado para que POR: R$, o valor e UN caibam com margem de segurança
-  let porNumFontSize = '42pt';
-  if (porInteger.length >= 6) porNumFontSize = '22pt';
-  else if (porInteger.length === 5) porNumFontSize = '26pt';
-  else if (porInteger.length === 4) porNumFontSize = '30pt';
-  else if (porInteger.length === 3) porNumFontSize = '36pt';
+  // Bloco POR: R$ (GOTHICBI Bold Italic): maximiza o aproveitamento da largura até 6 algarismos (ex: 9999,99)
+  let porNumFontSize = '46pt';
+  if (porInteger.length >= 6) porNumFontSize = '28pt';
+  else if (porInteger.length === 5) porNumFontSize = '33pt';
+  else if (porInteger.length === 4) porNumFontSize = '35pt';
+  else if (porInteger.length === 3) porNumFontSize = '39pt';
 
   // Bloco de Parcelamento (GOTHICBI Bold Italic): valor da parcela maximizado
   let instNumFontSize = '36pt';
@@ -136,7 +136,7 @@ export function PosterPreview({
             </h2>
           </div>
 
-          {/* Bloco de Preços (DE: R$ e POR: R$ + UN) - ocupa com eficiência todo o espaço livre */}
+          {/* Bloco de Preços (DE: R$ e POR: R$ + UN) - ocupa com máxima eficiência o espaço livre */}
           <div
             style={{
               flex: 1,
@@ -146,10 +146,10 @@ export function PosterPreview({
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: hasDiscount ? '4px' : '0',
+              gap: hasDiscount ? '13px' : '0',
             }}
           >
-            {/* Bloco DE: R$ (Arial 11pt + GOTHICBI Bold Italic 38pt) com line-height 1 */}
+            {/* Bloco DE: R$ (Arial + GOTHICBI Bold Italic) com line-height 1 */}
             {hasDiscount && (
               <div
                 style={{
@@ -163,7 +163,7 @@ export function PosterPreview({
               >
                 <span
                   style={{
-                    fontSize: deInteger.length >= 3 ? '9pt' : '10pt',
+                    fontSize: deInteger.length >= 5 ? '8.5pt' : deInteger.length >= 3 ? '9pt' : '10pt',
                     fontFamily: 'Arial, sans-serif',
                     fontWeight: 'bold',
                     color: 'rgb(0, 0, 0)',
@@ -198,12 +198,12 @@ export function PosterPreview({
                 width: '100%',
                 lineHeight: '0.88',
                 whiteSpace: 'nowrap',
-                gap: porInteger.length >= 3 ? '2px' : '3px',
+                gap: porInteger.length >= 5 ? '2px' : porInteger.length >= 3 ? '2.5px' : '3px',
               }}
             >
               <span
                 style={{
-                  fontSize: porInteger.length >= 3 ? '8.5pt' : '10pt',
+                  fontSize: porInteger.length >= 5 ? '8pt' : porInteger.length >= 3 ? '8.5pt' : '9.5pt',
                   fontFamily: 'Arial, sans-serif',
                   fontWeight: 'bold',
                   color: 'rgb(0, 0, 0)',
@@ -221,7 +221,7 @@ export function PosterPreview({
                   fontStyle: 'italic',
                   color: 'rgb(0, 0, 0)',
                   lineHeight: '0.88',
-                  letterSpacing: porInteger.length >= 3 ? '-0.035em' : '-0.025em',
+                  letterSpacing: porInteger.length >= 5 ? '-0.038em' : porInteger.length >= 3 ? '-0.03em' : '-0.02em',
                   flexShrink: 0,
                 }}
               >
@@ -229,7 +229,7 @@ export function PosterPreview({
               </span>
               <span
                 style={{
-                  fontSize: porInteger.length >= 3 ? '8pt' : '9.5pt',
+                  fontSize: porInteger.length >= 5 ? '7.5pt' : porInteger.length >= 3 ? '8pt' : '9pt',
                   fontFamily: 'Arial, sans-serif',
                   fontWeight: 'bold',
                   color: 'rgb(0, 0, 0)',
