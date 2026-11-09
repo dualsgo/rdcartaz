@@ -14,7 +14,7 @@ import { AutomationModal } from '@/app/components/automation-modal';
 import { SecurityModal } from '@/app/components/security-modal';
 import type { PosterData, PosterSettings, PosterType } from '@/app/lib/types';
 import { POSTER_FORMATS, VISIBLE_FORMATS, getPosterFormat } from '@/app/lib/poster-formats';
-import { parseProductCSV, parseProductExcel, parsePrice } from '@/app/lib/poster-utils';
+import { parseProductCSV, parseProductExcel, parsePrice, cleanSupplierName } from '@/app/lib/poster-utils';
 import { useHotkeys } from '@/hooks/use-hotkeys';
 import { Kbd } from '@/components/ui/kbd';
 
@@ -675,16 +675,13 @@ export default function Home() {
               }
             }
           } else {
-            filtered = imported.filter((item: any) => item.posterSubType === 'normal');
-            // Se o operador escolheu "Gerar Etiquetas (Branco)", mas o relatório era de promoções,
-            // converte para preço normal usando o preço final (POR) para gerar as etiquetas de gôndola brancas
-            if (filtered.length === 0 && imported.length > 0) {
-              filtered = imported.map((item: any) => ({
-                ...item,
-                posterSubType: 'normal',
-                priceFrom: '',
-              }));
-            }
+            // No modo "Gerar Etiquetas (Branco)", aproveita todos os itens do relatório (inclusive os que estão em promoção no Sem Giro),
+            // convertendo para o subtipo 'normal' e usando o preço vigente (priceFor)
+            filtered = imported.map((item: any) => ({
+              ...item,
+              posterSubType: 'normal',
+              priceFrom: '',
+            }));
           }
 
           if (filtered.length > 0) {
@@ -704,7 +701,9 @@ export default function Home() {
                     if (dbItem) {
                       return {
                         ...item,
-                        supplier: item.supplier || dbItem.supplier || '',
+                        code: item.code || dbItem.code || '',
+                        ean: item.ean || dbItem.ean || '',
+                        supplier: cleanSupplierName(item.supplier || dbItem.supplier || ''),
                         reference: item.reference || dbItem.reference || '',
                         description: item.description && item.description.length > 2 ? item.description : (dbItem.description || item.description),
                         campaign: dbItem.campaign || item.campaign || '',

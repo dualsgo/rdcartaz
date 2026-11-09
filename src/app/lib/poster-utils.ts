@@ -121,8 +121,37 @@ export function truncateMultiLine(text: string, charsPerLine: number, maxLines: 
   return lines;
 }
 
+export function cleanSupplierName(name: string): string {
+  if (!name) return '';
+  let clean = name.replace(/total de mercadorias sem giro.*$/i, '').trim();
+  if (!clean || /mercadoria sem fornecedor/i.test(clean)) return '';
+  // Remove sufixo "- Total de Mercadorias: N" (padrão Relatório Sem Giro)
+  clean = clean.split(/\s*[-–]\s*total de mercadorias\s*:/i)[0].trim();
+  // Remove prefixo "FORNECEDOR: CNPJ - " ou código numérico "270 - "
+  clean = clean.replace(/FORNECEDOR:\s*[\d.\-\/]+\s*[-–]?\s*/i, '').trim();
+  clean = clean.replace(/^\d+\s*[-–]\s*/, '').trim();
+  return clean.substring(0, 20).trim().toUpperCase();
+}
+
 /**
- * Lógica comum de processamento de uma linha de dados (seja vinda de CSV ou Excel)
+ * Extrai nome do fornecedor de uma linha de seção mesclada (ex: Relatório Sem Giro ou Relatório de Promoção)
+ * Retorna:
+ * - string (vazia se "Mercadoria sem fornecedor", ou nome limpo do fornecedor)
+ * - null se a linha não for um cabeçalho de seção de fornecedor
+ */
+export function extractSectionSupplier(rawText: string): string | null {
+  const text = String(rawText || '').replace(/\s+/g, ' ').trim();
+  if (!text) return null;
+  if (/total de mercadorias sem giro/i.test(text)) return null;
+  if (/mercadoria sem fornecedor/i.test(text)) return '';
+  if (/total de mercadorias\s*:/i.test(text) || /fornecedor\s*:/i.test(text)) {
+    return cleanSupplierName(text);
+  }
+  return null;
+}
+
+/**
+ * Lógica comum de processamento de uma linha de dados (seja vinda de CSV, Alteração de Preço ou Sem Giro)
  */
 function processProductRow(row: Record<string, any>, mapping: Record<string, number>, currentSupplier: string, settings?: PosterSettings): any {
   const getVal = (key: string) => {
@@ -134,12 +163,20 @@ function processProductRow(row: Record<string, any>, mapping: Record<string, num
   const mercadoriaRaw = getVal('mercadoria');
   const mercadoria = mercadoriaRaw !== undefined ? String(mercadoriaRaw).trim() : '';
   
-  if (!mercadoria || mercadoria.toLowerCase().includes('mercadoria') || mercadoria.toLowerCase().includes('descrição')) return null;
+  if (
+    !mercadoria ||
+    mercadoria.toLowerCase().includes('mercadoria') ||
+    mercadoria.toLowerCase().includes('descrição') ||
+    mercadoria.toLowerCase().includes('cod. interno')
+  ) {
+    return null;
+  }
 
   const sap        = String(getVal('sap') || '').trim();
   const ean        = String(getVal('ean') || '').trim();
   const ref        = String(getVal('ref') || '').trim();
-  const supplier   = currentSupplier || String(getVal('supplier') || '').trim();
+  const rowBrand   = String(getVal('supplier') || '').trim();
+  const supplier   = rowBrand || currentSupplier;
   
   const txtAtual = getVal('precoAtual');
   const txtNovo  = getVal('novoPreco');
@@ -149,40 +186,36 @@ function processProductRow(row: Record<string, any>, mapping: Record<string, num
   const valNovo  = parsePrice(txtNovo);
   const valPromo = parsePrice(txtPromo);
 
-  const cleanSupplier = (name: string) => {
-    if (!name) return '';
-    let clean = name.replace(/FORNECEDOR:\s*[\d.\-\/]+\s*[-–]?\s*/i, '').trim();
-    clean = clean.replace(/^\d+[\s\-–]+/, '').trim();
-    return clean.substring(0, 15).trim().toUpperCase();
-  };
-
-  let poster: any = {
+  const poster: any = {
     description: mercadoria.toUpperCase(),
     code: sap,
     ean: ean,
     reference: ref,
-    supplier: cleanSupplier(supplier),
+    supplier: cleanSupplierName(supplier),
     quantity: 1,
   };
 
   /**
-   * Lógica do Usuário:
-   * 1. SE TIVERMOS PROMOÇÃO (J), VALE J (Oferta)
-   * 2. SE NÃO TIVERMOS PROMOÇÃO, VALE NOVO PREÇO (I)
-   * 3. SE NOVO PREÇO < PREÇO ANTERIOR (H) MAS J É ZERO, É REDUÇÃO SEM OFERTA
+   * Lógica de Preços (compatível com Relatório de Alteração de Preço e Relatório Sem Giro):
+   * - No Relatório Sem Giro: precoAtual = Preço de Venda (Col I / 8), promocao = Preço Promocional (Col J / 9)
+   * - No Relatório de Alteração: precoAtual = Preço Anterior (H), novoPreco = Novo Preço (I), promocao = Promoção (J)
+   * 1. SE TIVERMOS PROMOÇÃO > 0 (e menor que o preço base), VALE OFERTA (DE = Novo ou Venda, POR = Promoção)
+   * 2. SE NÃO TIVERMOS PROMOÇÃO, VALE PREÇO NORMAL (POR = Novo Preço ou Preço de Venda)
    */
-  if (valPromo > 0) {
-    // É Promoção (J)
+  const baseRegular = valNovo > 0 ? valNovo : valAtual;
+  if (valPromo > 0 && (baseRegular === 0 || valPromo < baseRegular)) {
     poster.posterSubType = 'offer';
+    poster.isOffer = true;
     poster.priceFor = formatCurrency(valPromo);
-    // O "De" será o Novo (I) se existir e for maior que o promocional, senão o Anterior (H)
-    poster.priceFrom = (valNovo > valPromo) ? formatCurrency(valNovo) : (valAtual > valPromo ? formatCurrency(valAtual) : formatCurrency(valAtual));
+    poster.priceFrom = baseRegular > valPromo ? formatCurrency(baseRegular) : formatCurrency(valAtual);
   } else if (valNovo > 0) {
-    poster.posterSubType = 'normal'; 
+    poster.posterSubType = 'normal';
+    poster.isOffer = false;
     poster.priceFor = formatCurrency(valNovo);
     poster.priceFrom = '';
   } else {
     poster.posterSubType = 'normal';
+    poster.isOffer = false;
     poster.priceFor = formatCurrency(valAtual);
     poster.priceFrom = '';
   }
@@ -202,55 +235,72 @@ function processProductRow(row: Record<string, any>, mapping: Record<string, num
 export function parseStock(val: any): number {
   if (val === undefined || val === null || val === '') return 0;
   if (typeof val === 'number') return val >= 1000 ? val / 1000 : val;
-  const str = String(val).trim().replace(/\./g, '').replace(',', '.');
-  const num = parseFloat(str) || 0;
+  const str = String(val).trim();
+  if (!str) return 0;
+  // Padrão ERP Pleno / Sem Giro: 3 casas decimais ("2.000" = 2, "290.000" = 290, "1.250,000" = 1250)
+  if (/^[+-]?[\d.]+[.,]\d{3}$/.test(str)) {
+    const raw = parseInt(str.replace(/[.,]/g, ''), 10) || 0;
+    return raw / 1000;
+  }
+  const normalized = str.replace(/\./g, '').replace(',', '.');
+  const num = parseFloat(normalized) || 0;
   return num >= 1000 ? num / 1000 : num;
 }
 
 /**
- * Cria um mapeamento de colunas baseado nos headers encontrados ou índices fixos
+ * Cria um mapeamento de colunas baseado nos headers encontrados ou índices fixos.
+ * Suporta tanto o Relatório de Alteração de Preços quanto o Relatório de Mercadoria Sem Giro:
+ * - A (0): Cod. Interno -> sap
+ * - B (1): Cod. Principal / EAN -> ean
+ * - C (2): Mercadoria -> mercadoria
+ * - D (3): Cod. Fornecedor / Ref -> ref
+ * - E (4): Marca / Fornecedor -> supplier
+ * - F (5): Estoque -> estoque (ignora "Vlr Estoque")
+ * - I (8): Preço de Venda / Preço Atual -> precoAtual
+ * - J (9): Preço Promocional / Promoção -> promocao
  */
 const normalize = (str: string) => 
-  String(str || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  String(str || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
 
 function createMapping(headers: string[]): Record<string, number> {
   const hasHeaders = headers && headers.length > 0;
-  
-  const findIdx = (terms: string[], defaultIdx: number) => {
-    const normTerms = terms.map(t => normalize(t));
-    const idx = headers.findIndex(h => {
-      const normH = normalize(h);
-      return normTerms.some(t => {
-        if (normH === t) return true;
-        if (t.length >= 4 && normH.includes(t)) return true;
-        const tokens = normH.split(/[\s.\/_-]+/);
+  const normHeaders = headers.map(h => normalize(h));
+
+  const findExactOrPartial = (exactTerms: string[], partialTerms: string[], excludeTerms: string[], defaultIdx: number) => {
+    const normExact = exactTerms.map(t => normalize(t));
+    const normPartial = partialTerms.map(t => normalize(t));
+    const normExclude = excludeTerms.map(t => normalize(t));
+
+    // 1. Busca exata primeiro
+    let idx = normHeaders.findIndex(h => normExact.includes(h));
+    if (idx !== -1) return idx;
+
+    // 2. Busca parcial respeitando exclusões
+    idx = normHeaders.findIndex(h => {
+      if (!h) return false;
+      if (normExclude.some(ex => h.includes(ex))) return false;
+      return normPartial.some(t => {
+        if (h === t) return true;
+        if (t.length >= 4 && h.includes(t)) return true;
+        const tokens = h.split(/[\s.\/_-]+/);
         return tokens.includes(t);
       });
     });
-    
+
     if (idx !== -1) return idx;
     return hasHeaders ? -1 : defaultIdx;
   };
-  
-  const findSupplierIdx = () => {
-    const idx = headers.findIndex(h => {
-      const normH = normalize(h);
-      if (normH.includes('cod. forn') || normH.includes('cód. forn')) return false;
-      return normH.includes('fornecedor');
-    });
-    return idx !== -1 ? idx : -1;
-  };
 
   return {
-    sap:        findIdx(['sap', 'interno', 'código', 'codigo', 'cod. int', 'cód. int'], 0),
-    ean:        findIdx(['ean', 'barras'], 1),
-    mercadoria: findIdx(['mercadoria', 'descrição', 'descricao', 'produto', 'nome'], 2),
-    ref:        findIdx(['referencia', 'referência', 'ref', 'cod. forn', 'cód. forn'], 3),
-    estoque:    findIdx(['estoque', 'est'], 4),
-    precoAtual: findIdx(['anterior', 'atual', 'preço atual', 'preco atual', 'preço', 'preco'], 5),
-    novoPreco:  findIdx(['novo', 'novo preço', 'novo preco'], -1),
-    promocao:   findIdx(['promoção', 'promocao', 'promo'], 6),
-    supplier:   findSupplierIdx(),
+    sap:        findExactOrPartial(['cod. interno', 'cod interno', 'cod. int', 'codigo interno', 'sap'], ['sap', 'interno', 'cod. int', 'codigo'], ['fornecedor', 'principal'], 0),
+    ean:        findExactOrPartial(['cod. principal', 'cod principal', 'ean', 'codigo de barras'], ['principal', 'ean', 'barras'], ['interno', 'fornecedor'], 1),
+    mercadoria: findExactOrPartial(['mercadoria', 'descricao', 'produto'], ['mercadoria', 'descricao', 'produto', 'nome'], ['status', 'total'], 2),
+    ref:        findExactOrPartial(['cod. fornecedor', 'cod fornecedor', 'referencia', 'ref'], ['referencia', 'ref', 'cod. forn', 'cod. fornecedor'], [], 3),
+    supplier:   findExactOrPartial(['marca', 'fornecedor'], ['marca', 'fornecedor'], ['cod. forn', 'cod fornecedor', 'codigo'], -1),
+    estoque:    findExactOrPartial(['estoque', 'qtd estoque'], ['estoque', 'est'], ['vlr', 'valor', 'tipo'], 5),
+    precoAtual: findExactOrPartial(['preco de venda', 'preco atual', 'preco anterior', 'anterior'], ['preco de venda', 'preco atual', 'anterior', 'atual', 'preco'], ['promocional', 'promocao', 'promo', 'novo', 'custo', 'vlr'], 8),
+    novoPreco:  findExactOrPartial(['novo preco', 'preco novo', 'novo'], ['novo preco', 'novo'], ['promocional', 'promocao'], -1),
+    promocao:   findExactOrPartial(['preco promocional', 'promocao', 'preco promo'], ['promocional', 'promocao', 'promo'], [], 9),
   };
 }
 
@@ -286,8 +336,8 @@ export function parseProductCSV(content: string, settings?: PosterSettings): any
 }
 
 /**
- * Analisa relatórios Excel (XLS/XLSX ou HTML mascarado de XLS como "relatorio-promocao-com-estoque")
- * com suporte completo a múltiplas tabelas, múltiplas abas e desduplicação inteligente de códigos repetidos.
+ * Analisa relatórios Excel (XLS/XLSX ou HTML mascarado de XLS como "relatorio-promocao-com-estoque" e "Mercadoria Sem Giro")
+ * com suporte completo a múltiplas tabelas, seções agrupadas por fornecedor, múltiplas abas e desduplicação inteligente.
  */
 export function parseProductExcel(buffer: ArrayBuffer, settings?: PosterSettings): any[] {
   const itemsMap = new Map<string, any>();
@@ -305,6 +355,8 @@ export function parseProductExcel(buffer: ArrayBuffer, settings?: PosterSettings
       htmlText = winText.toLowerCase().includes('<html') || winText.toLowerCase().includes('<table') ? winText : testDecoder.decode(buffer);
     }
 
+    const isSemGiroReport = normalize(htmlText.slice(0, 4000)).includes('mercadoria sem giro');
+
     if (htmlText.toLowerCase().includes('<table') || htmlText.toLowerCase().includes('<html')) {
       const parser = new DOMParser();
       const doc = parser.parseFromString(htmlText, 'text/html');
@@ -312,20 +364,24 @@ export function parseProductExcel(buffer: ArrayBuffer, settings?: PosterSettings
 
       if (tables.length > 0) {
         for (const table of tables) {
-          // Extrai o fornecedor da tabela (ex: class="header-fornecedor")
-          let tableSupplier = '';
+          // Extrai o fornecedor inicial da tabela (ex: class="header-fornecedor" no relatório de promoção)
+          let currentSupplier = '';
           const supplierEl = table.querySelector('.header-fornecedor') || table.querySelector('thead th');
-          if (supplierEl && supplierEl.textContent && supplierEl.textContent.toUpperCase().includes('FORNECEDOR')) {
-            const raw = supplierEl.textContent.trim();
-            let clean = raw.replace(/FORNECEDOR:\s*[\d.\-\/]+\s*[-–]?\s*/i, '').trim();
-            clean = clean.replace(/^\d+[\s\-–]+/, '').trim();
-            tableSupplier = clean.substring(0, 15).trim().toUpperCase();
+          if (supplierEl && supplierEl.textContent) {
+            const parsedSup = extractSectionSupplier(supplierEl.textContent);
+            if (parsedSup !== null) {
+              currentSupplier = parsedSup;
+            }
           }
 
-          // Identifica cabeçalhos e mapeamento das colunas
+          // Identifica cabeçalhos iniciais e mapeamento das colunas
           const headerRows = Array.from(table.querySelectorAll('tr')).filter(tr => {
             const text = normalize(tr.textContent || '');
-            return text.includes('cod. int') || text.includes('mercadoria') || tr.classList.contains('headers-itens');
+            return (
+              tr.classList.contains('tr-cabecalho-nome') ||
+              tr.classList.contains('headers-itens') ||
+              (text.includes('cod. int') && text.includes('mercadoria'))
+            );
           });
 
           let tableMapping = createMapping([]);
@@ -334,10 +390,32 @@ export function parseProductExcel(buffer: ArrayBuffer, settings?: PosterSettings
             tableMapping = createMapping(thCells);
           }
 
-          // Itera sobre as linhas de produto
-          const rows = Array.from(table.querySelectorAll('tbody tr, tr'));
+          // Itera sobre as linhas da tabela (respeitando quebras de seção de fornecedor no meio da mesma tabela)
+          const rows = Array.from(table.querySelectorAll('tr'));
           for (const row of rows) {
-            if (row.querySelector('.header-fornecedor') || row.classList.contains('headers-itens')) continue;
+            // Verifica se é uma linha de seção / fornecedor (ex: <td colspan="12" class="td-cabecalho-nome">270 - ARCOM S/A - Total de Mercadorias: 4</td>)
+            const colspanCell = row.querySelector('td[colspan], th[colspan], .header-fornecedor, .td-cabecalho-nome');
+            if (colspanCell && row.querySelectorAll('td, th').length <= 2) {
+              const sectionSup = extractSectionSupplier(colspanCell.textContent || '');
+              if (sectionSup !== null) {
+                currentSupplier = sectionSup;
+              }
+              continue;
+            }
+
+            // Verifica se é uma linha de cabeçalho de colunas (repetida a cada seção no relatório Sem Giro)
+            const rowNorm = normalize(row.textContent || '');
+            if (
+              row.classList.contains('tr-cabecalho-nome') ||
+              row.classList.contains('headers-itens') ||
+              (rowNorm.includes('cod. int') && rowNorm.includes('mercadoria'))
+            ) {
+              const thCells = Array.from(row.querySelectorAll('th, td')).map(cell => (cell.textContent || '').trim());
+              if (thCells.length >= 3) {
+                tableMapping = createMapping(thCells);
+              }
+              continue;
+            }
             
             const cells = Array.from(row.querySelectorAll('td'));
             if (cells.length < 3) continue;
@@ -349,7 +427,7 @@ export function parseProductExcel(buffer: ArrayBuffer, settings?: PosterSettings
             });
 
             const mercadoria = String(rowData[tableMapping.mercadoria] || '').trim();
-            if (!mercadoria || mercadoria.toLowerCase().includes('mercadoria') || mercadoria.toLowerCase().includes('total')) continue;
+            if (!mercadoria || mercadoria.toLowerCase() === 'mercadoria' || mercadoria.toLowerCase().includes('total de mercadorias')) continue;
 
             const sap = String(rowData[tableMapping.sap] || '').trim();
             const ean = String(rowData[tableMapping.ean] || '').trim();
@@ -358,19 +436,30 @@ export function parseProductExcel(buffer: ArrayBuffer, settings?: PosterSettings
             const key = sap || ean;
             const estoque = parseStock(rowData[tableMapping.estoque]);
             const ref = String(rowData[tableMapping.ref] || '').trim();
+            const rowBrand = tableMapping.supplier !== undefined && tableMapping.supplier !== -1
+              ? cleanSupplierName(String(rowData[tableMapping.supplier] || ''))
+              : '';
+            const effectiveSupplier = rowBrand || currentSupplier;
 
-            // Desduplicação inteligente: se o mesmo produto já foi encontrado (ex: repetido em múltiplos setores)
+            // Desduplicação inteligente:
+            // No relatório Sem Giro, o mesmo produto pode se repetir em dois códigos de fornecedor com o MESMO estoque total da loja.
+            // Já em relatórios por setor/gôndola, os estoques se somam se não forem do Sem Giro.
             if (itemsMap.has(key)) {
               const existing = itemsMap.get(key);
               if (estoque > 0) {
-                existing.stock = (existing.stock || 0) + estoque;
+                if (isSemGiroReport) {
+                  existing.stock = Math.max(existing.stock || 0, estoque);
+                } else {
+                  existing.stock = (existing.stock || 0) + estoque;
+                }
               }
-              if (!existing.supplier && tableSupplier) existing.supplier = tableSupplier;
+              if (!existing.supplier && effectiveSupplier) existing.supplier = effectiveSupplier;
               if (!existing.reference && ref) existing.reference = ref;
+              if (!existing.ean && ean) existing.ean = ean;
               continue; // Não adiciona cartaz redundante
             }
 
-            const poster = processProductRow(rowData, tableMapping, tableSupplier, settings);
+            const poster = processProductRow(rowData, tableMapping, currentSupplier, settings);
             if (poster) {
               poster.stock = estoque;
               itemsMap.set(key, poster);
@@ -398,25 +487,30 @@ export function parseProductExcel(buffer: ArrayBuffer, settings?: PosterSettings
 
       let currentSupplier = '';
       let mapping = createMapping([]);
+      let isSemGiroSheet = false;
 
       for (let i = 0; i < sheetData.length; i++) {
         const cols = sheetData[i];
         if (!cols || cols.length === 0) continue;
 
         const firstCol = String(cols[0] || '').trim();
+        if (normalize(firstCol).includes('mercadoria sem giro')) {
+          isSemGiroSheet = true;
+        }
 
-        // Linha de Fornecedor mesclada
-        if (firstCol.toUpperCase().includes('FORNECEDOR') && (!cols[1] && !cols[2])) {
-          let clean = firstCol.replace(/FORNECEDOR:\s*[\d.\-\/]+\s*[-–]?\s*/i, '').trim();
-          clean = clean.replace(/^\d+[\s\-–]+/, '').trim();
-          currentSupplier = clean.substring(0, 15).trim().toUpperCase();
-          continue;
+        // Linha de seção / fornecedor mesclada (ex: "FORNECEDOR: ..." ou "270 - ARCOM S/A - Total de Mercadorias: 4")
+        if (!cols[1] && !cols[2]) {
+          const sectionSup = extractSectionSupplier(firstCol);
+          if (sectionSup !== null) {
+            currentSupplier = sectionSup;
+            continue;
+          }
         }
 
         // Linha de cabeçalho (critérios seguros para não colidir com nomes de brinquedos)
         const isHeader = cols.some(c => {
           const s = normalize(String(c || ''));
-          return s.includes('cod. int') || s.includes('codigo int') || s.includes('mercadoria') || s.includes('preco atual') || s.includes('promocao');
+          return s.includes('cod. int') || s.includes('codigo int') || s.includes('cod. principal') || s.includes('preco atual') || s.includes('preco promocional');
         });
 
         if (isHeader) {
@@ -424,12 +518,12 @@ export function parseProductExcel(buffer: ArrayBuffer, settings?: PosterSettings
           continue;
         }
 
-        if (firstCol && firstCol.length >= 3) {
+        if (firstCol && firstCol.length >= 1) {
           const rowObj: Record<number, any> = {};
           cols.forEach((val, idx) => { rowObj[idx] = val; });
 
           const mercadoria = String(rowObj[mapping.mercadoria] || '').trim();
-          if (!mercadoria || mercadoria.toLowerCase().includes('mercadoria')) continue;
+          if (!mercadoria || mercadoria.toLowerCase() === 'mercadoria' || mercadoria.toLowerCase().includes('total de mercadorias')) continue;
 
           const sap = String(rowObj[mapping.sap] || '').trim();
           const ean = String(rowObj[mapping.ean] || '').trim();
@@ -437,13 +531,24 @@ export function parseProductExcel(buffer: ArrayBuffer, settings?: PosterSettings
 
           const key = sap || ean;
           const estoque = parseStock(rowObj[mapping.estoque]);
+          const ref = String(rowObj[mapping.ref] || '').trim();
+          const rowBrand = mapping.supplier !== undefined && mapping.supplier !== -1
+            ? cleanSupplierName(String(rowObj[mapping.supplier] || ''))
+            : '';
+          const effectiveSupplier = rowBrand || currentSupplier;
 
           if (itemsMap.has(key)) {
             const existing = itemsMap.get(key);
             if (estoque > 0) {
-              existing.stock = (existing.stock || 0) + estoque;
+              if (isSemGiroSheet) {
+                existing.stock = Math.max(existing.stock || 0, estoque);
+              } else {
+                existing.stock = (existing.stock || 0) + estoque;
+              }
             }
-            if (!existing.supplier && currentSupplier) existing.supplier = currentSupplier;
+            if (!existing.supplier && effectiveSupplier) existing.supplier = effectiveSupplier;
+            if (!existing.reference && ref) existing.reference = ref;
+            if (!existing.ean && ean) existing.ean = ean;
             continue;
           }
 
@@ -466,165 +571,34 @@ export function parseProductExcel(buffer: ArrayBuffer, settings?: PosterSettings
  * Analisa um arquivo Excel (XLS/XLSX) especificamente para o BANCO DE DADOS
  */
 export function parseDatabaseImportExcel(buffer: ArrayBuffer): any[] {
-  let data: any[][] = [];
-
-  try {
-    const text = new TextDecoder("windows-1252").decode(buffer);
-    if (text.toLowerCase().includes('<html') || text.toLowerCase().includes('<table')) {
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(text, 'text/html');
-      const rows = Array.from(doc.querySelectorAll('tr'));
-      data = rows.map(tr => Array.from(tr.querySelectorAll('th, td')).map(td => {
-        const xStr = td.getAttribute('x:str');
-        if (xStr) return xStr.trim();
-        return (td.textContent || '').trim();
-      }));
-    }
-  } catch (e) {}
-
-  if (data.length === 0) {
-    const workbook = XLSX.read(buffer, { type: 'array' });
-    const firstSheetName = workbook.SheetNames[0];
-    const worksheet = workbook.Sheets[firstSheetName];
-    data = XLSX.utils.sheet_to_json(worksheet, { header: 1, raw: false }) as any[][];
-  }
-  
-  if (data.length < 1) return [];
-
-  const items: any[] = [];
-  let mapping = createMapping([]); // Default mapping
-  
-  for (let i = 0; i < data.length; i++) {
-    const cols = data[i];
-    if (!cols || cols.length === 0) continue;
-
-    // Detectar se é uma linha de header
-    const isHeader = cols.some(c => {
-      const s = normalize(String(c || ''));
-      return s.includes('sap') || s.includes('codigo') || s.includes('interno') || s.includes('mercadoria') || s.includes('ean') || s.includes('forn');
-    });
-
-    if (isHeader) {
-      const headers = cols.map(h => String(h || '').trim());
-      mapping = createMapping(headers);
-      continue;
-    }
-
-    const getVal = (key: string) => {
-      const idx = mapping[key];
-      if (idx === undefined || idx === -1) return '';
-      return String(cols[idx] || '').trim();
-    };
-
-    const description = getVal('mercadoria');
-    if (!description || description.toLowerCase().includes('mercadoria') || description.toLowerCase().includes('descrição')) continue;
-
-    const sap = getVal('sap');
-    const ean = getVal('ean');
-    
-    // Ignora se não tiver identificação mínima
-    if (!sap && !ean) continue;
-
-    items.push({
-      code: sap,
-      ean: ean,
-      reference: getVal('ref'),
-      description: description.toUpperCase(),
-    });
-  }
-
-  return items;
+  const parsed = parseProductExcel(buffer);
+  return parsed.map(item => ({
+    code: item.code || '',
+    ean: item.ean || '',
+    reference: item.reference || '',
+    description: (item.description || '').toUpperCase(),
+    supplier: (item.supplier || '').toUpperCase(),
+  }));
 }
 
-
-
-
 /**
- * Analisa o relatório "Mercadoria Sem Giro" (HTML mascarado de XLS)
- * Extrai dados completos incluindo preços para autopreenchimento
+ * Analisa o relatório "Mercadoria Sem Giro" (HTML mascarado de XLS ou planilha Excel)
+ * Extrai dados completos incluindo fornecedor por seção, estoque real e preços para autopreenchimento e geração de cartazes/etiquetas
  */
-export function parseReportSemGiro(buffer: ArrayBuffer): any[] {
-  let data: any[][] = [];
-
-  try {
-    const text = new TextDecoder("utf-8").decode(buffer);
-    if (text.toLowerCase().includes('<html') || text.toLowerCase().includes('<table')) {
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(text, 'text/html');
-      const rows = Array.from(doc.querySelectorAll('tr'));
-      data = rows.map(tr => Array.from(tr.querySelectorAll('th, td')).map(td => (td.textContent || '').trim()));
-    }
-  } catch (e) {
-    console.error('Erro ao decodificar HTML:', e);
-  }
-
-  // Se não for HTML, tenta SheetJS
-  if (data.length === 0) {
-    const workbook = XLSX.read(buffer, { type: 'array' });
-    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-    data = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' }) as any[][];
-  }
-
-  const items: any[] = [];
-  
-  // O relatório tem headers nas primeiras linhas, os dados começam após os headers mesclados
-  // Geralmente a linha 4 (índice 3) é o cabeçalho real
-  let headerIdx = -1;
-  for(let i=0; i < Math.min(data.length, 10); i++) {
-    const rowStr = data[i].join(' ').toLowerCase();
-    if (rowStr.includes('cod. interno') || rowStr.includes('mercadoria')) {
-      headerIdx = i;
-      break;
-    }
-  }
-
-  if (headerIdx === -1) return [];
-
-  for (let i = headerIdx + 1; i < data.length; i++) {
-    const row = data[i];
-    if (!row || row.length < 3) continue;
-
-    const sap = String(row[0] || '').trim();
-    const ean = String(row[1] || '').trim();
-    const description = String(row[2] || '').trim();
-
-    if (!sap && !ean) continue;
-    if (!description || description.toLowerCase().includes('total')) continue;
-
-    // Colunas solicitadas:
-    // D(3): Cod. Fornecedor -> Referência
-    // E(4): Marca -> Supplier
-    // F(5): Estoque -> Dividir por 1000
-    // I(8): Preço Regular
-    // J(9): Preço Oferta
-
-    const reference = String(row[3] || '').trim();
-    const supplier = String(row[4] || '').trim();
-    
-    // Estoque: 1000 vira 1
-    const estoqueRaw = parseFloat(String(row[5] || '0').replace(',', '.')) || 0;
-    const estoque = estoqueRaw / 1000;
-
-    const valRegular = parsePrice(row[8]);
-    const valOferta = parsePrice(row[9]);
-
-    // Lógica de preços para o cartaz
-    const hasOffer = valOferta > 0;
-    const priceFrom = hasOffer ? formatCurrency(valRegular) : '';
-    const priceFor = hasOffer ? formatCurrency(valOferta) : formatCurrency(valRegular);
-
-    items.push({
-      code: sap,
-      ean: ean,
-      description: description.toUpperCase(),
-      reference: reference,
-      supplier: supplier.toUpperCase(),
-      priceFrom: priceFrom,
-      priceFor: priceFor,
-      isOffer: hasOffer,
-      stock: estoque
-    });
-  }
-
-  return items;
+export function parseReportSemGiro(buffer: ArrayBuffer, settings?: PosterSettings): any[] {
+  const parsed = parseProductExcel(buffer, settings);
+  return parsed.map(item => ({
+    code: item.code || '',
+    ean: item.ean || '',
+    description: (item.description || '').toUpperCase(),
+    reference: item.reference || '',
+    supplier: (item.supplier || '').toUpperCase(),
+    priceFrom: item.priceFrom || '',
+    priceFor: item.priceFor || '0,00',
+    isOffer: Boolean(item.isOffer),
+    posterSubType: item.posterSubType || (item.isOffer ? 'offer' : 'normal'),
+    stock: item.stock ?? 0,
+    installments: item.installments || 1,
+    installmentPrice: item.installmentPrice || '0,00',
+  }));
 }
