@@ -11,7 +11,7 @@ import { calculateInstallments } from '@/app/lib/poster-utils';
 import { isOfferOnlyFormat } from '@/app/lib/poster-formats';
 
 import { cn, isTouchDevice } from '@/lib/utils';
-import { Loader2, CheckCircle2, XCircle, Search, RotateCcw, Info, Camera, Sparkles, ScanBarcode } from 'lucide-react';
+import { Loader2, CheckCircle2, XCircle, Search, RotateCcw, Info, Camera, Sparkles, ScanBarcode, Zap } from 'lucide-react';
 import { BarcodeScanner, type ScanStatus } from './barcode-scanner';
 
 function centsToDisplay(cents: number): string {
@@ -152,7 +152,7 @@ function focusAndSelect(el: HTMLInputElement | null): boolean {
 
 type ProductPayload = {
   description: string; reference: string; ean?: string; code?: string; supplier?: string;
-  priceFrom?: string; priceFor?: string;
+  priceFrom?: string; priceFor?: string; campaign?: string; category?: string;
 };
 
 export const PosterForm = forwardRef<PosterFormHandle, PosterFormProps>(function PosterForm(
@@ -166,7 +166,7 @@ export const PosterForm = forwardRef<PosterFormHandle, PosterFormProps>(function
   const [showScanner, setShowScanner] = useState(false);
   const [sessionScanCount, setSessionScanCount] = useState(0);
   const [searchValue, setSearchValue] = useState('');
-  const [suggestions, setSuggestions] = useState<{ key: string; description: string }[]>([]);
+  const [suggestions, setSuggestions] = useState<{ key: string; description: string; campaign?: string }[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [activeSuggestion, setActiveSuggestion] = useState(-1);
   const [pendingFocus, setPendingFocus] = useState<'from' | 'for' | null>(null);
@@ -325,7 +325,7 @@ export const PosterForm = forwardRef<PosterFormHandle, PosterFormProps>(function
     suggestTimer.current = setTimeout(async () => {
       try {
         const res = await fetch(`/api/produto/suggest?prefix=${encodeURIComponent(prefix)}`);
-        const list = await res.json() as { key: string; description: string }[];
+        const list = await res.json() as { key: string; description: string; campaign?: string }[];
         setSuggestions(list);
         setActiveSuggestion(-1);
         setShowSuggestions(list.length > 0);
@@ -373,6 +373,8 @@ export const PosterForm = forwardRef<PosterFormHandle, PosterFormProps>(function
         supplier: produto.supplier ?? '',
         priceFrom: produto.priceFrom ?? '',
         priceFor:  produto.priceFor  ?? '',
+        campaign:  produto.campaign  ?? '',
+        category:  produto.category  ?? '',
         // Formatos só-oferta (Relíquias/Totem) nunca podem virar "normal",
         // senão o campo DE some e não há como digitá-lo.
         posterSubType: isOfferOnlyFormat(posterType)
@@ -617,25 +619,37 @@ export const PosterForm = forwardRef<PosterFormHandle, PosterFormProps>(function
                 role="listbox"
                 className="absolute z-50 w-full mt-1 bg-white border rounded-lg shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-100"
               >
-                {suggestions.map((s, i) => (
-                  <button
-                    key={s.key}
-                    id={`suggestion-${i}`}
-                    type="button"
-                    role="option"
-                    aria-selected={i === activeSuggestion}
-                    tabIndex={-1}
-                    className={cn(
-                      'w-full text-left px-4 py-2.5 border-b last:border-0 flex flex-col',
-                      i === activeSuggestion ? 'bg-primary/5' : 'hover:bg-gray-50'
-                    )}
-                    onMouseEnter={() => setActiveSuggestion(i)}
-                    onMouseDown={(e) => { e.preventDefault(); handleSuggestionSelect(s.key); }}
-                  >
-                    <span className="font-bold text-gray-900">{s.key}</span>
-                    <span className="text-xs text-gray-500 uppercase truncate">{s.description}</span>
-                  </button>
-                ))}
+                {suggestions.map((s, i) => {
+                  const isHappyFriday = !!settings.happyFridayEnabled && s.campaign === 'ESQUENTA_BLACK';
+                  return (
+                    <button
+                      key={s.key}
+                      id={`suggestion-${i}`}
+                      type="button"
+                      role="option"
+                      aria-selected={i === activeSuggestion}
+                      tabIndex={-1}
+                      className={cn(
+                        'w-full text-left px-4 py-2.5 border-b last:border-0 flex flex-col transition-colors',
+                        isHappyFriday && 'border-l-2 border-l-amber-400 bg-amber-50/30',
+                        i === activeSuggestion ? 'bg-primary/5' : 'hover:bg-gray-50'
+                      )}
+                      onMouseEnter={() => setActiveSuggestion(i)}
+                      onMouseDown={(e) => { e.preventDefault(); handleSuggestionSelect(s.key); }}
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="font-bold text-gray-900">{s.key}</span>
+                        {isHappyFriday && (
+                          <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase px-1.5 py-0.5 rounded bg-zinc-900 text-amber-400 border border-amber-400/40 tracking-tight shrink-0">
+                            <Zap className="h-2.5 w-2.5 fill-amber-400" />
+                            Happy Friday
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-xs text-gray-500 uppercase truncate">{s.description}</span>
+                    </button>
+                  );
+                })}
               </div>
             )}
           </div>
@@ -758,9 +772,22 @@ export const PosterForm = forwardRef<PosterFormHandle, PosterFormProps>(function
             </p>
           </div>
         ) : lookupStatus === 'found' ? (
-          <div className="bg-green-50/50 border border-green-100 px-3 py-2.5 rounded-lg flex items-center justify-between">
+          <div className={cn(
+            "px-3 py-2.5 rounded-lg flex items-center justify-between border transition-colors",
+            settings.happyFridayEnabled && data.campaign === 'ESQUENTA_BLACK'
+              ? "bg-amber-50/50 border-amber-300/80 border-l-4 border-l-zinc-900"
+              : "bg-green-50/50 border-green-100"
+          )}>
             <div className="min-w-0 flex-1">
-              <p className="text-[10px] font-black text-green-700 uppercase tracking-tighter mb-1">Produto Selecionado</p>
+              <div className="flex items-center gap-2 mb-1 flex-wrap">
+                <p className="text-[10px] font-black text-green-700 uppercase tracking-tighter">Produto Selecionado</p>
+                {settings.happyFridayEnabled && data.campaign === 'ESQUENTA_BLACK' && (
+                  <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase px-1.5 py-0.5 rounded bg-zinc-900 text-amber-400 border border-amber-400/40 tracking-tight">
+                    <Zap className="h-2.5 w-2.5 fill-amber-400" />
+                    Happy Friday
+                  </span>
+                )}
+              </div>
               <h3 className="font-bold text-gray-900 truncate uppercase leading-none mb-1 text-sm">{data.description}</h3>
               <p className="text-[10px] text-green-600 font-mono">SAP: {data.code || '-'} | EAN: {data.ean || '-'}</p>
             </div>

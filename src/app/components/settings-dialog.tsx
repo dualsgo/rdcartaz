@@ -5,7 +5,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Settings, Database, RotateCcw, Check, Loader2, FileSpreadsheet, CreditCard } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { Settings, Database, RotateCcw, Check, Loader2, FileSpreadsheet, CreditCard, Zap } from 'lucide-react';
 import type { PosterSettings } from '@/app/lib/types';
 import { parseReportSemGiro } from '@/app/lib/poster-utils';
 import { cn } from '@/lib/utils';
@@ -32,11 +33,24 @@ export function SettingsDialog({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [maxInstallments, setMaxInstallments] = useState(settings.maxInstallments.toString());
   const [minAmount, setMinAmount] = useState(settings.minInstallmentAmount.toString());
+  const [happyFridayEnabled, setHappyFridayEnabled] = useState(!!settings.happyFridayEnabled);
 
   useEffect(() => {
     setMaxInstallments(settings.maxInstallments.toString());
     setMinAmount(settings.minInstallmentAmount.toString());
+    setHappyFridayEnabled(!!settings.happyFridayEnabled);
   }, [settings]);
+
+  const handleToggleHappyFriday = (checked: boolean) => {
+    setHappyFridayEnabled(checked);
+    let parsedMax = parseInt(maxInstallments, 10) || 10;
+    if (parsedMax !== 6) parsedMax = 10;
+    onSave({
+      maxInstallments: parsedMax,
+      minInstallmentAmount: 29.99,
+      happyFridayEnabled: checked,
+    });
+  };
 
   const handleSave = () => {
     let parsedMax = parseInt(maxInstallments, 10) || 10;
@@ -48,6 +62,7 @@ export function SettingsDialog({
     onSave({
       maxInstallments: parsedMax,
       minInstallmentAmount: 29.99,
+      happyFridayEnabled,
     });
   };
 
@@ -86,15 +101,63 @@ export function SettingsDialog({
           <span className="hidden sm:inline">Configurações</span>
         </button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] max-h-[90vh] overflow-y-auto custom-scrollbar">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-xl font-bold tracking-tight">
             <Settings className="h-5 w-5 text-primary" />
             Configurações do Sistema
           </DialogTitle>
         </DialogHeader>
-        <div className="grid gap-5 py-4">
+        <div className="grid gap-4 py-3">
           
+          {/* Seção Campanha Happy Friday */}
+          <div className={cn(
+            "p-4 rounded-xl border transition-all duration-300 shadow-sm",
+            happyFridayEnabled
+              ? "bg-zinc-900 text-white border-amber-400/60"
+              : "bg-muted/40 border-border"
+          )}>
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className={cn(
+                  "w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors",
+                  happyFridayEnabled ? "bg-amber-400 text-zinc-950" : "bg-amber-500/10 text-amber-600"
+                )}>
+                  <Zap className="h-4 w-4 fill-current" />
+                </div>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <h3 className={cn("text-sm font-bold leading-tight", happyFridayEnabled ? "text-white" : "text-gray-900")}>
+                      Campanha Happy Friday
+                    </h3>
+                    {happyFridayEnabled && (
+                      <span className="text-[9px] font-black uppercase px-1.5 py-0.5 rounded bg-amber-400 text-zinc-950 tracking-wider">
+                        Ativo
+                      </span>
+                    )}
+                  </div>
+                  <p className={cn(
+                    "text-[0.65rem] uppercase font-bold tracking-wider mt-0.5",
+                    happyFridayEnabled ? "text-amber-300/90" : "text-muted-foreground"
+                  )}>
+                    Esquenta Black Friday · 4.995 itens
+                  </p>
+                </div>
+              </div>
+              <Switch
+                id="happy-friday-toggle"
+                checked={happyFridayEnabled}
+                onCheckedChange={handleToggleHappyFriday}
+              />
+            </div>
+            <p className={cn(
+              "text-[0.72rem] mt-2.5 leading-relaxed",
+              happyFridayEnabled ? "text-zinc-300" : "text-muted-foreground"
+            )}>
+              Quando ativada, sinaliza de forma sutil na busca e na lista do lote todos os produtos que fazem parte do catálogo <b>Happy Friday</b>.
+            </p>
+          </div>
+
           {/* Seção de Parcelamento */}
           <div className="p-4 bg-gradient-to-br from-amber-50/40 to-orange-50/20 rounded-xl border border-amber-200/60 shadow-sm space-y-4">
             <div className="flex items-center gap-2">

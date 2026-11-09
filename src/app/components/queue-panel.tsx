@@ -13,7 +13,8 @@ import {
   ChevronDown, 
   ChevronUp, 
   RotateCcw,
-  Tag
+  Tag,
+  Zap
 } from 'lucide-react';
 import type { PosterData, PosterType } from '@/app/lib/types';
 import { getPosterFormat } from '@/app/lib/poster-formats';
@@ -113,9 +114,12 @@ type QueuePanelProps = {
   onStockFilterChange?: (stock: string) => void;
   priceRangeFilter?: 'all' | 'under-50' | '50-100' | 'over-100';
   onPriceRangeFilterChange?: (range: string) => void;
+  campaignFilter?: 'all' | 'happy-friday' | 'regular';
+  onCampaignFilterChange?: (campaign: 'all' | 'happy-friday' | 'regular') => void;
   availableSuppliers?: string[];
   hasStockData?: boolean;
   onResetFilters?: () => void;
+  happyFridayEnabled?: boolean;
   className?: string;
 };
 
@@ -139,14 +143,21 @@ export function QueuePanel({
   onStockFilterChange,
   priceRangeFilter = 'all',
   onPriceRangeFilterChange,
+  campaignFilter = 'all',
+  onCampaignFilterChange,
   availableSuppliers = [],
   hasStockData = false,
   onResetFilters,
+  happyFridayEnabled = false,
   className,
 }: QueuePanelProps) {
   const [showFilters, setShowFilters] = useState(false);
   const hiddenCount = queue.length - filteredQueue.length;
   const totalUnits = filteredQueue.reduce((acc, item) => acc + (item.quantity || 1), 0);
+  const totalHappyFridayInQueue = useMemo(
+    () => (happyFridayEnabled ? queue.filter(i => i.campaign === 'ESQUENTA_BLACK').length : 0),
+    [happyFridayEnabled, queue]
+  );
 
   // Conta fornecedores no lote completo
   const supplierCounts = useMemo(() => {
@@ -163,6 +174,7 @@ export function QueuePanel({
     supplierFilter !== 'all' || 
     stockFilter !== 'all' || 
     priceRangeFilter !== 'all' ||
+    (happyFridayEnabled && campaignFilter !== 'all') ||
     queueSort !== 'stock-desc';
 
   return (
@@ -179,6 +191,26 @@ export function QueuePanel({
             <span className="text-[10px] font-semibold text-muted-foreground tabular-nums whitespace-nowrap">
               {totalUnits} un.
             </span>
+          )}
+          {happyFridayEnabled && queue.length > 0 && (
+            <button
+              type="button"
+              onClick={() => onCampaignFilterChange?.(campaignFilter === 'happy-friday' ? 'all' : 'happy-friday')}
+              className={cn(
+                "inline-flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded-full font-black tabular-nums whitespace-nowrap transition-all border",
+                campaignFilter === 'happy-friday'
+                  ? "bg-amber-400 text-zinc-950 border-zinc-900 shadow-sm"
+                  : "bg-zinc-900 text-amber-400 border-amber-400/40 hover:bg-zinc-800"
+              )}
+              title={
+                campaignFilter === 'happy-friday'
+                  ? 'Mostrando apenas itens Happy Friday. Clique para mostrar todos.'
+                  : `Filtrar apenas os ${totalHappyFridayInQueue} itens da campanha Happy Friday`
+              }
+            >
+              <Zap className={cn("h-2.5 w-2.5", campaignFilter === 'happy-friday' ? "fill-zinc-950" : "fill-amber-400")} />
+              <span>{totalHappyFridayInQueue}</span>
+            </button>
           )}
         </div>
 
@@ -264,6 +296,25 @@ export function QueuePanel({
               <option value="none">⏱️ Ordem Original do Arquivo</option>
             </select>
           </div>
+
+          {/* Filtro por Campanha (exibido apenas quando Happy Friday está ativo nas configurações) */}
+          {happyFridayEnabled && (
+            <div className="space-y-1 pt-1 border-t border-border/40">
+              <span className="text-[10px] font-black uppercase tracking-wider text-amber-700 flex items-center gap-1.5">
+                <Zap className="h-3 w-3 text-amber-500 fill-amber-500" />
+                Campanha
+              </span>
+              <select
+                value={campaignFilter}
+                onChange={(e) => onCampaignFilterChange?.(e.target.value as 'all' | 'happy-friday' | 'regular')}
+                className="w-full h-7 px-2 text-[11px] font-bold bg-background border border-amber-300 rounded-md text-foreground focus:ring-1 focus:ring-amber-500 outline-none"
+              >
+                <option value="all">Todos os Itens ({queue.length})</option>
+                <option value="happy-friday">⚡ Somente Happy Friday ({totalHappyFridayInQueue})</option>
+                <option value="regular">Fora da Campanha ({queue.length - totalHappyFridayInQueue})</option>
+              </select>
+            </div>
+          )}
 
           {/* Filtro por Fornecedor (se houver fornecedores mapeados) */}
           {availableSuppliers.length > 0 && (
@@ -352,6 +403,7 @@ export function QueuePanel({
                 lastPage = startPage;
 
                 currentPos += (item.quantity || 1);
+                const isHappyFriday = happyFridayEnabled && item.campaign === 'ESQUENTA_BLACK';
 
                 return (
                   <React.Fragment key={index}>
@@ -377,6 +429,7 @@ export function QueuePanel({
                       className={cn(
                         'flex items-center gap-3 px-4 py-2.5 hover:bg-white transition-colors group border-b border-border/30 last:border-b-0 relative cursor-pointer outline-none',
                         'focus-visible:bg-white focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring',
+                        isHappyFriday && selectedIndex !== realIndex && 'bg-amber-50/35 hover:bg-amber-50/60 border-l-2 border-l-amber-500',
                         selectedIndex === realIndex && 'bg-primary/5 border-l-2 border-l-primary'
                       )}
                       title="Clique para visualizar · Del remove · +/- altera quantidade"
@@ -420,8 +473,17 @@ export function QueuePanel({
                           )}
                         </p>
 
-                        {/* Badges de Estoque e Fornecedor */}
+                        {/* Badges de Campanha, Estoque e Fornecedor */}
                         <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                          {isHappyFriday && (
+                            <span
+                              className="inline-flex items-center gap-1 text-[9px] font-black px-1.5 py-0.2 rounded bg-zinc-900 text-amber-400 border border-amber-400/40 uppercase tracking-tight"
+                              title="Produto selecionado para a campanha Happy Friday"
+                            >
+                              <Zap className="h-2.5 w-2.5 fill-amber-400 shrink-0" />
+                              Happy Friday
+                            </span>
+                          )}
                           {item.stock !== undefined && item.stock !== null && (
                             <span
                               className={cn(

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { Database, X, Search, Pencil, Trash2, Plus, Check, XCircle, Loader2, ChevronLeft, ChevronRight, AlertTriangle, Upload, RotateCcw } from 'lucide-react';
+import { Database, X, Search, Pencil, Trash2, Plus, Check, XCircle, Loader2, ChevronLeft, ChevronRight, AlertTriangle, Upload, RotateCcw, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -16,6 +16,8 @@ type ProdutoItem = {
   code?: string;
   priceFrom?: string;
   priceFor?: string;
+  campaign?: string;
+  category?: string;
 };
 
 type ListResponse = {
@@ -36,13 +38,15 @@ export function DatabasePanel({
   onClose, 
   onImportSessionData,
   onClearSessionData,
-  hasSessionData
+  hasSessionData,
+  happyFridayEnabled = false,
 }: { 
   open: boolean; 
   onClose: () => void;
   onImportSessionData?: (data: any[]) => void;
   onClearSessionData?: () => void;
   hasSessionData?: boolean;
+  happyFridayEnabled?: boolean;
 }) {
   const [search, setSearch]         = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -489,10 +493,21 @@ export function DatabasePanel({
                   <div key={item.key} className="bg-card">
                     {/* ── Row ── */}
                     {!isEditing && !isDeleting && (
-                      <div className="flex items-center gap-3 px-4 py-3 hover:bg-muted/40 transition-colors group">
+                      <div className={cn(
+                        "flex items-center gap-3 px-4 py-3 hover:bg-muted/40 transition-colors group",
+                        happyFridayEnabled && item.campaign === 'ESQUENTA_BLACK' && "bg-amber-50/30 border-l-2 border-l-amber-500"
+                      )}>
                         <span className="font-mono text-xs text-muted-foreground w-16 shrink-0">{item.key}</span>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium truncate leading-tight">{item.description}</p>
+                          <div className="flex items-center gap-2">
+                            <p className="text-sm font-medium truncate leading-tight">{item.description}</p>
+                            {happyFridayEnabled && item.campaign === 'ESQUENTA_BLACK' && (
+                              <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase px-1.5 py-0.5 rounded bg-zinc-900 text-amber-400 border border-amber-400/40 tracking-tight shrink-0">
+                                <Zap className="h-2.5 w-2.5 fill-amber-400" />
+                                Happy Friday
+                              </span>
+                            )}
+                          </div>
                           <div className="flex gap-3 mt-0.5 flex-wrap">
                             {item.ean  && <span className="text-[10px] text-muted-foreground font-mono">EAN: {item.ean}</span>}
                             {item.reference && item.reference !== item.key && (

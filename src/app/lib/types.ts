@@ -16,11 +16,14 @@ export type PosterData = {
   supplier?: string;
   quantity?: number;
   stock?: number;
+  campaign?: string;
+  category?: string;
 };
 
 export type PosterSettings = {
   maxInstallments: number;
   minInstallmentAmount: number;
+  happyFridayEnabled?: boolean;
 };
 
 export type PosterType = 'reliquias' | 'reliquias-a6' | 'etiqueta-oficial' | 'aereo' | 'totem' | 'vitrine';

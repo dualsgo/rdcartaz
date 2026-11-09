@@ -15,6 +15,7 @@ export function PosterPreviewVitrine({
   paymentOption,
   posterSubType,
   supplier,
+  campaign,
   settings,
 }: PosterData & { settings: PosterSettings }) {
   const valDe = parsePrice(priceFrom);
@@ -22,6 +23,7 @@ export function PosterPreviewVitrine({
 
   const isOffer = posterSubType === 'offer';
   const hasDiscount = valDe > 0 && valPor > 0 && valDe > valPor;
+  const isHappyFridayItem = Boolean(settings?.happyFridayEnabled && campaign === 'ESQUENTA_BLACK');
 
   const displayDescription = truncateDescription(description, 35); // Limite um pouco maior pois ganhamos espaço horizontal
 
@@ -69,10 +71,22 @@ export function PosterPreviewVitrine({
       <div className="w-full h-full flex flex-col justify-between" style={{ transform: 'scale(0.95)', transformOrigin: 'center' }}>
         
         {/* 1. DESCRIÇÃO */}
-        <div className="shrink-0 mb-1">
-          <h2 className="font-bold text-[18px] leading-[1.1] uppercase tracking-tighter overflow-hidden line-clamp-2 text-center w-full">
+        <div className={cn("shrink-0 mb-1", isHappyFridayItem && "flex items-center justify-between gap-2")}>
+          <h2
+            className={cn(
+              "font-bold text-[18px] leading-[1.1] uppercase tracking-tighter overflow-hidden line-clamp-2",
+              isHappyFridayItem ? "text-left flex-1 min-w-0" : "text-center w-full"
+            )}
+          >
             {displayDescription}
           </h2>
+          {isHappyFridayItem && (
+            <div
+              className="w-[5.5mm] h-[5.5mm] rounded-full bg-black shrink-0"
+              style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}
+              aria-label="Item selecionado Happy Friday"
+            />
+          )}
         </div>
 
         {/* 2. ÁREA DE PREÇO (Ocupando largura total) */}

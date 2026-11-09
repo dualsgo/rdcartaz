@@ -10,9 +10,11 @@ export type ProdutoEntry = {
     supplier?: string;
     priceFrom?: string;
     priceFor?: string;
+    campaign?: string;
+    category?: string;
 };
 
-export type SuggestItem = { key: string; description: string; searchDesc: string };
+export type SuggestItem = { key: string; description: string; searchDesc: string; campaign?: string };
 
 let produtosCache: Record<string, ProdutoEntry> | null = null;
 let suggestCache: SuggestItem[] | null = null;
@@ -84,7 +86,8 @@ export function getSuggestCache(): SuggestItem[] {
             result.push({ 
                 key: k, 
                 description: desc,
-                searchDesc: desc.toUpperCase() // Cache do uppercase para busca rápida
+                searchDesc: desc.toUpperCase(), // Cache do uppercase para busca rápida
+                ...(products[k].campaign ? { campaign: products[k].campaign } : {})
             });
         }
     }

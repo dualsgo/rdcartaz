@@ -18,7 +18,7 @@ import { parseProductCSV, parseProductExcel, parsePrice } from '@/app/lib/poster
 import { useHotkeys } from '@/hooks/use-hotkeys';
 import { Kbd } from '@/components/ui/kbd';
 
-import { Printer, Plus, FileStack, PackageOpen, Info, Database, Edit3, LayoutGrid, FileDown, CheckCircle2, ScanBarcode } from 'lucide-react';
+import { Printer, Plus, FileStack, PackageOpen, Info, Database, Edit3, LayoutGrid, FileDown, CheckCircle2, ScanBarcode, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -61,6 +61,7 @@ export default function Home() {
   const [settings, setSettings] = useState<PosterSettings>({
     maxInstallments: 10,
     minInstallmentAmount: 29.99,
+    happyFridayEnabled: false,
   });
 
   const [sessionProducts, setSessionProducts] = useState<Record<string, any>>({});
@@ -158,19 +159,87 @@ export default function Home() {
     }
   }, [queue]);
 
+  // Enriquecimento automático de campanha para itens já existentes no lote (ex: restaurados do localStorage)
+  useEffect(() => {
+    const uncheckedItems = queue.filter(item => item.campaign === undefined && (item.code || item.ean));
+    if (uncheckedItems.length === 0) return;
+
+    const keys = Array.from(new Set(uncheckedItems.map(i => i.code || i.ean).filter(Boolean)));
+    if (keys.length === 0) return;
+
+    let cancelled = false;
+    fetch('/api/produto/bulk-lookup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ keys }),
+    })
+      .then(res => (res.ok ? res.json() : null))
+      .then(data => {
+        if (cancelled || !data?.results) return;
+        setQueue(prev =>
+          prev.map(item => {
+            if (item.campaign !== undefined) return item;
+            const dbItem = data.results[item.code] || data.results[item.ean];
+            return {
+              ...item,
+              campaign: dbItem?.campaign || '',
+              category: dbItem?.category || item.category || '',
+            };
+          })
+        );
+      })
+      .catch(() => {});
+
+    return () => {
+      cancelled = true;
+    };
+  }, [queue]);
+
   const saveSettings = (newSettings: PosterSettings) => {
     setSettings(newSettings);
     localStorage.setItem('poster-settings', JSON.stringify(newSettings));
     localStorage.setItem('poster-settings-v2', JSON.stringify(newSettings));
   };
 
-  const handleImportSessionData = (items: any[]) => {
+  const handleImportSessionData = async (items: any[]) => {
     const map: Record<string, any> = {};
+    const keysToLookup = new Set<string>();
     items.forEach(item => {
-      if (item.code) map[item.code] = item;
-      if (item.ean) map[item.ean] = item;
+      if (item.code) {
+        map[item.code] = item;
+        keysToLookup.add(String(item.code));
+      }
+      if (item.ean) {
+        map[item.ean] = item;
+        keysToLookup.add(String(item.ean));
+      }
     });
-    setSessionProducts(map);
+
+    if (keysToLookup.size > 0) {
+      try {
+        const res = await fetch('/api/produto/bulk-lookup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ keys: Array.from(keysToLookup) }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.results) {
+            items.forEach(item => {
+              const dbItem = data.results[item.code] || data.results[item.ean];
+              if (dbItem) {
+                item.campaign = dbItem.campaign || '';
+                item.category = dbItem.category || '';
+              }
+            });
+          }
+        }
+      } catch {
+        // silencioso
+      }
+    }
+
+    setSessionProducts({ ...map });
     setContinuousScan(true);
   };
 
@@ -187,6 +256,7 @@ export default function Home() {
   const [supplierFilter, setSupplierFilter] = useState<string>('all');
   const [stockFilter, setStockFilter] = useState<'all' | 'with-stock' | 'no-stock'>('all');
   const [priceRangeFilter, setPriceRangeFilter] = useState<'all' | 'under-50' | '50-100' | 'over-100'>('all');
+  const [campaignFilter, setCampaignFilter] = useState<'all' | 'happy-friday' | 'regular'>('all');
 
   const availableSuppliers = useMemo(() => {
     const set = new Set<string>();
@@ -230,6 +300,14 @@ export default function Home() {
       });
     }
 
+    if (settings.happyFridayEnabled && campaignFilter !== 'all') {
+      if (campaignFilter === 'happy-friday') {
+        result = result.filter(item => item.campaign === 'ESQUENTA_BLACK');
+      } else if (campaignFilter === 'regular') {
+        result = result.filter(item => item.campaign !== 'ESQUENTA_BLACK');
+      }
+    }
+
     if (queueSort !== 'none') {
       result.sort((a, b) => {
         if (queueSort === 'stock-desc') return (b.stock || 0) - (a.stock || 0);
@@ -247,7 +325,7 @@ export default function Home() {
     }
 
     return result;
-  }, [queue, queueFilter, supplierFilter, stockFilter, priceRangeFilter, queueSort]);
+  }, [queue, queueFilter, supplierFilter, stockFilter, priceRangeFilter, campaignFilter, settings.happyFridayEnabled, queueSort]);
 
   // Expande a fila considerando as quantidades de cada item para impressão
   const expandedQueue = useMemo(() => {
@@ -620,9 +698,11 @@ export default function Home() {
                         supplier: item.supplier || dbItem.supplier || '',
                         reference: item.reference || dbItem.reference || '',
                         description: item.description && item.description.length > 2 ? item.description : (dbItem.description || item.description),
+                        campaign: dbItem.campaign || item.campaign || '',
+                        category: dbItem.category || item.category || '',
                       };
                     }
-                    return item;
+                    return { ...item, campaign: item.campaign || '' };
                   });
                 }
               }
@@ -637,6 +717,7 @@ export default function Home() {
               setSupplierFilter('all');
               setStockFilter('all');
               setPriceRangeFilter('all');
+              setCampaignFilter('all');
               setQueue(prev => clearFirst ? [...filtered] : [...prev, ...filtered]);
               setQueueFilter(importMode === 'offer' ? 'offer' : 'normal');
               setImportCount(filtered.length);
@@ -724,6 +805,7 @@ export default function Home() {
         onImportSessionData={handleImportSessionData}
         onClearSessionData={handleClearSessionData}
         hasSessionData={hasSessionData}
+        happyFridayEnabled={!!settings.happyFridayEnabled}
       />
       <AutomationModal 
         isOpen={showAutomation} 
@@ -759,6 +841,18 @@ export default function Home() {
                 <div className="flex flex-col leading-none">
                   <span className="text-[10px] font-black text-emerald-700 uppercase tracking-tight">Sem Giro Ativo</span>
                   <span className="text-[8px] font-bold text-emerald-600 uppercase tracking-widest">Bipagem Contínua ON</span>
+                </div>
+              </div>
+            )}
+            {settings.happyFridayEnabled && (
+              <div
+                className="flex items-center gap-1.5 px-2.5 py-1 bg-zinc-900 border border-amber-400/50 rounded-lg shrink-0 ml-1 shadow-sm animate-in fade-in"
+                title="Destaque da campanha Happy Friday ativado nas configurações"
+              >
+                <Zap className="h-3.5 w-3.5 text-amber-400 fill-amber-400" />
+                <div className="flex flex-col leading-none">
+                  <span className="text-[10px] font-black text-amber-400 uppercase tracking-tight">Happy Friday</span>
+                  <span className="text-[8px] font-bold text-zinc-300 uppercase tracking-widest">Destaque ON</span>
                 </div>
               </div>
             )}
@@ -913,7 +1007,13 @@ export default function Home() {
               onRemove={handleRemoveFromQueue}
               onUpdateQuantity={handleUpdateQuantity}
               onClear={() => setQueue([])}
-              onShowHidden={() => setQueueFilter('all')}
+              onShowHidden={() => {
+                setQueueFilter('all');
+                setSupplierFilter('all');
+                setStockFilter('all');
+                setPriceRangeFilter('all');
+                setCampaignFilter('all');
+              }}
               queueSort={queueSort}
               onSortChange={(sort) => setQueueSort(sort as any)}
               supplierFilter={supplierFilter}
@@ -922,12 +1022,16 @@ export default function Home() {
               onStockFilterChange={(stk) => setStockFilter(stk as any)}
               priceRangeFilter={priceRangeFilter}
               onPriceRangeFilterChange={(range) => setPriceRangeFilter(range as any)}
+              campaignFilter={campaignFilter}
+              onCampaignFilterChange={setCampaignFilter}
               availableSuppliers={availableSuppliers}
               hasStockData={hasStockData}
+              happyFridayEnabled={!!settings.happyFridayEnabled}
               onResetFilters={() => {
                 setSupplierFilter('all');
                 setStockFilter('all');
                 setPriceRangeFilter('all');
+                setCampaignFilter('all');
                 setQueueSort('stock-desc');
                 setQueueFilter('all');
               }}
@@ -1053,7 +1157,34 @@ export default function Home() {
                 onRemove={handleRemoveFromQueue}
                 onUpdateQuantity={handleUpdateQuantity}
                 onClear={() => setQueue([])}
-                onShowHidden={() => setQueueFilter('all')}
+                onShowHidden={() => {
+                  setQueueFilter('all');
+                  setSupplierFilter('all');
+                  setStockFilter('all');
+                  setPriceRangeFilter('all');
+                  setCampaignFilter('all');
+                }}
+                queueSort={queueSort}
+                onSortChange={(sort) => setQueueSort(sort as any)}
+                supplierFilter={supplierFilter}
+                onSupplierFilterChange={setSupplierFilter}
+                stockFilter={stockFilter}
+                onStockFilterChange={(stk) => setStockFilter(stk as any)}
+                priceRangeFilter={priceRangeFilter}
+                onPriceRangeFilterChange={(range) => setPriceRangeFilter(range as any)}
+                campaignFilter={campaignFilter}
+                onCampaignFilterChange={setCampaignFilter}
+                availableSuppliers={availableSuppliers}
+                hasStockData={hasStockData}
+                happyFridayEnabled={!!settings.happyFridayEnabled}
+                onResetFilters={() => {
+                  setSupplierFilter('all');
+                  setStockFilter('all');
+                  setPriceRangeFilter('all');
+                  setCampaignFilter('all');
+                  setQueueSort('stock-desc');
+                  setQueueFilter('all');
+                }}
                 className="h-full"
               />
             </div>

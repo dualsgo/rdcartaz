@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
         const produtos = loadProdutos();
 
         const seen = new Set<string>();
-        const entries: { key: string; description: string; reference: string; ean?: string; code?: string; supplier?: string }[] = [];
+        const entries: { key: string; description: string; reference: string; ean?: string; code?: string; supplier?: string; campaign?: string; category?: string }[] = [];
 
         // Otimização: for...in é mais leve que Object.entries
         for (const key in produtos) {
@@ -40,11 +40,12 @@ export async function GET(request: NextRequest) {
                              val.description.toUpperCase().includes(search) || 
                              (val.reference && val.reference.toUpperCase().includes(search)) ||
                              (val.ean && val.ean.includes(search)) ||
-                             (val.code && val.code.includes(search));
+                             (val.code && val.code.includes(search)) ||
+                             (val.campaign && val.campaign.toUpperCase().includes(search));
                 
                 if (!match) continue;
             }
-            entries.push({ key, description: val.description, reference: val.reference, ean: val.ean, code: val.code, supplier: val.supplier });
+            entries.push({ key, description: val.description, reference: val.reference, ean: val.ean, code: val.code, supplier: val.supplier, campaign: val.campaign, category: val.category });
         }
 
         // Ordenação pode ser lenta se entries for gigante, mas entries já está filtrada por busca ou reduzida por SAP keys
@@ -158,6 +159,8 @@ export async function PATCH(request: NextRequest) {
             ...(supplier !== undefined ? (supplier ? { supplier: String(supplier).trim().toUpperCase() } : {}) : (existing.supplier ? { supplier: existing.supplier } : {})),
             ...(priceFrom !== undefined ? { priceFrom: String(priceFrom).trim() } : (existing.priceFrom ? { priceFrom: existing.priceFrom } : {})),
             ...(priceFor !== undefined ? { priceFor: String(priceFor).trim() } : (existing.priceFor ? { priceFor: existing.priceFor } : {})),
+            ...(existing.campaign ? { campaign: existing.campaign } : {}),
+            ...(existing.category ? { category: existing.category } : {}),
         };
 
         produtos[keyClean] = updated;
@@ -221,6 +224,10 @@ export async function PUT(request: NextRequest) {
             const refClean  = reference ? String(reference).trim() : '';
             const suppClean = supplier ? String(supplier).trim().toUpperCase() : undefined;
 
+            // Define a chave principal (prioridade para SAP se existir, senão EAN)
+            const primaryKey = codeClean || eanClean!;
+            const existing = produtos[primaryKey];
+
             const entry: ProdutoEntry = {
                 description: descClean,
                 reference: refClean,
@@ -229,10 +236,10 @@ export async function PUT(request: NextRequest) {
                 ...(suppClean ? { supplier: suppClean } : {}),
                 ...(item.priceFrom ? { priceFrom: String(item.priceFrom).trim() } : {}),
                 ...(item.priceFor ? { priceFor: String(item.priceFor).trim() } : {}),
+                ...(existing?.campaign ? { campaign: existing.campaign } : {}),
+                ...(existing?.category ? { category: existing.category } : {}),
             };
 
-            // Define a chave principal (prioridade para SAP se existir, senão EAN)
-            const primaryKey = codeClean || eanClean!;
             produtos[primaryKey] = entry;
 
             // Cria aliases

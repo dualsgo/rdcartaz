@@ -26,7 +26,11 @@ export async function GET(request: NextRequest) {
         for (const item of all) {
             // Busca por código (início) OU descrição (contém) - Usando searchDesc pré-calculado
             if (item.key.startsWith(prefix) || item.searchDesc.includes(searchPrefix)) {
-                matches.push({ key: item.key, description: item.description });
+                matches.push({
+                    key: item.key,
+                    description: item.description,
+                    ...(item.campaign ? { campaign: item.campaign } : {})
+                });
                 if (matches.length >= 15) break; 
             }
         }
