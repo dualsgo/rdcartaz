@@ -108,6 +108,10 @@ type QueuePanelProps = {
   onShowHidden: () => void;
   queueSort?: 'stock-desc' | 'stock-asc' | 'discount-desc' | 'price-asc' | 'price-desc' | 'name-asc' | 'none';
   onSortChange?: (sort: string) => void;
+  subTypeGroup?: 'offer-first' | 'normal-first' | 'none';
+  onSubTypeGroupChange?: (group: 'offer-first' | 'normal-first' | 'none') => void;
+  queueFilter?: 'all' | 'offer' | 'normal';
+  onQueueFilterChange?: (filter: 'all' | 'offer' | 'normal') => void;
   supplierFilter?: string;
   onSupplierFilterChange?: (supplier: string) => void;
   stockFilter?: 'all' | 'with-stock' | 'no-stock';
@@ -137,6 +141,10 @@ export function QueuePanel({
   onShowHidden,
   queueSort = 'stock-desc',
   onSortChange,
+  subTypeGroup = 'offer-first',
+  onSubTypeGroupChange,
+  queueFilter = 'all',
+  onQueueFilterChange,
   supplierFilter = 'all',
   onSupplierFilterChange,
   stockFilter = 'all',
@@ -158,6 +166,11 @@ export function QueuePanel({
     () => (happyFridayEnabled ? queue.filter(i => i.campaign === 'ESQUENTA_BLACK').length : 0),
     [happyFridayEnabled, queue]
   );
+  const offerCountInQueue = useMemo(
+    () => queue.filter(i => i.posterSubType === 'offer').length,
+    [queue]
+  );
+  const normalCountInQueue = queue.length - offerCountInQueue;
 
   // Conta fornecedores no lote completo
   const supplierCounts = useMemo(() => {
@@ -174,6 +187,8 @@ export function QueuePanel({
     supplierFilter !== 'all' || 
     stockFilter !== 'all' || 
     priceRangeFilter !== 'all' ||
+    queueFilter !== 'all' ||
+    subTypeGroup !== 'offer-first' ||
     (happyFridayEnabled && campaignFilter !== 'all') ||
     queueSort !== 'stock-desc';
 
@@ -297,6 +312,41 @@ export function QueuePanel({
             </select>
           </div>
 
+          {/* Agrupamento e Filtro de Ofertas vs. Sem Oferta (Ativo por padrão para evitar folhas incompletas) */}
+          <div className="grid grid-cols-2 gap-2 pt-1 border-t border-border/40">
+            <div className="space-y-1">
+              <span className="text-[9px] font-black uppercase tracking-wider text-muted-foreground flex items-center gap-1">
+                <FileStack className="h-2.5 w-2.5 text-primary" />
+                Agrupar Folhas
+              </span>
+              <select
+                value={subTypeGroup}
+                onChange={(e) => onSubTypeGroupChange?.(e.target.value as 'offer-first' | 'normal-first' | 'none')}
+                className="w-full h-7 px-1.5 text-[10px] font-bold bg-background border rounded-md text-foreground focus:ring-1 focus:ring-primary outline-none"
+              >
+                <option value="offer-first">🔥 Ofertas 1º (Padrão)</option>
+                <option value="normal-first">🏷️ Sem Oferta 1º</option>
+                <option value="none">🔀 Não Agrupar</option>
+              </select>
+            </div>
+
+            <div className="space-y-1">
+              <span className="text-[9px] font-black uppercase tracking-wider text-muted-foreground flex items-center gap-1">
+                <Filter className="h-2.5 w-2.5 text-primary" />
+                Tipo de Preço
+              </span>
+              <select
+                value={queueFilter}
+                onChange={(e) => onQueueFilterChange?.(e.target.value as 'all' | 'offer' | 'normal')}
+                className="w-full h-7 px-1.5 text-[10px] font-bold bg-background border rounded-md text-foreground focus:ring-1 focus:ring-primary outline-none"
+              >
+                <option value="all">Todos ({queue.length})</option>
+                <option value="offer">Com Oferta ({offerCountInQueue})</option>
+                <option value="normal">Sem Oferta ({normalCountInQueue})</option>
+              </select>
+            </div>
+          </div>
+
           {/* Filtro por Campanha (exibido apenas quando Happy Friday está ativo nas configurações) */}
           {happyFridayEnabled && (
             <div className="space-y-1 pt-1 border-t border-border/40">
@@ -392,27 +442,66 @@ export function QueuePanel({
         ) : (
           <div className="pb-4">
             {(() => {
-              let currentPos = 0;
+              let simPage = 1;
+              let simCountOnPage = 0;
+              let simPageIsOffer: boolean | null = null;
               let lastPage = 0;
 
               return filteredQueue.map((item: PosterData, index: number) => {
                 const realIndex = queue.indexOf(item);
-                const startPage = Math.floor(currentPos / perPage) + 1;
-                const endPage = Math.floor((currentPos + (item.quantity || 1) - 1) / perPage) + 1;
+                const qty = Math.max(1, item.quantity || 1);
+                const isItemOffer = item.posterSubType === 'offer';
+                let startPage = simPage;
+                let endPage = simPage;
+
+                for (let q = 0; q < qty; q++) {
+                  if (simCountOnPage === perPage) {
+                    simPage++;
+                    simCountOnPage = 0;
+                    simPageIsOffer = null;
+                  }
+                  if (
+                    simCountOnPage > 0 &&
+                    subTypeGroup !== 'none' &&
+                    simPageIsOffer !== null &&
+                    simPageIsOffer !== isItemOffer
+                  ) {
+                    simPage++;
+                    simCountOnPage = 0;
+                    simPageIsOffer = null;
+                  }
+                  if (simCountOnPage === 0) {
+                    simPageIsOffer = isItemOffer;
+                  }
+                  if (q === 0) startPage = simPage;
+                  endPage = simPage;
+                  simCountOnPage++;
+                }
+
                 const showHeader = startPage !== lastPage;
                 lastPage = startPage;
-
-                currentPos += (item.quantity || 1);
                 const isHappyFriday = happyFridayEnabled && item.campaign === 'ESQUENTA_BLACK';
 
                 return (
                   <React.Fragment key={index}>
                     {showHeader && (
-                      <div className="bg-muted/30 px-4 py-1.5 border-y border-border/50 sticky top-0 z-10 backdrop-blur-sm">
+                      <div className="bg-muted/30 px-4 py-1.5 border-y border-border/50 sticky top-0 z-10 backdrop-blur-sm flex items-center justify-between">
                         <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest flex items-center gap-2">
                           <span className="w-1.5 h-1.5 rounded-full bg-primary" />
                           Página {startPage}
                         </p>
+                        {subTypeGroup !== 'none' && (
+                          <span
+                            className={cn(
+                              "text-[8px] font-black uppercase px-1.5 py-0.5 rounded border",
+                              isItemOffer
+                                ? "bg-orange-50 text-orange-700 border-orange-200"
+                                : "bg-blue-50 text-blue-700 border-blue-200"
+                            )}
+                          >
+                            {isItemOffer ? 'Bloco Ofertas' : 'Bloco Sem Oferta'}
+                          </span>
+                        )}
                       </div>
                     )}
                     <div

@@ -253,6 +253,7 @@ export default function Home() {
   const orientation = currentFormat.orientation;
 
   const [queueSort, setQueueSort] = useState<'stock-desc' | 'stock-asc' | 'discount-desc' | 'price-asc' | 'price-desc' | 'name-asc' | 'none'>('stock-desc');
+  const [subTypeGroup, setSubTypeGroup] = useState<'offer-first' | 'normal-first' | 'none'>('offer-first');
   const [supplierFilter, setSupplierFilter] = useState<string>('all');
   const [stockFilter, setStockFilter] = useState<'all' | 'with-stock' | 'no-stock'>('all');
   const [priceRangeFilter, setPriceRangeFilter] = useState<'all' | 'under-50' | '50-100' | 'over-100'>('all');
@@ -324,8 +325,15 @@ export default function Home() {
       });
     }
 
+    // Agrupamento padrão de Ofertas e Sem Oferta (evita folhas quebradas com apenas 1 oferta intercalada)
+    if (subTypeGroup !== 'none') {
+      const offers = result.filter(item => item.posterSubType === 'offer');
+      const normals = result.filter(item => item.posterSubType !== 'offer');
+      result = subTypeGroup === 'offer-first' ? [...offers, ...normals] : [...normals, ...offers];
+    }
+
     return result;
-  }, [queue, queueFilter, supplierFilter, stockFilter, priceRangeFilter, campaignFilter, settings.happyFridayEnabled, queueSort]);
+  }, [queue, queueFilter, supplierFilter, stockFilter, priceRangeFilter, campaignFilter, settings.happyFridayEnabled, queueSort, subTypeGroup]);
 
   // Expande a fila considerando as quantidades de cada item para impressão
   const expandedQueue = useMemo(() => {
@@ -339,13 +347,10 @@ export default function Home() {
     return result;
   }, [filteredQueue]);
 
-  // Agrupa os itens em páginas garantindo que não misture oferta e normal na mesma página
-  // (exceto nos cartazes Relíquias quando Happy Friday estiver ativo, pois usam o mesmo papel/layout)
+  // Agrupa os itens em páginas garantindo que não misture oferta e sem oferta na mesma página quando agrupados
   const printPages = useMemo(() => {
     const pages: PosterData[][] = [];
     let currentPage: PosterData[] = [];
-    const allowMixedSubTypes =
-      Boolean(settings.happyFridayEnabled) && (posterType === 'reliquias' || posterType === 'reliquias-a6');
     
     expandedQueue.forEach(item => {
       if (currentPage.length === perPage) {
@@ -353,7 +358,7 @@ export default function Home() {
         currentPage = [];
       }
       
-      if (currentPage.length > 0 && !allowMixedSubTypes) {
+      if (currentPage.length > 0 && subTypeGroup !== 'none') {
         const isCurrentOffer = currentPage[0].posterSubType === 'offer';
         const isItemOffer = item.posterSubType === 'offer';
         if (isCurrentOffer !== isItemOffer) {
@@ -370,7 +375,7 @@ export default function Home() {
     }
     
     return pages;
-  }, [expandedQueue, perPage, settings.happyFridayEnabled, posterType]);
+  }, [expandedQueue, perPage, subTypeGroup]);
 
   const totalPages = printPages.length;
 
@@ -1024,6 +1029,10 @@ export default function Home() {
               }}
               queueSort={queueSort}
               onSortChange={(sort) => setQueueSort(sort as any)}
+              subTypeGroup={subTypeGroup}
+              onSubTypeGroupChange={setSubTypeGroup}
+              queueFilter={queueFilter}
+              onQueueFilterChange={setQueueFilter}
               supplierFilter={supplierFilter}
               onSupplierFilterChange={setSupplierFilter}
               stockFilter={stockFilter}
@@ -1041,6 +1050,7 @@ export default function Home() {
                 setPriceRangeFilter('all');
                 setCampaignFilter('all');
                 setQueueSort('stock-desc');
+                setSubTypeGroup('offer-first');
                 setQueueFilter('all');
               }}
               className="h-full"
@@ -1174,6 +1184,10 @@ export default function Home() {
                 }}
                 queueSort={queueSort}
                 onSortChange={(sort) => setQueueSort(sort as any)}
+                subTypeGroup={subTypeGroup}
+                onSubTypeGroupChange={setSubTypeGroup}
+                queueFilter={queueFilter}
+                onQueueFilterChange={setQueueFilter}
                 supplierFilter={supplierFilter}
                 onSupplierFilterChange={setSupplierFilter}
                 stockFilter={stockFilter}
@@ -1191,6 +1205,7 @@ export default function Home() {
                   setPriceRangeFilter('all');
                   setCampaignFilter('all');
                   setQueueSort('stock-desc');
+                  setSubTypeGroup('offer-first');
                   setQueueFilter('all');
                 }}
                 className="h-full"
