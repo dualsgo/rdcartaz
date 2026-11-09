@@ -120,7 +120,10 @@ export function getPosterFormat(type: PosterType): PosterFormat {
   return POSTER_FORMATS[type] ?? POSTER_FORMATS.reliquias;
 }
 
-export function isOfferOnlyFormat(type: PosterType): boolean {
+export function isOfferOnlyFormat(type: PosterType, happyFridayEnabled?: boolean): boolean {
+  if (happyFridayEnabled && (type === 'reliquias' || type === 'reliquias-a6')) {
+    return false;
+  }
   return getPosterFormat(type).offerOnly;
 }
 

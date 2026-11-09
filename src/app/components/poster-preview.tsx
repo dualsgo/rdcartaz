@@ -21,7 +21,8 @@ export function PosterPreview({
   const valDe  = parsePrice(priceFrom);
   const valPor = parsePrice(priceFor);
 
-  const hasDiscount = valDe > 0 && valPor > 0 && valDe > valPor;
+  const isHappyFriday = Boolean(settings?.happyFridayEnabled);
+  const hasDiscount = isOffer && valDe > 0 && valPor > 0 && valDe > valPor;
   const discount    = hasDiscount ? Math.round(((valDe - valPor) / valDe) * 100) : 0;
 
   const [porInteger, porDecimal] = formatCurrency(valPor).split(',');
@@ -68,7 +69,7 @@ export function PosterPreview({
       style={{
         width: '13.6cm',
         height: '9.0cm',
-        backgroundImage: "url('/backgrounds/reliquias-bg.png')",
+        backgroundImage: isHappyFriday ? 'none' : "url('/backgrounds/reliquias-bg.png')",
         backgroundRepeat: 'no-repeat',
         backgroundSize: '13.6cm 9.0cm',
         backgroundPosition: '0 0',
@@ -98,18 +99,18 @@ export function PosterPreview({
             overflow: 'hidden',
           }}
         >
-          {/* Espaçador superior para preservar a área do logotipo pré-impresso OFERTAS */}
-          <div style={{ height: '2.65cm', flexShrink: 0 }} aria-hidden="true" />
+          {/* Espaçador superior: reduzido no modo Happy Friday (sem logotipo OFERTAS) para subir descrição e preço */}
+          <div style={{ height: isHappyFriday ? '0.85cm' : '2.65cm', flexShrink: 0 }} aria-hidden="true" />
 
-          {/* Descrição do Produto (Roboto Bold) - ocupa 100% da largura logo abaixo do OFERTAS */}
+          {/* Descrição do Produto (Roboto Bold) - ocupa 100% da largura */}
           <div
             style={{
               width: '100%',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              minHeight: '0.95cm',
-              maxHeight: '1.35cm',
+              minHeight: isHappyFriday ? '1.15cm' : '0.95cm',
+              maxHeight: isHappyFriday ? '1.85cm' : '1.35cm',
               flexShrink: 0,
               overflow: 'hidden',
             }}
@@ -126,7 +127,7 @@ export function PosterPreview({
                 textTransform: 'uppercase',
                 margin: 0,
                 display: '-webkit-box',
-                WebkitLineClamp: 2,
+                WebkitLineClamp: isHappyFriday ? 3 : 2,
                 WebkitBoxOrient: 'vertical',
                 overflow: 'hidden',
                 width: '100%',
@@ -293,7 +294,92 @@ export function PosterPreview({
           }}
         >
           {/* Selo Circular Preto: cresce para width 86% da coluna com aspect-ratio 1 / 1 */}
-          {hasDiscount ? (
+          {isHappyFriday ? (
+            <div
+              style={{
+                width: '86%',
+                aspectRatio: '1 / 1',
+                background: '#000000',
+                borderRadius: '50%',
+                fontFamily: 'Helvetica, Arial, sans-serif',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '10% 11%',
+                boxSizing: 'border-box',
+                zIndex: 10,
+                overflow: 'hidden',
+                WebkitPrintColorAdjust: 'exact',
+                printColorAdjust: 'exact',
+              }}
+            >
+              {/* Chamada Principal da Campanha Happy Friday */}
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  textAlign: 'center',
+                  color: '#ffffff',
+                  fontFamily: 'Arial, sans-serif',
+                  fontWeight: 'bold',
+                  textTransform: 'uppercase',
+                  lineHeight: '1.12',
+                  width: '100%',
+                }}
+              >
+                <span style={{ fontSize: '9.2pt', letterSpacing: '-0.2px' }}>
+                  COMPRE R$ 100,00
+                </span>
+                <span style={{ fontSize: '8.8pt', letterSpacing: '-0.2px' }}>
+                  EM PRODUTOS¹ E LEVE
+                </span>
+                <span style={{ fontSize: '9.2pt', letterSpacing: '-0.2px' }}>
+                  ESTE PRODUTO COM
+                </span>
+                <span
+                  style={{
+                    fontSize: '12.5pt',
+                    fontWeight: 900,
+                    letterSpacing: '-0.3px',
+                    marginTop: '1.5px',
+                  }}
+                >
+                  50% DE DESCONTO¹
+                </span>
+              </div>
+
+              {/* Divisória sutil */}
+              <div
+                style={{
+                  width: '72%',
+                  height: '0.8px',
+                  backgroundColor: 'rgba(255, 255, 255, 0.4)',
+                  marginTop: '4px',
+                  marginBottom: '4px',
+                  flexShrink: 0,
+                }}
+              />
+
+              {/* Texto Legal (Nota ¹) sem ambiguidades jurídicas */}
+              <p
+                style={{
+                  margin: 0,
+                  maxWidth: '88%',
+                  fontSize: '5.1pt',
+                  fontFamily: 'Arial, sans-serif',
+                  fontWeight: 'normal',
+                  color: '#ffffff',
+                  textAlign: 'center',
+                  lineHeight: '1.18',
+                }}
+              >
+                ¹A cada R$ 100,00 em compras de produtos da loja com preço regular (que não estejam em promoção), o cliente tem direito a adquirir 1 (uma) unidade deste produto selecionado com 50% de desconto sobre o preço vigente neste cartaz.
+              </p>
+            </div>
+          ) : hasDiscount ? (
             <div
               style={{
                 width: '86%',
@@ -307,6 +393,8 @@ export function PosterPreview({
                 justifyContent: 'center',
                 zIndex: 10,
                 overflow: 'hidden',
+                WebkitPrintColorAdjust: 'exact',
+                printColorAdjust: 'exact',
               }}
             >
               {/* Numeral da Porcentagem em Arial Bold (maximizado para 60pt-66pt) */}

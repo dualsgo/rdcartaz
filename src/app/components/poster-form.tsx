@@ -219,10 +219,10 @@ export const PosterForm = forwardRef<PosterFormHandle, PosterFormProps>(function
   
   // Força o tipo 'oferta' para modelos que não possuem 'preço normal'
   useEffect(() => {
-    if (isOfferOnlyFormat(posterType)) {
+    if (isOfferOnlyFormat(posterType, settings.happyFridayEnabled)) {
       setData(prev => ({ ...prev, posterSubType: 'offer' }));
     }
-  }, [posterType, setData]);
+  }, [posterType, settings.happyFridayEnabled, setData]);
   
   // Automatização inteligente do parcelamento
   useEffect(() => {
@@ -376,8 +376,8 @@ export const PosterForm = forwardRef<PosterFormHandle, PosterFormProps>(function
         campaign:  produto.campaign  ?? '',
         category:  produto.category  ?? '',
         // Formatos só-oferta (Relíquias/Totem) nunca podem virar "normal",
-        // senão o campo DE some e não há como digitá-lo.
-        posterSubType: isOfferOnlyFormat(posterType)
+        // exceto quando o modo Happy Friday está ativo (permite cartaz de preço regular ou oferta).
+        posterSubType: isOfferOnlyFormat(posterType, settings.happyFridayEnabled)
           ? 'offer'
           : hasPriceFrom ? 'offer' : (produto.priceFor ? 'normal' : data.posterSubType),
         paymentOption: payOption,
@@ -862,7 +862,7 @@ export const PosterForm = forwardRef<PosterFormHandle, PosterFormProps>(function
              <Label className="font-bold text-gray-900 uppercase tracking-tight text-sm">
                 2. Preços
              </Label>
-             {!isOfferOnlyFormat(posterType) && (
+             {!isOfferOnlyFormat(posterType, settings.happyFridayEnabled) && (
                <div className="flex bg-muted p-1 rounded-xl shadow-inner border border-border/50">
                  <button
                    type="button"

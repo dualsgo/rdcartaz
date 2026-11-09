@@ -340,9 +340,12 @@ export default function Home() {
   }, [filteredQueue]);
 
   // Agrupa os itens em páginas garantindo que não misture oferta e normal na mesma página
+  // (exceto nos cartazes Relíquias quando Happy Friday estiver ativo, pois usam o mesmo papel/layout)
   const printPages = useMemo(() => {
     const pages: PosterData[][] = [];
     let currentPage: PosterData[] = [];
+    const allowMixedSubTypes =
+      Boolean(settings.happyFridayEnabled) && (posterType === 'reliquias' || posterType === 'reliquias-a6');
     
     expandedQueue.forEach(item => {
       if (currentPage.length === perPage) {
@@ -350,7 +353,7 @@ export default function Home() {
         currentPage = [];
       }
       
-      if (currentPage.length > 0) {
+      if (currentPage.length > 0 && !allowMixedSubTypes) {
         const isCurrentOffer = currentPage[0].posterSubType === 'offer';
         const isItemOffer = item.posterSubType === 'offer';
         if (isCurrentOffer !== isItemOffer) {
@@ -367,7 +370,7 @@ export default function Home() {
     }
     
     return pages;
-  }, [expandedQueue, perPage]);
+  }, [expandedQueue, perPage, settings.happyFridayEnabled, posterType]);
 
   const totalPages = printPages.length;
 
@@ -412,9 +415,10 @@ export default function Home() {
     setPosterType(newType);
     if (isProductReady || (currentPoster.description && currentPoster.description !== 'DESCRIÇÃO DO PRODUTO')) {
       const format = getPosterFormat(newType);
+      const forceOffer = format.offerOnly && !(settings.happyFridayEnabled && (newType === 'reliquias' || newType === 'reliquias-a6'));
       setCurrentPoster(prev => ({
         ...prev,
-        posterSubType: format.offerOnly ? 'offer' : prev.posterSubType,
+        posterSubType: forceOffer ? 'offer' : prev.posterSubType,
       }));
     }
   };
@@ -660,10 +664,15 @@ export default function Home() {
 
           let filtered: any[] = [];
           if (importMode === 'offer') {
-            filtered = imported.filter((item: any) => item.posterSubType === 'offer');
-            // Se o arquivo tiver apenas produtos sem preço DE, carrega todos como ofertas
-            if (filtered.length === 0 && imported.length > 0) {
+            if (settings.happyFridayEnabled) {
+              // Com Happy Friday ativo, cartazes podem ser gerados tanto para ofertas quanto para preço regular
               filtered = imported;
+            } else {
+              filtered = imported.filter((item: any) => item.posterSubType === 'offer');
+              // Se o arquivo tiver apenas produtos sem preço DE, carrega todos como ofertas
+              if (filtered.length === 0 && imported.length > 0) {
+                filtered = imported;
+              }
             }
           } else {
             filtered = imported.filter((item: any) => item.posterSubType === 'normal');
@@ -719,12 +728,12 @@ export default function Home() {
               setPriceRangeFilter('all');
               setCampaignFilter('all');
               setQueue(prev => clearFirst ? [...filtered] : [...prev, ...filtered]);
-              setQueueFilter(importMode === 'offer' ? 'offer' : 'normal');
+              setQueueFilter(settings.happyFridayEnabled ? 'all' : (importMode === 'offer' ? 'offer' : 'normal'));
               setImportCount(filtered.length);
               setImportStatus('success');
               setPreviewMode('page'); 
               
-              if (importMode === 'normal' && (posterType === 'reliquias' || posterType === 'reliquias-a6')) {
+              if (!settings.happyFridayEnabled && importMode === 'normal' && (posterType === 'reliquias' || posterType === 'reliquias-a6')) {
                 setPosterType('etiqueta-oficial');
               }
             };
