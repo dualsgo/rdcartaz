@@ -516,7 +516,7 @@ export function PosterPreview({
                   minHeight: '2.9cm',
                   border: '1.3px solid #000000',
                   borderRadius: '3px',
-                  padding: '2.5mm 3mm',
+                  padding: '2mm 2.2mm',
                   boxSizing: 'border-box',
                   display: 'flex',
                   flexDirection: 'column',
@@ -531,38 +531,38 @@ export function PosterPreview({
                 <p
                   style={{
                     margin: 0,
-                    fontSize: '8.2pt',
+                    fontSize: '7.8pt',
                     fontWeight: 'bold',
-                    lineHeight: '1.2',
+                    lineHeight: '1.16',
                     textTransform: 'uppercase',
                     letterSpacing: '-0.1px',
                     textAlign: 'center',
                     width: '100%',
                   }}
                 >
-                  A CADA R$ 100 EM COMPRAS FORA DA CAMPANHA, LEVE 1 ITEM COM 50% OFF¹
+                  A CADA R$ 100 EM COMPRAS FORA DA CAMPANHA, COMPRE 1 ITEM SELECIONADO COM 50% OFF¹
                 </p>
                 <div
                   style={{
                     width: '65%',
                     height: '0.8px',
                     backgroundColor: '#000000',
-                    margin: '3.5px 0',
+                    margin: '2.5px 0',
                     opacity: 0.25,
                   }}
                 />
                 <p
                   style={{
                     margin: 0,
-                    fontSize: '6.4pt',
+                    fontSize: '4.75pt',
                     fontWeight: 'normal',
-                    lineHeight: '1.22',
+                    lineHeight: '1.16',
                     color: '#000000',
                     textAlign: 'center',
                     width: '100%',
                   }}
                 >
-                  ¹R$ 200 = 2 itens, R$ 300 = 3 itens. Válido de 05/11 a 30/11/2026 ou enquanto durarem os estoques.
+                  ¹A cada R$ 100 em compras, o cliente terá direito a adquirir 1 produto selecionado com 50% de desconto. R$ 200 em compras = 2 produtos; R$ 300 = 3 produtos, e assim sucessivamente. Desconto válido exclusivamente para os produtos participantes e sinalizados. Promoção válida de 05/11 a 30/11/2026 ou enquanto durarem os estoques.
                 </p>
               </div>
             </div>
