@@ -534,13 +534,14 @@ export function PosterPreview({
                 <p
                   style={{
                     margin: 0,
-                    fontSize: '7.8pt',
+                    fontSize: '7.0pt',
                     fontWeight: 'bold',
-                    lineHeight: '1.16',
+                    lineHeight: '1.18',
                     textTransform: 'uppercase',
                     letterSpacing: '-0.1px',
                     textAlign: 'center',
                     width: '100%',
+                    color: '#000000',
                   }}
                 >
                   A CADA R$ 100 EM COMPRAS FORA DA CAMPANHA, COMPRE 1 ITEM SELECIONADO COM 50% OFF¹
@@ -550,22 +551,21 @@ export function PosterPreview({
                     width: '65%',
                     height: '0.8px',
                     backgroundColor: '#000000',
-                    margin: '2.5px 0',
-                    opacity: 0.25,
+                    margin: '3px 0',
                   }}
                 />
                 <p
                   style={{
                     margin: 0,
-                    fontSize: '4.75pt',
+                    fontSize: '6.4pt',
                     fontWeight: 'normal',
-                    lineHeight: '1.16',
+                    lineHeight: '1.2',
                     color: '#000000',
                     textAlign: 'center',
                     width: '100%',
                   }}
                 >
-                  ¹A cada R$ 100 em compras, o cliente terá direito a adquirir 1 produto selecionado com 50% de desconto. R$ 200 em compras = 2 produtos; R$ 300 = 3 produtos, e assim sucessivamente. Desconto válido exclusivamente para os produtos participantes e sinalizados. Promoção válida de 05/11 a 30/11/2026 ou enquanto durarem os estoques.
+                  ¹A cada R$ 100 em compras, o cliente terá direito a adquirir 1 produto selecionado com 50% de desconto. R$ 200 em compras = 2 produtos; R$ 300 = 3 produtos, e assim sucessivamente. Desconto válido exclusivamente para os produtos participantes e sinalizados.
                 </p>
               </div>
             </div>
