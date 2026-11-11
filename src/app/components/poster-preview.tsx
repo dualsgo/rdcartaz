@@ -540,21 +540,21 @@ export function PosterPreview({
                     width: '100%',
                   }}
                 >
-                  Comprando R$ 100 em produtos da loja fora da campanha¹
+                  A CADA R$ 100 EM COMPRAS FORA DA CAMPANHA, LEVE 1 ITEM COM 50% OFF¹
                 </p>
                 <div
                   style={{
-                    width: '60%',
+                    width: '65%',
                     height: '0.8px',
                     backgroundColor: '#000000',
-                    margin: '3px 0',
+                    margin: '3.5px 0',
                     opacity: 0.25,
                   }}
                 />
                 <p
                   style={{
                     margin: 0,
-                    fontSize: '6.2pt',
+                    fontSize: '6.4pt',
                     fontWeight: 'normal',
                     lineHeight: '1.22',
                     color: '#000000',
@@ -562,7 +562,7 @@ export function PosterPreview({
                     width: '100%',
                   }}
                 >
-                  ¹A cada R$ 100 em itens com preço regular (fora de ofertas), leve 1 produto participante com 50% de desconto sobre o valor deste cartaz.
+                  ¹R$ 200 = 2 itens, R$ 300 = 3 itens. Válido de 05/11 a 30/11/2026 ou enquanto durarem os estoques.
                 </p>
               </div>
             </div>
