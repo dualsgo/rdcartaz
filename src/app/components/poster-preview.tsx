@@ -32,27 +32,62 @@ export function PosterPreview({
   const showInstallments = maxInstallments > 1;
   const [instInteger, instDecimal] = formatCurrency(installmentValue).split(',');
 
-  // ── TIPOGRAFIA a0309ac COM ESPAÇAMENTOS E TAMANHOS MAXIMIZADOS ──
-  // Descrição do Produto (Roboto Bold): font-size ampliado para preencher a largura
+  // ── TIPOGRAFIA DINÂMICA COM MAXIMIZAÇÃO DE ÁREA (COM TRAVAS DE SEGURANÇA CONTRA OVERFLOW) ──
+  // Descrição do Produto (Roboto Bold): quando Happy Friday está ativo, há mais altura livre na coluna esquerda
   let descFontSize = '15.5pt';
-  if (description.length > 45) descFontSize = '12pt';
-  else if (description.length > 32) descFontSize = '13.5pt';
-  else if (description.length > 22) descFontSize = '15pt';
-  else if (description.length <= 14) descFontSize = '19.5pt';
-  else descFontSize = '16.5pt';
+  if (isHappyFriday) {
+    if (description.length > 55) descFontSize = '13pt';
+    else if (description.length > 40) descFontSize = '14.5pt';
+    else if (description.length > 28) descFontSize = '16.5pt';
+    else if (description.length > 18) descFontSize = '18.5pt';
+    else if (description.length <= 12) descFontSize = '22pt';
+    else descFontSize = '20pt';
+  } else {
+    if (description.length > 45) descFontSize = '12pt';
+    else if (description.length > 32) descFontSize = '13.5pt';
+    else if (description.length > 22) descFontSize = '15pt';
+    else if (description.length <= 14) descFontSize = '19.5pt';
+    else descFontSize = '16.5pt';
+  }
 
   // Bloco DE: R$ (GOTHICBI Bold Italic): preenchimento otimizado da largura sem transbordar
   let deNumFontSize = '34pt';
-  if (deInteger.length >= 5) deNumFontSize = '27pt';
-  else if (deInteger.length === 4) deNumFontSize = '29pt';
-  else if (deInteger.length === 3) deNumFontSize = '31pt';
+  if (isHappyFriday) {
+    if (deInteger.length >= 6) deNumFontSize = '24pt';
+    else if (deInteger.length === 5) deNumFontSize = '27pt';
+    else if (deInteger.length === 4) deNumFontSize = '30pt';
+    else if (deInteger.length === 3) deNumFontSize = '33pt';
+    else deNumFontSize = '35pt';
+  } else {
+    if (deInteger.length >= 5) deNumFontSize = '27pt';
+    else if (deInteger.length === 4) deNumFontSize = '29pt';
+    else if (deInteger.length === 3) deNumFontSize = '31pt';
+  }
 
-  // Bloco POR: R$ (GOTHICBI Bold Italic): maximiza o aproveitamento da largura até 6 algarismos (ex: 9999,99)
+  // Bloco POR: R$ (GOTHICBI Bold Italic): maximiza o tamanho do preço principal com calibração precisa por dígitos
   let porNumFontSize = '46pt';
-  if (porInteger.length >= 6) porNumFontSize = '28pt';
-  else if (porInteger.length === 5) porNumFontSize = '33pt';
-  else if (porInteger.length === 4) porNumFontSize = '35pt';
-  else if (porInteger.length === 3) porNumFontSize = '39pt';
+  if (isHappyFriday) {
+    // Quando tem parcelamento na esquerda, calibramos para manter o preço grande e legível sem empurrar o parcelamento
+    if (showInstallments) {
+      if (porInteger.length >= 6) porNumFontSize = '28pt';
+      else if (porInteger.length === 5) porNumFontSize = '33pt';
+      else if (porInteger.length === 4) porNumFontSize = '38pt';
+      else if (porInteger.length === 3) porNumFontSize = '43pt';
+      else porNumFontSize = '46pt';
+    } else {
+      // Sem parcelamento, pode crescer ao máximo disponível
+      if (porInteger.length >= 6) porNumFontSize = '32pt';
+      else if (porInteger.length === 5) porNumFontSize = '38pt';
+      else if (porInteger.length === 4) porNumFontSize = '44pt';
+      else if (porInteger.length === 3) porNumFontSize = '49pt';
+      else porNumFontSize = '53pt';
+    }
+  } else {
+    if (porInteger.length >= 6) porNumFontSize = '28pt';
+    else if (porInteger.length === 5) porNumFontSize = '33pt';
+    else if (porInteger.length === 4) porNumFontSize = '35pt';
+    else if (porInteger.length === 3) porNumFontSize = '39pt';
+  }
 
   // Bloco de Parcelamento (GOTHICBI Bold Italic): valor da parcela maximizado
   let instNumFontSize = '36pt';
@@ -176,7 +211,7 @@ export function PosterPreview({
                 </span>
                 <span
                   style={{
-                    fontSize: isHappyFriday ? (deInteger.length >= 4 ? '24pt' : '27pt') : deNumFontSize,
+                    fontSize: deNumFontSize,
                     fontFamily: 'GOTHICBI, "Century Gothic", sans-serif',
                     fontWeight: 'bold',
                     fontStyle: 'italic',
@@ -205,7 +240,7 @@ export function PosterPreview({
               <span
                 style={{
                   fontSize: isHappyFriday
-                    ? (porInteger.length >= 4 ? '7.5pt' : '8.5pt')
+                    ? (porInteger.length >= 5 ? '8pt' : porInteger.length >= 3 ? '9pt' : '10pt')
                     : (porInteger.length >= 5 ? '8pt' : porInteger.length >= 3 ? '8.5pt' : '9.5pt'),
                   fontFamily: 'Arial, sans-serif',
                   fontWeight: 'bold',
@@ -218,9 +253,7 @@ export function PosterPreview({
               </span>
               <span
                 style={{
-                  fontSize: isHappyFriday
-                    ? (porInteger.length >= 5 ? '28pt' : porInteger.length >= 4 ? '32pt' : '36pt')
-                    : porNumFontSize,
+                  fontSize: porNumFontSize,
                   fontFamily: 'GOTHICBI, "Century Gothic", sans-serif',
                   fontWeight: 'bold',
                   fontStyle: 'italic',
@@ -235,7 +268,7 @@ export function PosterPreview({
               <span
                 style={{
                   fontSize: isHappyFriday
-                    ? (porInteger.length >= 4 ? '7.5pt' : '8.5pt')
+                    ? (porInteger.length >= 5 ? '8pt' : porInteger.length >= 3 ? '8.5pt' : '9.5pt')
                     : (porInteger.length >= 5 ? '7.5pt' : porInteger.length >= 3 ? '8pt' : '9pt'),
                   fontFamily: 'Arial, sans-serif',
                   fontWeight: 'bold',
@@ -390,124 +423,146 @@ export function PosterPreview({
             overflow: 'hidden',
           }}
         >
-          {/* Selo Circular Preto: no Happy Friday, ocupa destaque central vertical com mensagens atrativas e conformidade */}
+          {/* No Happy Friday: Círculo Chamativo em Cima + Retângulo Regulamento em Baixo (sem a frase de validade/estoque no rodapé) */}
           {isHappyFriday ? (
             <div
               style={{
-                width: '92%',
-                aspectRatio: '1 / 1',
-                background: '#000000',
-                borderRadius: '50%',
-                fontFamily: 'Helvetica, Arial, sans-serif',
+                width: '100%',
+                height: '100%',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                justifyContent: 'center',
-                padding: '8% 8%',
+                justifyContent: 'space-between',
+                paddingTop: '2mm',
+                paddingBottom: '1mm',
                 boxSizing: 'border-box',
-                zIndex: 10,
-                marginTop: 'auto',
-                marginBottom: 'auto',
-                overflow: 'hidden',
-                WebkitPrintColorAdjust: 'exact',
-                printColorAdjust: 'exact',
               }}
             >
-              {/* Chamada Principal de Grande Impacto */}
+              {/* Círculo Preto Chamativo com letras brancas (Alto Contraste P&B, texto centralizado) */}
               <div
                 style={{
+                  width: '5.0cm',
+                  height: '5.0cm',
+                  background: '#000000',
+                  borderRadius: '50%',
+                  fontFamily: 'Arial, Helvetica, sans-serif',
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
                   textAlign: 'center',
-                  color: '#ffffff',
-                  fontFamily: 'Arial, sans-serif',
-                  textTransform: 'uppercase',
-                  lineHeight: '1.08',
-                  width: '100%',
+                  padding: '3.5mm',
+                  boxSizing: 'border-box',
+                  zIndex: 10,
+                  flexShrink: 0,
+                  WebkitPrintColorAdjust: 'exact',
+                  printColorAdjust: 'exact',
                 }}
               >
                 <span
                   style={{
-                    fontSize: '9.2pt',
+                    fontSize: '11pt',
                     fontWeight: 'bold',
-                    letterSpacing: '0.4px',
-                    color: '#facc15',
+                    color: '#ffffff',
+                    letterSpacing: '1.2px',
+                    textTransform: 'uppercase',
+                    lineHeight: '1',
+                    textAlign: 'center',
+                    width: '100%',
+                    display: 'block',
                   }}
                 >
                   GANHE
                 </span>
                 <span
                   style={{
-                    fontSize: '20pt',
+                    fontSize: '32pt',
+                    fontFamily: 'Arial Black, Impact, sans-serif',
                     fontWeight: 900,
-                    letterSpacing: '-0.8px',
-                    lineHeight: '0.95',
-                    marginTop: '1px',
+                    color: '#ffffff',
+                    letterSpacing: '-1.5px',
+                    lineHeight: '0.9',
+                    marginTop: '3px',
+                    marginBottom: '1px',
+                    textAlign: 'center',
+                    width: '100%',
+                    display: 'block',
                   }}
                 >
-                  50% OFF¹
+                  50% OFF
                 </span>
                 <span
                   style={{
-                    fontSize: '9.5pt',
-                    fontWeight: 800,
-                    letterSpacing: '-0.2px',
+                    fontSize: '10.5pt',
+                    fontWeight: 'bold',
+                    color: '#ffffff',
+                    letterSpacing: '0.4px',
+                    textTransform: 'uppercase',
+                    lineHeight: '1',
                     marginTop: '2px',
+                    textAlign: 'center',
+                    width: '100%',
+                    display: 'block',
                   }}
                 >
-                  NESTE PRODUTO
+                  NESTE ITEM
                 </span>
               </div>
 
-              {/* Linha divisória fina */}
+              {/* Retângulo com o Regulamento da Campanha (Mais alto, quase quadrado, texto ampliado e nítido) */}
               <div
                 style={{
-                  width: '68%',
-                  height: '0.8px',
-                  backgroundColor: 'rgba(255, 255, 255, 0.35)',
-                  marginTop: '6px',
-                  marginBottom: '5px',
-                  flexShrink: 0,
-                }}
-              />
-
-              {/* Condição / Mecânica da Promoção (Atrativa e Juridicamente Clara) */}
-              <div
-                style={{
+                  width: '5.0cm',
+                  minHeight: '2.9cm',
+                  border: '1.3px solid #000000',
+                  borderRadius: '3px',
+                  padding: '2.5mm 3mm',
+                  boxSizing: 'border-box',
                   display: 'flex',
                   flexDirection: 'column',
-                  alignItems: 'center',
                   justifyContent: 'center',
+                  alignItems: 'center',
                   textAlign: 'center',
-                  color: '#ffffff',
                   fontFamily: 'Arial, sans-serif',
-                  lineHeight: '1.18',
-                  maxWidth: '92%',
+                  color: '#000000',
+                  backgroundColor: 'transparent',
                 }}
               >
                 <p
                   style={{
                     margin: 0,
-                    fontSize: '5.8pt',
+                    fontSize: '8.2pt',
                     fontWeight: 'bold',
+                    lineHeight: '1.2',
                     textTransform: 'uppercase',
                     letterSpacing: '-0.1px',
+                    textAlign: 'center',
+                    width: '100%',
                   }}
                 >
                   Comprando R$ 100 em produtos da loja fora da campanha¹
                 </p>
+                <div
+                  style={{
+                    width: '60%',
+                    height: '0.8px',
+                    backgroundColor: '#000000',
+                    margin: '3px 0',
+                    opacity: 0.25,
+                  }}
+                />
                 <p
                   style={{
-                    margin: '3px 0 0 0',
-                    fontSize: '4.4pt',
+                    margin: 0,
+                    fontSize: '6.2pt',
                     fontWeight: 'normal',
-                    color: 'rgba(255, 255, 255, 0.85)',
-                    lineHeight: '1.15',
+                    lineHeight: '1.22',
+                    color: '#000000',
+                    textAlign: 'center',
+                    width: '100%',
                   }}
                 >
-                  ¹A cada R$ 100 em itens com preço regular (não promocionais), adquira 1 unid. selecionada com 50% de desconto sobre o preço vigente.
+                  ¹A cada R$ 100 em itens com preço regular (fora de ofertas), leve 1 produto participante com 50% de desconto sobre o valor deste cartaz.
                 </p>
               </div>
             </div>
@@ -677,24 +732,26 @@ export function PosterPreview({
             <div style={{ flex: 1 }} />
           ) : null}
 
-          {/* Aviso Legal: Fixado na base exata, alinhado horizontalmente com o rodapé SAP/EAN/REF */}
-          <div
-            style={{
-              marginTop: 'auto',
-              width: '100%',
-              textAlign: 'center',
-              fontSize: '6.5pt',
-              fontFamily: 'Arial, sans-serif',
-              fontWeight: 'bold',
-              color: 'rgb(0, 0, 0)',
-              textTransform: 'uppercase',
-              whiteSpace: 'nowrap',
-              lineHeight: '1',
-              paddingBottom: '1mm',
-            }}
-          >
-            {validityText}
-          </div>
+          {/* Aviso Legal: Fixado na base exata, ocultado no Happy Friday pois o retângulo inferior já contém todo o regulamento legal */}
+          {!isHappyFriday && (
+            <div
+              style={{
+                marginTop: 'auto',
+                width: '100%',
+                textAlign: 'center',
+                fontSize: '6.5pt',
+                fontFamily: 'Arial, sans-serif',
+                fontWeight: 'bold',
+                color: 'rgb(0, 0, 0)',
+                textTransform: 'uppercase',
+                whiteSpace: 'nowrap',
+                lineHeight: '1',
+                paddingBottom: '1mm',
+              }}
+            >
+              {validityText}
+            </div>
+          )}
         </div>
       </div>
     </div>
