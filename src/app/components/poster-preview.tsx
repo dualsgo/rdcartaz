@@ -441,11 +441,11 @@ export function PosterPreview({
                 boxSizing: 'border-box',
               }}
             >
-              {/* Círculo Preto Chamativo com letras brancas (Alto Contraste P&B, texto centralizado) */}
+              {/* Círculo Preto Chamativo com letras brancas (Reduzido em 5%: 4.75cm, com respiro perfeito até o retângulo) */}
               <div
                 style={{
-                  width: '5.0cm',
-                  height: '5.0cm',
+                  width: '4.75cm',
+                  height: '4.75cm',
                   background: '#000000',
                   borderRadius: '50%',
                   fontFamily: 'Arial, Helvetica, sans-serif',
@@ -454,7 +454,7 @@ export function PosterPreview({
                   alignItems: 'center',
                   justifyContent: 'center',
                   textAlign: 'center',
-                  padding: '3.5mm',
+                  padding: '3mm',
                   boxSizing: 'border-box',
                   zIndex: 10,
                   flexShrink: 0,
@@ -464,7 +464,7 @@ export function PosterPreview({
               >
                 <span
                   style={{
-                    fontSize: '11pt',
+                    fontSize: '10.5pt',
                     fontWeight: 'bold',
                     color: '#ffffff',
                     letterSpacing: '1.2px',
@@ -479,13 +479,13 @@ export function PosterPreview({
                 </span>
                 <span
                   style={{
-                    fontSize: '32pt',
+                    fontSize: '30.5pt',
                     fontFamily: 'Arial Black, Impact, sans-serif',
                     fontWeight: 900,
                     color: '#ffffff',
                     letterSpacing: '-1.5px',
                     lineHeight: '0.9',
-                    marginTop: '3px',
+                    marginTop: '2.5px',
                     marginBottom: '1px',
                     textAlign: 'center',
                     width: '100%',
@@ -496,7 +496,7 @@ export function PosterPreview({
                 </span>
                 <span
                   style={{
-                    fontSize: '10.5pt',
+                    fontSize: '10pt',
                     fontWeight: 'bold',
                     color: '#ffffff',
                     letterSpacing: '0.4px',
