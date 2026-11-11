@@ -108,16 +108,16 @@ export function PosterPreview({
         backgroundRepeat: 'no-repeat',
         backgroundSize: '13.6cm 9.0cm',
         backgroundPosition: '0 0',
-        padding: '2mm',
+        padding: isHappyFriday ? '2.5mm' : '2mm',
         boxSizing: 'border-box',
       }}
     >
-      {/* Container Principal: Grid de 2 colunas 50% / 50% com preenchimento total */}
+      {/* Container Principal: no Happy Friday, coluna esquerda ganha espaço extra (1.3fr vs 1.0fr) e o bloco da direita se aproxima da borda direita */}
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
-          gap: '2mm',
+          gridTemplateColumns: isHappyFriday ? '1fr auto' : '1fr 1fr',
+          gap: isHappyFriday ? '3mm' : '2mm',
           height: '100%',
           width: '100%',
           alignItems: 'stretch',
@@ -132,6 +132,8 @@ export function PosterPreview({
             height: '100%',
             boxSizing: 'border-box',
             overflow: 'hidden',
+            minWidth: 0,
+            paddingRight: isHappyFriday ? '1mm' : '0',
           }}
         >
           {/* Espaçador superior: reduzido no modo Happy Friday (sem logotipo OFERTAS) para subir descrição e preço */}
@@ -417,7 +419,7 @@ export function PosterPreview({
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-between',
-            alignItems: 'center',
+            alignItems: isHappyFriday ? 'flex-end' : 'center',
             height: '100%',
             boxSizing: 'border-box',
             overflow: 'hidden',
@@ -427,14 +429,15 @@ export function PosterPreview({
           {isHappyFriday ? (
             <div
               style={{
-                width: '100%',
+                width: 'auto',
                 height: '100%',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                paddingTop: '2mm',
-                paddingBottom: '1mm',
+                paddingTop: '1mm',
+                paddingBottom: '0',
+                paddingRight: '0.5mm',
                 boxSizing: 'border-box',
               }}
             >
