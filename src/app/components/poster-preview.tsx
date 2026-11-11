@@ -137,7 +137,7 @@ export function PosterPreview({
             </h2>
           </div>
 
-          {/* Bloco de Preços (DE: R$ e POR: R$ + UN) - ocupa com máxima eficiência o espaço livre */}
+          {/* Bloco de Preços (DE: R$ e POR: R$ + UN) e Parcelamento no Happy Friday */}
           <div
             style={{
               flex: 1,
@@ -147,7 +147,7 @@ export function PosterPreview({
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: hasDiscount ? '13px' : '0',
+              gap: isHappyFriday ? '4px' : hasDiscount ? '13px' : '0',
             }}
           >
             {/* Bloco DE: R$ (Arial + GOTHICBI Bold Italic) com line-height 1 */}
@@ -176,7 +176,7 @@ export function PosterPreview({
                 </span>
                 <span
                   style={{
-                    fontSize: deNumFontSize,
+                    fontSize: isHappyFriday ? (deInteger.length >= 4 ? '24pt' : '27pt') : deNumFontSize,
                     fontFamily: 'GOTHICBI, "Century Gothic", sans-serif',
                     fontWeight: 'bold',
                     fontStyle: 'italic',
@@ -190,7 +190,7 @@ export function PosterPreview({
               </div>
             )}
 
-            {/* Bloco POR: R$ + UN (GOTHICBI Bold Italic) - maior elemento da coluna esquerda */}
+            {/* Bloco POR: R$ + UN (GOTHICBI Bold Italic) */}
             <div
               style={{
                 display: 'flex',
@@ -204,7 +204,9 @@ export function PosterPreview({
             >
               <span
                 style={{
-                  fontSize: porInteger.length >= 5 ? '8pt' : porInteger.length >= 3 ? '8.5pt' : '9.5pt',
+                  fontSize: isHappyFriday
+                    ? (porInteger.length >= 4 ? '7.5pt' : '8.5pt')
+                    : (porInteger.length >= 5 ? '8pt' : porInteger.length >= 3 ? '8.5pt' : '9.5pt'),
                   fontFamily: 'Arial, sans-serif',
                   fontWeight: 'bold',
                   color: 'rgb(0, 0, 0)',
@@ -216,7 +218,9 @@ export function PosterPreview({
               </span>
               <span
                 style={{
-                  fontSize: porNumFontSize,
+                  fontSize: isHappyFriday
+                    ? (porInteger.length >= 5 ? '28pt' : porInteger.length >= 4 ? '32pt' : '36pt')
+                    : porNumFontSize,
                   fontFamily: 'GOTHICBI, "Century Gothic", sans-serif',
                   fontWeight: 'bold',
                   fontStyle: 'italic',
@@ -230,7 +234,9 @@ export function PosterPreview({
               </span>
               <span
                 style={{
-                  fontSize: porInteger.length >= 5 ? '7.5pt' : porInteger.length >= 3 ? '8pt' : '9pt',
+                  fontSize: isHappyFriday
+                    ? (porInteger.length >= 4 ? '7.5pt' : '8.5pt')
+                    : (porInteger.length >= 5 ? '7.5pt' : porInteger.length >= 3 ? '8pt' : '9pt'),
                   fontFamily: 'Arial, sans-serif',
                   fontWeight: 'bold',
                   color: 'rgb(0, 0, 0)',
@@ -241,6 +247,97 @@ export function PosterPreview({
                 UN
               </span>
             </div>
+
+            {/* Bloco de Parcelamento reposicionado para a ESQUERDA quando Happy Friday estiver ativo */}
+            {isHappyFriday && showInstallments && (
+              <div
+                style={{
+                  width: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  textAlign: 'center',
+                  marginTop: '4px',
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: '7.5pt',
+                    fontFamily: 'Arial, sans-serif',
+                    fontWeight: 'bold',
+                    color: '#000000',
+                    lineHeight: '1.1',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.2px',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  OU EM ATÉ {maxInstallments}X DE
+                </span>
+
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'baseline',
+                    justifyContent: 'center',
+                    marginTop: '1px',
+                    whiteSpace: 'nowrap',
+                    lineHeight: '0.9',
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: '8pt',
+                      fontFamily: 'Arial, sans-serif',
+                      fontWeight: 'bold',
+                      color: '#000000',
+                      marginRight: '2px',
+                    }}
+                  >
+                    R$
+                  </span>
+                  <span
+                    style={{
+                      fontSize: instInteger.length >= 4 ? '18pt' : '21pt',
+                      fontFamily: 'GOTHICBI, "Century Gothic", sans-serif',
+                      fontWeight: 'bold',
+                      fontStyle: 'italic',
+                      color: '#000000',
+                      lineHeight: '0.9',
+                    }}
+                  >
+                    {instInteger}
+                  </span>
+                  <span
+                    style={{
+                      fontSize: '12pt',
+                      fontFamily: 'GOTHICBI, "Century Gothic", sans-serif',
+                      fontWeight: 'bold',
+                      fontStyle: 'italic',
+                      color: '#000000',
+                      lineHeight: '0.9',
+                      marginLeft: '1px',
+                    }}
+                  >
+                    ,{instDecimal}
+                  </span>
+                  <span
+                    style={{
+                      fontSize: '7pt',
+                      fontFamily: 'Arial, sans-serif',
+                      fontWeight: 'bold',
+                      color: '#000000',
+                      lineHeight: '1',
+                      letterSpacing: '0.2px',
+                      marginLeft: '3px',
+                    }}
+                  >
+                    CADA
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Rodapé de Códigos: SAP / EAN / REF (Arial Bold) - fixado na base com 100% de largura */}
@@ -281,7 +378,7 @@ export function PosterPreview({
           </div>
         </div>
 
-        {/* ── METADE DIREITA: Selo Circular, Bloco de Parcelamento e Aviso Legal ── */}
+        {/* ── METADE DIREITA: Selo Circular, Bloco de Parcelamento (quando não for Happy Friday) e Aviso Legal ── */}
         <div
           style={{
             display: 'flex',
@@ -293,11 +390,11 @@ export function PosterPreview({
             overflow: 'hidden',
           }}
         >
-          {/* Selo Circular Preto: cresce para width 86% da coluna com aspect-ratio 1 / 1 */}
+          {/* Selo Circular Preto: no Happy Friday, ocupa destaque central vertical com mensagens atrativas e conformidade */}
           {isHappyFriday ? (
             <div
               style={{
-                width: '86%',
+                width: '92%',
                 aspectRatio: '1 / 1',
                 background: '#000000',
                 borderRadius: '50%',
@@ -306,15 +403,17 @@ export function PosterPreview({
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                padding: '10% 11%',
+                padding: '8% 8%',
                 boxSizing: 'border-box',
                 zIndex: 10,
+                marginTop: 'auto',
+                marginBottom: 'auto',
                 overflow: 'hidden',
                 WebkitPrintColorAdjust: 'exact',
                 printColorAdjust: 'exact',
               }}
             >
-              {/* Chamada Principal da Campanha Happy Friday */}
+              {/* Chamada Principal de Grande Impacto */}
               <div
                 style={{
                   display: 'flex',
@@ -324,60 +423,93 @@ export function PosterPreview({
                   textAlign: 'center',
                   color: '#ffffff',
                   fontFamily: 'Arial, sans-serif',
-                  fontWeight: 'bold',
                   textTransform: 'uppercase',
-                  lineHeight: '1.12',
+                  lineHeight: '1.08',
                   width: '100%',
                 }}
               >
-                <span style={{ fontSize: '9.2pt', letterSpacing: '-0.2px' }}>
-                  COMPRE R$ 100,00
-                </span>
-                <span style={{ fontSize: '8.8pt', letterSpacing: '-0.2px' }}>
-                  EM PRODUTOS¹ E LEVE
-                </span>
-                <span style={{ fontSize: '9.2pt', letterSpacing: '-0.2px' }}>
-                  ESTE PRODUTO COM
+                <span
+                  style={{
+                    fontSize: '9.2pt',
+                    fontWeight: 'bold',
+                    letterSpacing: '0.4px',
+                    color: '#facc15',
+                  }}
+                >
+                  GANHE
                 </span>
                 <span
                   style={{
-                    fontSize: '12.5pt',
+                    fontSize: '20pt',
                     fontWeight: 900,
-                    letterSpacing: '-0.3px',
-                    marginTop: '1.5px',
+                    letterSpacing: '-0.8px',
+                    lineHeight: '0.95',
+                    marginTop: '1px',
                   }}
                 >
-                  50% DE DESCONTO¹
+                  50% OFF¹
+                </span>
+                <span
+                  style={{
+                    fontSize: '9.5pt',
+                    fontWeight: 800,
+                    letterSpacing: '-0.2px',
+                    marginTop: '2px',
+                  }}
+                >
+                  NESTE PRODUTO
                 </span>
               </div>
 
-              {/* Divisória sutil */}
+              {/* Linha divisória fina */}
               <div
                 style={{
-                  width: '72%',
+                  width: '68%',
                   height: '0.8px',
-                  backgroundColor: 'rgba(255, 255, 255, 0.4)',
-                  marginTop: '4px',
-                  marginBottom: '4px',
+                  backgroundColor: 'rgba(255, 255, 255, 0.35)',
+                  marginTop: '6px',
+                  marginBottom: '5px',
                   flexShrink: 0,
                 }}
               />
 
-              {/* Texto Legal (Nota ¹) sem ambiguidades jurídicas */}
-              <p
+              {/* Condição / Mecânica da Promoção (Atrativa e Juridicamente Clara) */}
+              <div
                 style={{
-                  margin: 0,
-                  maxWidth: '88%',
-                  fontSize: '5.1pt',
-                  fontFamily: 'Arial, sans-serif',
-                  fontWeight: 'normal',
-                  color: '#ffffff',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                   textAlign: 'center',
+                  color: '#ffffff',
+                  fontFamily: 'Arial, sans-serif',
                   lineHeight: '1.18',
+                  maxWidth: '92%',
                 }}
               >
-                ¹A cada R$ 100,00 em compras de produtos da loja com preço regular (que não estejam em promoção), o cliente tem direito a adquirir 1 (uma) unidade deste produto selecionado com 50% de desconto sobre o preço vigente neste cartaz.
-              </p>
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: '5.8pt',
+                    fontWeight: 'bold',
+                    textTransform: 'uppercase',
+                    letterSpacing: '-0.1px',
+                  }}
+                >
+                  Comprando R$ 100 em produtos da loja fora da campanha¹
+                </p>
+                <p
+                  style={{
+                    margin: '3px 0 0 0',
+                    fontSize: '4.4pt',
+                    fontWeight: 'normal',
+                    color: 'rgba(255, 255, 255, 0.85)',
+                    lineHeight: '1.15',
+                  }}
+                >
+                  ¹A cada R$ 100 em itens com preço regular (não promocionais), adquira 1 unid. selecionada com 50% de desconto sobre o preço vigente.
+                </p>
+              </div>
             </div>
           ) : hasDiscount ? (
             <div
@@ -430,8 +562,8 @@ export function PosterPreview({
             <div style={{ width: '86%', aspectRatio: '1 / 1' }} />
           )}
 
-          {/* Bloco de Parcelamento: Ocupa 100% da largura, valor maximizado com line-height 0.9 */}
-          {showInstallments ? (
+          {/* Bloco de Parcelamento (quando NÃO for Happy Friday, pois no Happy Friday já foi para a esquerda) */}
+          {!isHappyFriday && showInstallments ? (
             <div
               style={{
                 width: '100%',
@@ -541,9 +673,9 @@ export function PosterPreview({
                 </span>
               </div>
             </div>
-          ) : (
+          ) : !isHappyFriday ? (
             <div style={{ flex: 1 }} />
-          )}
+          ) : null}
 
           {/* Aviso Legal: Fixado na base exata, alinhado horizontalmente com o rodapé SAP/EAN/REF */}
           <div
