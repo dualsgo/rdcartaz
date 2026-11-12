@@ -116,8 +116,20 @@ export const POSTER_FORMATS: Record<PosterType, PosterFormat> = {
 
 export const VISIBLE_FORMATS: PosterFormat[] = Object.values(POSTER_FORMATS).filter(f => f.visible);
 
-export function getPosterFormat(type: PosterType): PosterFormat {
-  return POSTER_FORMATS[type] ?? POSTER_FORMATS.reliquias;
+export function getPosterFormat(type: PosterType, happyFridayEnabled?: boolean): PosterFormat {
+  const base = POSTER_FORMATS[type] ?? POSTER_FORMATS.reliquias;
+  if (happyFridayEnabled && type === 'reliquias-a6') {
+    return {
+      ...base,
+      label: 'Happy Friday A5',
+      shortLabel: 'A5',
+      caption: '2/folha',
+      description: 'Campanha Happy Friday · 2 cartazes A5 por folha A4',
+      perPage: 2,
+      singleDims: { w: 514, h: 680 },
+    };
+  }
+  return base;
 }
 
 export function isOfferOnlyFormat(type: PosterType, happyFridayEnabled?: boolean): boolean {

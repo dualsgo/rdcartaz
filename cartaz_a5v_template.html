@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Cartaz A5V - Pricefy Template</title>
+  <style>
+    @font-face {
+      font-family: 'Roboto-Bold';
+      src: url('https://rihappy.pricefy.com.br/config/fonts/Roboto-Bold.ttf') format('truetype');
+      font-weight: bold;
+    }
+    @font-face {
+      font-family: 'Roboto-Regular';
+      src: url('https://rihappy.pricefy.com.br/config/fonts/Roboto-Regular.ttf') format('truetype');
+      font-weight: normal;
+    }
+    @font-face {
+      font-family: 'GOTHICB';
+      src: url('https://rihappy.pricefy.com.br/config/fonts/GOTHICB.TTF') format('truetype');
+      font-weight: bold;
+    }
+
+    body {
+      margin: 0;
+      padding: 20px;
+      background-color: #f0f0f0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .label-text {
+      position: absolute;
+      border: 1px solid transparent;
+      box-sizing: border-box;
+      padding: 0px;
+      margin: 0px;
+      line-height: 0.735em;
+      width: auto;
+      vertical-align: top;
+      white-space: nowrap;
+    }
+
+    .label-box {
+      position: absolute;
+      box-sizing: border-box;
+      padding: 0px;
+      margin: 0px;
+      vertical-align: top;
+    }
+
+    .pdf-page {
+      margin: 0px;
+      position: relative;
+    }
+
+    .pdf-page-on-preview {
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Início do Cartaz A5V (13.6cm x 18cm) -->
+  <div id="label" class="pdf-page pdf-page-on-preview paper-color background-as-image" style="position: relative; top: 0cm; left: 0cm; height: 18cm; width: 13.6cm; background-repeat: no-repeat; background-size: contain; margin: 0px auto; background-color: white; background-image: url('./OFERTA-IMP_A5V_343888522_Preview.png');">
+    
+    <!-- Selo Preto Circular "Ganhe Desconto 50%" -->
+    <div id="box_seloHappy" class="label-box" style="background-color: black; border-color: black; border-width: 1.3px; border-style: solid; border-radius: 585px; height: 3.055cm; width: 2.925cm; top: 13.845cm; left: 1.17cm;"></div>
+
+    <!-- Caixa Borda do Desconto / Produto Secundário -->
+    <div id="box_boxODesconto" class="label-box" style="background-color: transparent; border-color: black; border-width: 2.6px; border-style: solid; border-radius: 7.8px; height: 2.6cm; width: 8.775cm; top: 14.17cm; left: 4.225cm;"></div>
+
+    <!-- Descrição Principal do Produto -->
+    <div id="field_produtoDescricaoPrincipalCartaz" class="label-text" style="font-size: 27pt; font-family: Roboto-Bold; font-weight: bold; color: black; line-height: 115%; top: 6.76cm; left: 0.65cm; text-align: center; width: 12.415cm; height: 2.21cm; overflow: visible; white-space: pre-wrap;">
+      <p style="position: absolute; top: 50%; width: inherit; transform: translateY(-50%); -webkit-transform: translateY(-50%);">BB SEREIA&#10;MALIBU</p>
+    </div>
+
+    <!-- Descrição Secundária do Produto -->
+    <div id="field_produtoDescricaoSecundariaCartaz" class="label-text" style="font-size: 16pt; font-family: Roboto-Bold; font-weight: bold; color: black; line-height: 115%; top: 8.97cm; left: 0.65cm; text-align: center; width: 12.415cm; height: 0.65cm; overflow: visible; white-space: pre-wrap;">
+      <p style="position: absolute; top: 50%; width: inherit; transform: translateY(-50%); -webkit-transform: translateY(-50%);">BB SEREIA MALIBU</p>
+    </div>
+
+    <!-- Texto Promocional / Produto Secundário -->
+    <div id="field_produtoDescricaoPrincipalCartazSecundario" class="label-text" style="font-size: 16.25pt; font-family: Roboto-Bold; font-weight: bold; color: black; line-height: 115%; top: 14.365cm; left: 4.55cm; text-align: center; width: 8.125cm; height: 2.275cm; overflow: visible; white-space: pre-wrap;">
+      <p style="position: absolute; top: 50%; width: inherit; transform: translateY(-50%); -webkit-transform: translateY(-50%);">A cada R$ 100, desbloqueis 50% OFF neste produto!</p>
+    </div>
+
+    <!-- Preço Vigente (Valor Inteiro + Centavos) -->
+    <div id="field_valorVigente">
+      <div id="field_valorVigente_availableArea" class="label-box label-text" style="background-color: transparent; border-color: transparent; border-width: 1px; border-style: none; height: 2.925cm; width: 11.765cm; top: 10.4cm; left: 1.3cm;"></div>
+      <div id="field_valorVigente_usedArea" class="label-box" style="background-color: transparent; border-color: transparent; border-width: 1px; border-style: none; height: 2.91042cm; width: 11.9524cm; top: 10.4073cm; left: 1.20629cm;"></div>
+      <div id="field_valorVigente_num" class="label-text" style="font-size: 110pt; font-family: GOTHICB; color: black; line-height: 0.735em; top: 10.4073cm; left: 1.20629cm; text-align: center; width: 6.52002cm; height: 2.91042cm; overflow: visible; white-space: pre-wrap;">199</div>
+      <div id="field_valorVigente_cen" class="label-text" style="font-size: 110pt; font-family: GOTHICB; color: black; line-height: 0.735em; top: 10.4073cm; left: 7.72631cm; text-align: center; width: 5.4324cm; height: 3.76497cm; overflow: visible; white-space: pre-wrap;">,99</div>
+    </div>
+
+    <!-- Selo Happy: "Ganhe" -->
+    <div id="field_fraseHappy" class="label-text" style="font-size: 17.55pt; font-family: Roboto-Regular; color: white; line-height: 110%; top: 13.975cm; left: 1.6445cm; text-align: center; width: 1.95cm; height: 0.975cm; overflow: visible; white-space: pre-wrap;">
+      <p style="position: absolute; top: 50%; width: inherit; transform: translateY(-50%); -webkit-transform: translateY(-50%);">Ganhe</p>
+    </div>
+
+    <!-- Selo Happy: "Desconto" -->
+    <div id="field_descontoHappy" class="label-text" style="font-size: 11.7pt; font-family: Roboto-Regular; color: white; line-height: 110%; top: 15.665cm; left: 1.365cm; text-align: center; width: 2.6cm; height: 0.975cm; overflow: visible; white-space: pre-wrap;">
+      <p style="position: absolute; top: 50%; width: inherit; transform: translateY(-50%); -webkit-transform: translateY(-50%);">Desconto</p>
+    </div>
+
+    <!-- Selo Happy: "50% " -->
+    <div id="field_percentualDesconto" class="label-text" style="font-size: 29.25pt; font-family: Roboto-Bold; font-weight: bold; color: white; line-height: 110%; top: 15.34cm; left: 1.495cm; text-align: center; width: 2.6cm; height: auto; overflow: visible; white-space: pre-wrap;">
+      <p style="position: absolute; top: 50%; width: inherit; transform: translateY(-50%); -webkit-transform: translateY(-50%);">50% </p>
+    </div>
+
+    <!-- Unidade de Medida (UN) -->
+    <div id="field_produtoApresentacao" class="label-text" style="font-size: 16.25pt; font-family: Roboto-Bold; color: black; line-height: 0.935em; top: 13.4511cm; left: 9.02631cm; text-align: left; width: 2.275cm; height: auto; overflow: visible; white-space: pre-wrap;">UN</div>
+
+    <!-- Símbolo Monetário (R$) -->
+    <div id="field_simbolo" class="label-text" style="font-size: 14.3pt; font-family: Roboto-Bold; color: black; line-height: 0.935em; top: 10.5238cm; left: 0.588793cm; text-align: left; width: 1.3cm; height: auto; overflow: visible; white-space: pre-wrap;">R$</div>
+
+    <!-- Validade da Oferta -->
+    <div id="static_12" class="label-text" style="font-size: 7.15pt; font-family: Roboto-Regular; color: black; line-height: 130%; letter-spacing: 0.013cm; top: 16.965cm; left: 0.65cm; text-align: left; width: 5.5575cm; height: auto; overflow: visible; white-space: pre-wrap;">Oferta válida de 02/11/2024 a 31/12/9999 <br>Mediante estoque</div>
+
+    <!-- Referência e Código do Produto -->
+    <div id="field_comReferencia" class="label-text" style="font-size: 7.15pt; font-family: Roboto-Regular; color: black; line-height: 0.935em; letter-spacing: 0.013cm; top: 16.9588cm; left: 6.8575cm; text-align: right; width: 6.1425cm; height: auto; overflow: visible; white-space: pre-wrap;">Ref. HHG52 Cód. 5123295</div>
+  </div>
+
+</body>
+</html>

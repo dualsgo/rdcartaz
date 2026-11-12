@@ -8,14 +8,15 @@ type FormatSelectorProps = {
   value: PosterType;
   onChange: (type: PosterType) => void;
   className?: string;
+  happyFridayEnabled?: boolean;
 };
 
 /**
  * Seletor ÚNICO de formato de impressão (antes duplicado em header, formulário e prévia).
  * Segmented control compacto, com atalhos Alt+1..N.
  */
-export function FormatSelector({ value, onChange, className }: FormatSelectorProps) {
-  const current = getPosterFormat(value);
+export function FormatSelector({ value, onChange, className, happyFridayEnabled }: FormatSelectorProps) {
+  const current = getPosterFormat(value, happyFridayEnabled);
 
   return (
     <div className={cn('space-y-1.5', className)}>
@@ -33,7 +34,8 @@ export function FormatSelector({ value, onChange, className }: FormatSelectorPro
         aria-label="Formato de impressão"
         className="grid grid-cols-4 gap-1 p-1 bg-muted rounded-xl border border-border/50 shadow-inner"
       >
-        {VISIBLE_FORMATS.map((f, i) => {
+        {VISIBLE_FORMATS.map((rawF, i) => {
+          const f = getPosterFormat(rawF.id, happyFridayEnabled);
           const active = value === f.id;
           return (
             <button

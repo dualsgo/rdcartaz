@@ -248,7 +248,7 @@ export default function Home() {
     setContinuousScan(false);
   };
 
-  const currentFormat = getPosterFormat(posterType);
+  const currentFormat = getPosterFormat(posterType, settings.happyFridayEnabled);
   const perPage = currentFormat.perPage;
   const orientation = currentFormat.orientation;
 
@@ -942,6 +942,7 @@ export default function Home() {
               <FormatSelector 
                 value={posterType} 
                 onChange={handlePosterTypeChange} 
+                happyFridayEnabled={settings.happyFridayEnabled}
               />
             </div>
 

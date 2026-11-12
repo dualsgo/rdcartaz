@@ -2,21 +2,27 @@
 
 import type { PosterData, PosterSettings } from '@/app/lib/types';
 import { parsePrice, formatCurrency, calculateInstallments } from '@/app/lib/poster-utils';
+import { PosterPreviewHappyFridayA5 } from './poster-preview-happy-friday-a5';
 
-export function PosterPreview({
-  description,
-  priceFrom,
-  priceFor,
-  code,
-  ean,
-  reference,
-  supplier,
-  paymentOption,
-  posterSubType,
-  offerValidityStart,
-  offerValidity,
-  settings,
-}: PosterData & { isImperdiveis?: boolean; settings: PosterSettings }) {
+export function PosterPreview(props: PosterData & { isImperdiveis?: boolean; settings: PosterSettings }) {
+  if (props.settings?.happyFridayEnabled) {
+    return <PosterPreviewHappyFridayA5 {...props} />;
+  }
+
+  const {
+    description,
+    priceFrom,
+    priceFor,
+    code,
+    ean,
+    reference,
+    supplier,
+    paymentOption,
+    posterSubType,
+    offerValidityStart,
+    offerValidity,
+    settings,
+  } = props;
   const isOffer = posterSubType === 'offer';
   const valDe  = parsePrice(priceFrom);
   const valPor = parsePrice(priceFor);

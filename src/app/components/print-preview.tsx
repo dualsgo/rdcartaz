@@ -115,7 +115,12 @@ export function SinglePosterPreview({
             )}
             {posterType === 'reliquias-a6' && (
               <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <div style={{ width: '13.6cm', height: '9.0cm', transform: 'scale(0.95)', transformOrigin: 'center center' }}>
+                <div style={{ 
+                  width: '13.6cm', 
+                  height: settings?.happyFridayEnabled ? '18.0cm' : '9.0cm', 
+                  transform: settings?.happyFridayEnabled ? 'scale(0.85)' : 'scale(0.95)', 
+                  transformOrigin: 'center center' 
+                }}>
                   <PosterPreview {...data} isImperdiveis={false} settings={settings} />
                 </div>
               </div>
@@ -359,6 +364,48 @@ export function PageGrid({
             <PosterPreview {...d} isImperdiveis={false} settings={settings} />
           </div>
         )}
+      </div>
+    );
+  }
+
+  // Happy Friday A5 (2 cartazes por folha A4 paisagem)
+  if (posterType === 'reliquias-a6' && settings?.happyFridayEnabled) {
+    return (
+      <div 
+        className={cn("w-full h-full relative", pageBgClass)}
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(2, 13.6cm)',
+          gridTemplateRows: '18.0cm',
+          gap: '5mm',
+          justifyContent: 'center',
+          alignContent: 'center',
+          paddingTop: '15mm',
+          paddingBottom: '15mm',
+          paddingLeft: '10mm',
+          paddingRight: '10mm',
+          boxSizing: 'border-box',
+        }}
+      >
+        {allSlots.map((d, i) => (
+          <div 
+            key={i} 
+            className="flex items-center justify-center overflow-hidden box-border print:border-none"
+            style={{ width: '13.6cm', height: '18.0cm' }}
+          >
+            {d && (
+              <div 
+                style={{ 
+                  width: '13.6cm', 
+                  height: '18.0cm', 
+                  overflow: 'hidden' 
+                }}
+              >
+                <PosterPreview {...d} isImperdiveis={false} settings={settings} />
+              </div>
+            )}
+          </div>
+        ))}
       </div>
     );
   }

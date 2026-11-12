@@ -52,8 +52,8 @@ function SheetGlyph({ perPage, filled, orientation }: { perPage: number; filled:
 
 /* ─────────────────────────── SheetOccupancy ─────────────────────────── */
 // Ocupação da folha atual, calculada a partir das páginas reais de impressão
-export function SheetOccupancy({ printPages, posterType }: { printPages: PosterData[][]; posterType: PosterType }) {
-  const fmt = getPosterFormat(posterType);
+export function SheetOccupancy({ printPages, posterType, happyFridayEnabled }: { printPages: PosterData[][]; posterType: PosterType; happyFridayEnabled?: boolean }) {
+  const fmt = getPosterFormat(posterType, happyFridayEnabled);
   const perPage = fmt.perPage;
   const totalSheets = printPages.length;
   const filled = totalSheets > 0 ? printPages[totalSheets - 1].length : 0;
@@ -428,7 +428,7 @@ export function QueuePanel({
         </div>
       )}
 
-      <SheetOccupancy printPages={printPages} posterType={posterType} />
+      <SheetOccupancy printPages={printPages} posterType={posterType} happyFridayEnabled={happyFridayEnabled} />
 
       {/* ── Lista de Itens do Lote ── */}
       <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
