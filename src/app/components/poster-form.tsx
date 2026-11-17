@@ -171,6 +171,7 @@ export const PosterForm = forwardRef<PosterFormHandle, PosterFormProps>(function
   const [activeSuggestion, setActiveSuggestion] = useState(-1);
   const [pendingFocus, setPendingFocus] = useState<'from' | 'for' | null>(null);
   const suggestTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const autoScanTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const rootRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -339,6 +340,29 @@ export const PosterForm = forwardRef<PosterFormHandle, PosterFormProps>(function
     setLookupStatus('idle');
     setIsManualMode(false);
     setShowWarning(false);
+
+    if (autoScanTimer.current) {
+      clearTimeout(autoScanTimer.current);
+      autoScanTimer.current = null;
+    }
+
+    const trimmed = v.trim();
+    if (hasSessionData && continuousScan && trimmed.length >= 3) {
+      const t = keyTimesRef.current;
+      const isRapidInput = t.length >= WEDGE_MIN_CHARS && ((t[t.length - 1] - t[0]) / (t.length - 1) <= 80);
+      const isCompleteEan = /^\d{12,14}$/.test(trimmed);
+      const isExactSessionMatch = Boolean(sessionProducts?.[trimmed]);
+
+      if (isExactSessionMatch || isCompleteEan || isRapidInput) {
+        autoScanTimer.current = setTimeout(() => {
+          autoScanTimer.current = null;
+          keyTimesRef.current = [];
+          void runLookup(trimmed, true);
+        }, 120);
+        return;
+      }
+    }
+
     fetchSuggestions(v);
   };
 
@@ -420,18 +444,24 @@ export const PosterForm = forwardRef<PosterFormHandle, PosterFormProps>(function
 
   /** Busca + avança o foco (ou adiciona direto ao lote em bipagem contínua) */
   const runLookup = useCallback(async (q: string, fromScanner = false) => {
+    if (autoScanTimer.current) {
+      clearTimeout(autoScanTimer.current);
+      autoScanTimer.current = null;
+    }
     const found = await handleLookup(q);
     if (!found) {
-      if (fromScanner) playBeep('error');
+      if (fromScanner || (hasSessionData && continuousScan)) playBeep('error');
       return;
     }
     const hasPrice = displayToCents(found.priceFor || '') > 0;
 
-    if (fromScanner) {
-      if (hasSessionData && continuousScan && hasPrice && onAutoAdd?.(found, 'wedge')) {
+    if (hasSessionData && continuousScan) {
+      if (hasPrice && onAutoAdd?.(found, 'wedge')) {
         playBeep('success');
         return; // o formulário é remontado e o foco volta para a busca
       }
+      playBeep(hasPrice ? 'success' : 'error');
+    } else if (fromScanner) {
       playBeep(hasPrice ? 'success' : 'error');
     }
 
@@ -520,10 +550,24 @@ export const PosterForm = forwardRef<PosterFormHandle, PosterFormProps>(function
       setActiveSuggestion(-1);
       return;
     }
+    if (e.key === 'Tab' && hasSessionData && continuousScan && searchValue.trim().length >= 3) {
+      e.preventDefault();
+      if (autoScanTimer.current) {
+        clearTimeout(autoScanTimer.current);
+        autoScanTimer.current = null;
+      }
+      keyTimesRef.current = [];
+      void runLookup(searchValue, true);
+      return;
+    }
     if (e.key === 'Enter') {
       e.preventDefault();
       if (e.ctrlKey || e.metaKey) return; // Ctrl+Enter é tratado pelo atalho global
-      const fromScanner = consumeWedgeDetection();
+      if (autoScanTimer.current) {
+        clearTimeout(autoScanTimer.current);
+        autoScanTimer.current = null;
+      }
+      const fromScanner = consumeWedgeDetection() || (hasSessionData && continuousScan);
       if (!fromScanner && hasSuggestions && activeSuggestion >= 0 && suggestions[activeSuggestion]) {
         handleSuggestionSelect(suggestions[activeSuggestion].key);
         return;

@@ -584,7 +584,13 @@ export default function Home() {
   const handleAutoAdd = useCallback((data: PosterData, source: AutoAddSource): boolean => {
     const valPor = parsePrice(data.priceFor);
     if (valPor <= 0) return false;
-    return checkOldQueueAndProceed(data);
+    const added = checkOldQueueAndProceed(data);
+    if (added && source === 'wedge') {
+      setCurrentPoster(initialPosterData());
+      setIsProductReady(false);
+      setFormKey((k: number) => k + 1);
+    }
+    return added;
   }, [checkOldQueueAndProceed]);
 
   // Atalhos Globais de Teclado (F2, Alt+1..4, Ctrl+Enter, Ctrl+P, Escape)
