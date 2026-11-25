@@ -18,8 +18,14 @@ import type { PosterData, PosterSettings, PosterType } from '@/app/lib/types';
 import { getPosterFormat, doesItemMatchCampaignMode, getCampaignModeLabel } from '@/app/lib/poster-formats';
 import { cn } from '@/lib/utils';
 
+function getEffectiveMode(settings?: PosterSettings) {
+  return settings?.campaignAssistantEnabled
+    ? (settings?.campaignMode === '50off' ? '50off' : 'friday')
+    : 'regular';
+}
+
 function renderPosterSlot(data: PosterData, slotSize: 'single' | 'a4' | 'a5' | 'a6', settings: PosterSettings) {
-  const mode = settings?.campaignMode ?? 'regular';
+  const mode = getEffectiveMode(settings);
   if (mode === '50off') {
     const scaleMap = { single: 'scale(1)', a4: 'scale(1.45)', a5: 'scale(1)', a6: 'scale(0.66)' };
     return (
@@ -62,7 +68,7 @@ export function SinglePosterPreview({
   const [ready, setReady] = useState(false);
   
   // Safety check to prevent crash if dimensions are missing
-  const dims = getPosterFormat(posterType, settings?.campaignMode ?? 'regular', settings?.campaignBrand).singleDims;
+  const dims = getPosterFormat(posterType, getEffectiveMode(settings), settings?.campaignBrand).singleDims;
   const { w, h } = dims;
 
   // Para o aéreo, o preview mostra apenas a área de conteúdo (75%),
@@ -117,7 +123,7 @@ export function SinglePosterPreview({
           <p className="text-sm font-medium">Busque um produto para ver o cartaz</p>
           <p className="text-xs opacity-60 text-center">Use o campo de busca ao lado para localizar ou cadastrar o produto</p>
         </div>
-      ) : !doesItemMatchCampaignMode(data.campaign, settings?.campaignMode ?? 'regular') ? (
+      ) : settings?.campaignAssistantEnabled && !doesItemMatchCampaignMode(data.campaign, getEffectiveMode(settings)) ? (
         <div className="flex flex-col items-center justify-center gap-2 text-center p-6 max-w-sm bg-white/95 rounded-xl border border-red-200 shadow-sm">
           <p className="text-xs font-black uppercase tracking-tight text-red-700">
             Item fora da lista selecionada
@@ -125,7 +131,7 @@ export function SinglePosterPreview({
           <p className="text-[11px] text-red-800 leading-snug">
             Este produto não faz parte da lista de{' '}
             <span className="font-bold">
-              {getCampaignModeLabel(settings?.campaignMode ?? 'regular', settings?.campaignBrand)}
+              {getCampaignModeLabel(getEffectiveMode(settings), settings?.campaignBrand)}
             </span>{' '}
             e não pode ser exibido neste modelo.
           </p>
@@ -178,7 +184,7 @@ export function PagePreview({
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0.4);
   const totalPages = pages.length;
-  const orientation = getPosterFormat(posterType, settings?.campaignMode ?? 'regular', settings?.campaignBrand).orientation;
+  const orientation = getPosterFormat(posterType, getEffectiveMode(settings), settings?.campaignBrand).orientation;
   const isPortrait = orientation === 'portrait';
   const targetW = (isPortrait ? 210 : 297) * 3.78;
   const targetH = (isPortrait ? 297 : 210) * 3.78;
@@ -200,7 +206,7 @@ export function PagePreview({
   }, [targetW, targetH]);
 
   return (
-    <div ref={containerRef} className="w-full h-full bg-muted/40 overflow-y-auto custom-scrollbar px-6 py-8">
+    <div ref={containerRef} className="w-full h-full bg-muted/40 overflow-y-auto overflow-x-hidden custom-scrollbar px-6 py-8">
       <div className="flex flex-col items-center gap-12 pb-12">
         {pages.map((pageItems, idx) => (
           <div key={idx} className="relative group">
@@ -209,22 +215,29 @@ export function PagePreview({
               PÁGINA {idx + 1} DE {totalPages}
             </div>
             
-            <div 
-              className="bg-white shadow-2xl origin-top shrink-0"
-              style={{ 
-                width: isPortrait ? '210mm' : '297mm', 
-                height: isPortrait ? '297mm' : '210mm',
-                transform: `scale(${scale})`,
-                marginBottom: `calc(${isPortrait ? '297mm' : '210mm'} * (${scale} - 1))` // Compensa o espaço vazio deixado pelo scale
+            <div
+              className="shadow-2xl bg-white"
+              style={{
+                width: `calc(${isPortrait ? '210mm' : '297mm'} * ${scale})`,
+                height: `calc(${isPortrait ? '297mm' : '210mm'} * ${scale})`,
+                overflow: 'hidden',
               }}
             >
-
-              <PageGrid 
-                items={pageItems} 
-                posterType={posterType} 
-                perPage={perPage} 
-                settings={settings} 
-              />
+              <div 
+                className="bg-white origin-top-left shrink-0"
+                style={{ 
+                  width: isPortrait ? '210mm' : '297mm', 
+                  height: isPortrait ? '297mm' : '210mm',
+                  transform: `scale(${scale})`,
+                }}
+              >
+                <PageGrid 
+                  items={pageItems} 
+                  posterType={posterType} 
+                  perPage={perPage} 
+                  settings={settings} 
+                />
+              </div>
             </div>
           </div>
         ))}
@@ -247,7 +260,7 @@ export function PageGrid({
 }) {
   const pageBgClass = 'bg-white';
   const allSlots = Array.from({ length: perPage }).map((_, i) => items[i] || null);
-  const mode = settings?.campaignMode ?? 'regular';
+  const mode = getEffectiveMode(settings);
   const hasCampaignItem = mode === 'friday' || mode === '50off';
   const isPortrait =
     posterType !== 'campanha-a5' &&

@@ -12,8 +12,8 @@ import { SettingsDialog } from '@/app/components/settings-dialog';
 import { ImportModal } from '@/app/components/import-modal';
 import { AutomationModal } from '@/app/components/automation-modal';
 import { SecurityModal } from '@/app/components/security-modal';
-import type { PosterData, PosterSettings, PosterType } from '@/app/lib/types';
-import { POSTER_FORMATS, VISIBLE_FORMATS, getPosterFormat, getVisibleFormats, getCampaignKind, isOfferOnlyFormat, doesItemMatchCampaignMode, getCampaignModeLabel } from '@/app/lib/poster-formats';
+import type { PosterData, PosterSettings, PosterType, CampaignMode } from '@/app/lib/types';
+import { POSTER_FORMATS, VISIBLE_FORMATS, getPosterFormat, getVisibleFormats, getCampaignKind, isOfferOnlyFormat, doesItemMatchCampaignMode, getCampaignModeLabel, CAMPAIGN_SHEET_LINKS } from '@/app/lib/poster-formats';
 import { useToast } from '@/hooks/use-toast';
 import { parseProductCSV, parseProductExcel, parsePrice, cleanSupplierName } from '@/app/lib/poster-utils';
 import { useHotkeys } from '@/hooks/use-hotkeys';
@@ -64,7 +64,8 @@ export default function Home() {
     minInstallmentAmount: 29.99,
     happyFridayEnabled: false,
     campaignBrand: 'rihappy',
-    campaignMode: 'regular',
+    campaignMode: 'friday',
+    campaignAssistantEnabled: false,
     enabledFormats: { posters: true, gondola: false, vitrine: false },
   });
 
@@ -80,6 +81,7 @@ export default function Home() {
     type: 'error' | 'warning';
     title: string;
     message: string;
+    links?: { label: string; url: string }[];
     onConfirm?: () => void;
     onCancel?: () => void;
     confirmText?: string;
@@ -202,14 +204,31 @@ export default function Home() {
   const { toast } = useToast();
 
   const saveSettings = (newSettings: PosterSettings) => {
-    const prevMode = settings.campaignMode ?? 'regular';
-    const nextMode = newSettings.campaignMode ?? 'regular';
+    const prevAssistant = Boolean(settings.campaignAssistantEnabled);
+    const nextAssistant = Boolean(newSettings.campaignAssistantEnabled);
+    const prevEffectiveMode = prevAssistant ? (settings.campaignMode === '50off' ? '50off' : 'friday') : 'regular';
+    const nextEffectiveMode = nextAssistant ? (newSettings.campaignMode === '50off' ? '50off' : 'friday') : 'regular';
+
     setSettings(newSettings);
     localStorage.setItem('poster-settings', JSON.stringify(newSettings));
     localStorage.setItem('poster-settings-v2', JSON.stringify(newSettings));
 
-    if (prevMode !== nextMode) {
-      if (isProductReady && !doesItemMatchCampaignMode(currentPoster.campaign, nextMode)) {
+    if (!prevAssistant && nextAssistant) {
+      setSecurityModal({
+        isOpen: true,
+        type: 'warning',
+        title: 'Assistente de Campanhas Ativado',
+        message: 'Com o Assistente ativo, os itens são filtrados por campanha (Happy/Best Friday ou Campanha 50%) e cada produto só poderá gerar os cartazes pertinentes à sua lista oficial. Para fazer cartazes tradicionais de qualquer produto, desative o assistente.',
+        links: [
+          CAMPAIGN_SHEET_LINKS.friday,
+          CAMPAIGN_SHEET_LINKS['50off'],
+        ],
+        confirmText: 'ENTENDI',
+      });
+    }
+
+    if (prevEffectiveMode !== nextEffectiveMode && nextAssistant) {
+      if (isProductReady && !doesItemMatchCampaignMode(currentPoster.campaign, nextEffectiveMode)) {
         setCurrentPoster(initialPosterData());
         setIsProductReady(false);
         setSelectedQueueIndex(null);
@@ -217,9 +236,9 @@ export default function Home() {
         toast({
           variant: 'destructive',
           title: 'Item não faz parte desta lista',
-          description: `O produto selecionado foi ocultado porque não pertence a ${getCampaignModeLabel(nextMode, newSettings.campaignBrand)}.`,
+          description: `O produto selecionado foi ocultado porque não pertence a ${getCampaignModeLabel(nextEffectiveMode, newSettings.campaignBrand)}.`,
         });
-      } else if (selectedQueueIndex !== null && queue[selectedQueueIndex] && !doesItemMatchCampaignMode(queue[selectedQueueIndex].campaign, nextMode)) {
+      } else if (selectedQueueIndex !== null && queue[selectedQueueIndex] && !doesItemMatchCampaignMode(queue[selectedQueueIndex].campaign, nextEffectiveMode)) {
         setSelectedQueueIndex(null);
       }
     }
@@ -272,7 +291,10 @@ export default function Home() {
     setContinuousScan(false);
   };
 
-  const campaignMode = settings.campaignMode ?? 'regular';
+  const assistantEnabled = Boolean(settings.campaignAssistantEnabled);
+  const campaignMode: CampaignMode = assistantEnabled
+    ? (settings.campaignMode === '50off' ? '50off' : 'friday')
+    : 'regular';
   const currentFormat = getPosterFormat(posterType, campaignMode, settings.campaignBrand);
   const perPage = currentFormat.perPage;
   const orientation = currentFormat.orientation;
@@ -333,12 +355,12 @@ export default function Home() {
       });
     }
 
-    if (campaignMode === '50off') {
-      result = result.filter(item => getCampaignKind(item.campaign) === '50off');
-    } else if (campaignMode === 'friday') {
-      result = result.filter(item => getCampaignKind(item.campaign) === 'friday');
-    } else {
-      result = result.filter(item => getCampaignKind(item.campaign) === null);
+    if (assistantEnabled) {
+      if (campaignMode === '50off') {
+        result = result.filter(item => getCampaignKind(item.campaign) === '50off');
+      } else if (campaignMode === 'friday') {
+        result = result.filter(item => getCampaignKind(item.campaign) === 'friday');
+      }
     }
 
     if (queueSort !== 'none') {
@@ -365,7 +387,7 @@ export default function Home() {
     }
 
     return result;
-  }, [queue, queueFilter, supplierFilter, stockFilter, priceRangeFilter, campaignMode, queueSort, subTypeGroup]);
+  }, [queue, queueFilter, supplierFilter, stockFilter, priceRangeFilter, assistantEnabled, campaignMode, queueSort, subTypeGroup]);
 
   // Expande a fila considerando as quantidades de cada item para impressão
   const expandedQueue = useMemo(() => {
@@ -932,49 +954,64 @@ export default function Home() {
               </button>
             </div>
 
-            {/* Seletor de Modo / Campanha */}
-            <div
-              role="group"
-              aria-label="Selecionar campanha"
-              className="flex items-center gap-0.5 p-0.5 bg-muted rounded-lg border border-border/60 shrink-0 shadow-sm"
+            {/* Botão Assistente de Campanhas + Filtros de Campanha quando ativo */}
+            <button
+              type="button"
+              onClick={() =>
+                saveSettings({
+                  ...settings,
+                  campaignAssistantEnabled: !assistantEnabled,
+                  campaignMode: settings.campaignMode === '50off' ? '50off' : 'friday',
+                })
+              }
+              className={cn(
+                'inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-tight border transition-all shrink-0 shadow-sm',
+                assistantEnabled
+                  ? 'bg-zinc-900 text-amber-400 border-amber-400/60'
+                  : 'bg-background text-foreground border-border hover:bg-muted'
+              )}
+              title={
+                assistantEnabled
+                  ? 'Clique para desativar o Assistente de Campanhas e liberar cartazes tradicionais para qualquer item'
+                  : 'Ativar Assistente de Campanhas (filtra e restringe itens às listas de Black/Happy Friday e 50% OFF)'
+              }
             >
-              <button
-                type="button"
-                onClick={() => saveSettings({ ...settings, campaignMode: 'friday' })}
-                className={cn(
-                  'px-2 sm:px-2.5 py-1 rounded-md text-[9px] sm:text-[10px] font-black uppercase tracking-tight transition-all whitespace-nowrap',
-                  campaignMode === 'friday'
-                    ? 'bg-amber-400 text-zinc-950 shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground'
-                )}
+              <Zap className={cn('h-3.5 w-3.5', assistantEnabled ? 'fill-amber-400 text-amber-400' : 'text-amber-500')} />
+              <span>{assistantEnabled ? 'Assistente Ativo' : 'Ativar Assistente de Campanhas'}</span>
+            </button>
+
+            {assistantEnabled && (
+              <div
+                role="group"
+                aria-label="Selecionar campanha"
+                className="flex items-center gap-0.5 p-0.5 bg-muted rounded-lg border border-border/60 shrink-0 shadow-sm animate-in fade-in"
               >
-                {settings.campaignBrand === 'pbkids' ? 'Best Friday' : 'Happy Friday'}
-              </button>
-              <button
-                type="button"
-                onClick={() => saveSettings({ ...settings, campaignMode: '50off' })}
-                className={cn(
-                  'px-2 sm:px-2.5 py-1 rounded-md text-[9px] sm:text-[10px] font-black uppercase tracking-tight transition-all whitespace-nowrap',
-                  campaignMode === '50off'
-                    ? 'bg-zinc-900 text-amber-400 shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground'
-                )}
-              >
-                Campanha 50%
-              </button>
-              <button
-                type="button"
-                onClick={() => saveSettings({ ...settings, campaignMode: 'regular' })}
-                className={cn(
-                  'px-2 sm:px-2.5 py-1 rounded-md text-[9px] sm:text-[10px] font-black uppercase tracking-tight transition-all whitespace-nowrap',
-                  campaignMode === 'regular'
-                    ? 'bg-background text-foreground shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground'
-                )}
-              >
-                Ofertas Regulares
-              </button>
-            </div>
+                <button
+                  type="button"
+                  onClick={() => saveSettings({ ...settings, campaignMode: 'friday' })}
+                  className={cn(
+                    'px-2 sm:px-2.5 py-1 rounded-md text-[9px] sm:text-[10px] font-black uppercase tracking-tight transition-all whitespace-nowrap',
+                    campaignMode === 'friday'
+                      ? 'bg-amber-400 text-zinc-950 shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground'
+                  )}
+                >
+                  {settings.campaignBrand === 'pbkids' ? 'Best Friday' : 'Happy Friday'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => saveSettings({ ...settings, campaignMode: '50off' })}
+                  className={cn(
+                    'px-2 sm:px-2.5 py-1 rounded-md text-[9px] sm:text-[10px] font-black uppercase tracking-tight transition-all whitespace-nowrap',
+                    campaignMode === '50off'
+                      ? 'bg-zinc-900 text-amber-400 shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground'
+                  )}
+                >
+                  Campanha 50%
+                </button>
+              </div>
+            )}
           </div>
 
           <div className="flex items-center gap-2">
@@ -1067,7 +1104,8 @@ export default function Home() {
                 onImportBatch={() => setShowAutomation(true)}
                 sessionProducts={sessionProducts}
                 onAutoAdd={handleAutoAdd}
-                onSwitchCampaignMode={(mode) => saveSettings({ ...settings, campaignMode: mode })}
+                onSwitchCampaignMode={(mode) => saveSettings({ ...settings, campaignAssistantEnabled: true, campaignMode: mode })}
+                onDisableAssistant={() => saveSettings({ ...settings, campaignAssistantEnabled: false })}
                 onSubmit={handleAddToQueue}
                 continuousScan={continuousScan}
                 onContinuousScanChange={handleContinuousScanChange}

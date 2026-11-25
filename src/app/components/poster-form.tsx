@@ -8,10 +8,10 @@ import { Switch } from '@/components/ui/switch';
 import { Kbd } from '@/components/ui/kbd';
 import type { PosterData, PosterType, PosterSettings, CampaignMode } from '@/app/lib/types';
 import { calculateInstallments } from '@/app/lib/poster-utils';
-import { isOfferOnlyFormat, doesItemMatchCampaignMode, getCampaignKind, getCampaignModeLabel } from '@/app/lib/poster-formats';
+import { isOfferOnlyFormat, doesItemMatchCampaignMode, getCampaignKind, getCampaignModeLabel, CAMPAIGN_SHEET_LINKS } from '@/app/lib/poster-formats';
 
 import { cn, isTouchDevice } from '@/lib/utils';
-import { Loader2, CheckCircle2, XCircle, Search, RotateCcw, Info, Camera, Sparkles, ScanBarcode, Zap, AlertTriangle } from 'lucide-react';
+import { Loader2, CheckCircle2, XCircle, Search, RotateCcw, Info, Camera, Sparkles, ScanBarcode, Zap, AlertTriangle, ExternalLink } from 'lucide-react';
 import { BarcodeScanner, type ScanStatus } from './barcode-scanner';
 
 function centsToDisplay(cents: number): string {
@@ -98,6 +98,7 @@ type PosterFormProps = {
   /** Foca a busca ao montar (ignorado em dispositivos touch) */
   autoFocus?: boolean;
   onSwitchCampaignMode?: (mode: CampaignMode) => void;
+  onDisableAssistant?: () => void;
 };
 
 /* Leitores de código de barras USB (HID) "digitam" muito mais rápido que um humano. */
@@ -160,7 +161,7 @@ type ProductPayload = {
 export const PosterForm = forwardRef<PosterFormHandle, PosterFormProps>(function PosterForm(
   {
     data, setData, posterType, settings, onLookupStatusChange, onImportBatch, sessionProducts,
-    onAutoAdd, onSubmit, continuousScan = false, onContinuousScanChange, autoFocus = false, onSwitchCampaignMode,
+    onAutoAdd, onSubmit, continuousScan = false, onContinuousScanChange, autoFocus = false, onSwitchCampaignMode, onDisableAssistant,
   },
   ref
 ) {
@@ -226,12 +227,17 @@ export const PosterForm = forwardRef<PosterFormHandle, PosterFormProps>(function
     setData(prev => ({ ...prev, priceFrom: priceFrom.display }));
   }, [priceFrom.display, setData]);
   
+  const assistantEnabled = Boolean(settings.campaignAssistantEnabled);
+  const effectiveCampaignMode: CampaignMode = assistantEnabled
+    ? (settings.campaignMode === '50off' ? '50off' : 'friday')
+    : 'regular';
+
   // Força o tipo 'oferta' para modelos que não possuem 'preço normal'
   useEffect(() => {
-    if (isOfferOnlyFormat(posterType, settings.campaignMode)) {
+    if (isOfferOnlyFormat(posterType, effectiveCampaignMode)) {
       setData(prev => ({ ...prev, posterSubType: 'offer' }));
     }
-  }, [posterType, settings.campaignMode, setData]);
+  }, [posterType, effectiveCampaignMode, setData]);
   
   // Automatização inteligente do parcelamento
   useEffect(() => {
@@ -412,7 +418,7 @@ export const PosterForm = forwardRef<PosterFormHandle, PosterFormProps>(function
         offerValidity:      produto.offerValidity      || data.offerValidity,
         // Formatos só-oferta (Relíquias/Totem) nunca podem virar "normal",
         // exceto quando o modo Happy Friday está ativo (permite cartaz de preço regular ou oferta).
-        posterSubType: isOfferOnlyFormat(posterType, settings.campaignMode)
+        posterSubType: isOfferOnlyFormat(posterType, effectiveCampaignMode)
           ? 'offer'
           : hasPriceFrom ? 'offer' : (produto.priceFor ? 'normal' : data.posterSubType),
         paymentOption: payOption,
@@ -421,14 +427,13 @@ export const PosterForm = forwardRef<PosterFormHandle, PosterFormProps>(function
 
     const applyFound = (produto: ProductPayload): PosterData | null => {
       const foundData = buildFoundData(produto);
-      const currentMode = settings.campaignMode ?? 'regular';
-      if (!doesItemMatchCampaignMode(foundData.campaign, currentMode)) {
+      if (assistantEnabled && !doesItemMatchCampaignMode(foundData.campaign, effectiveCampaignMode)) {
         const kind = getCampaignKind(foundData.campaign);
         const actualMode: CampaignMode = kind === 'friday' ? 'friday' : kind === '50off' ? '50off' : 'regular';
         setCampaignMismatch({
           description: foundData.description,
           code: foundData.code || query,
-          expectedMode: currentMode,
+          expectedMode: effectiveCampaignMode,
           actualMode,
         });
         setLookupStatus('notfound');
@@ -753,7 +758,18 @@ export const PosterForm = forwardRef<PosterFormHandle, PosterFormProps>(function
                 </p>
               </div>
             </div>
-            {onSwitchCampaignMode && (
+            {(campaignMismatch.expectedMode === 'friday' || campaignMismatch.expectedMode === '50off') && (
+              <a
+                href={CAMPAIGN_SHEET_LINKS[campaignMismatch.expectedMode].url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-between gap-2 py-1.5 px-3 bg-white hover:bg-red-100/50 text-red-900 border border-red-200 font-bold text-[10px] rounded-lg transition-colors"
+              >
+                <span>{CAMPAIGN_SHEET_LINKS[campaignMismatch.expectedMode].label}</span>
+                <ExternalLink className="h-3 w-3 shrink-0 text-red-700" />
+              </a>
+            )}
+            {campaignMismatch.actualMode !== 'regular' && onSwitchCampaignMode && (
               <button
                 type="button"
                 onClick={() => {
@@ -764,6 +780,18 @@ export const PosterForm = forwardRef<PosterFormHandle, PosterFormProps>(function
                 className="w-full py-1.5 px-3 bg-red-600 hover:bg-red-700 text-white font-black text-[10px] uppercase tracking-wider rounded-lg transition-colors"
               >
                 Mudar para {getCampaignModeLabel(campaignMismatch.actualMode, settings.campaignBrand)}
+              </button>
+            )}
+            {campaignMismatch.actualMode === 'regular' && onDisableAssistant && (
+              <button
+                type="button"
+                onClick={() => {
+                  setCampaignMismatch(null);
+                  onDisableAssistant();
+                }}
+                className="w-full py-1.5 px-3 bg-zinc-800 hover:bg-zinc-900 text-white font-black text-[10px] uppercase tracking-wider rounded-lg transition-colors"
+              >
+                Desativar Assistente (Fazer Cartaz Tradicional)
               </button>
             )}
           </div>
@@ -888,17 +916,23 @@ export const PosterForm = forwardRef<PosterFormHandle, PosterFormProps>(function
         ) : lookupStatus === 'found' ? (
           <div className={cn(
             "px-3 py-2.5 rounded-lg flex items-center justify-between border transition-colors",
-            settings.happyFridayEnabled && data.campaign === 'ESQUENTA_BLACK'
+            getCampaignKind(data.campaign)
               ? "bg-amber-50/50 border-amber-300/80 border-l-4 border-l-zinc-900"
               : "bg-green-50/50 border-green-100"
           )}>
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2 mb-1 flex-wrap">
                 <p className="text-[10px] font-black text-green-700 uppercase tracking-tighter">Produto Selecionado</p>
-                {settings.happyFridayEnabled && data.campaign === 'ESQUENTA_BLACK' && (
+                {getCampaignKind(data.campaign) === '50off' && (
                   <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase px-1.5 py-0.5 rounded bg-zinc-900 text-amber-400 border border-amber-400/40 tracking-tight">
                     <Zap className="h-2.5 w-2.5 fill-amber-400" />
-                    Happy Friday
+                    50% OFF
+                  </span>
+                )}
+                {getCampaignKind(data.campaign) === 'friday' && (
+                  <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase px-1.5 py-0.5 rounded bg-amber-400 text-zinc-950 border border-zinc-900/20 tracking-tight">
+                    <Zap className="h-2.5 w-2.5 fill-zinc-950" />
+                    {settings.campaignBrand === 'pbkids' ? 'Best Friday' : 'Happy Friday'}
                   </span>
                 )}
               </div>
@@ -976,7 +1010,7 @@ export const PosterForm = forwardRef<PosterFormHandle, PosterFormProps>(function
              <Label className="font-bold text-gray-900 uppercase tracking-tight text-sm">
                 2. Preços
              </Label>
-             {!isOfferOnlyFormat(posterType, settings.campaignMode) && (
+             {!isOfferOnlyFormat(posterType, effectiveCampaignMode) && (
                <div className="flex bg-muted p-1 rounded-xl shadow-inner border border-border/50">
                  <button
                    type="button"

@@ -2,7 +2,7 @@
 
 import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, XCircle, X } from 'lucide-react';
+import { AlertTriangle, XCircle, X, ExternalLink } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export type SecurityModalProps = {
@@ -13,6 +13,7 @@ export type SecurityModalProps = {
   type: 'error' | 'warning';
   title: string;
   message: string;
+  links?: { label: string; url: string }[];
   confirmText?: string;
   cancelText?: string;
 };
@@ -25,6 +26,7 @@ export function SecurityModal({
   type,
   title,
   message,
+  links,
   confirmText,
   cancelText,
 }: SecurityModalProps) {
@@ -102,6 +104,22 @@ export function SecurityModal({
             <p className="mt-2 text-sm text-gray-600 font-medium leading-relaxed">
               {message}
             </p>
+            {links && links.length > 0 && (
+              <div className="mt-3 space-y-1.5">
+                {links.map((link) => (
+                  <a
+                    key={link.url}
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-amber-50 hover:bg-amber-100 border border-amber-200 text-xs font-bold text-amber-900 transition-colors"
+                  >
+                    <span className="truncate">{link.label}</span>
+                    <ExternalLink className="h-3.5 w-3.5 shrink-0 text-amber-700" />
+                  </a>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 

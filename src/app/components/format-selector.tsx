@@ -28,8 +28,8 @@ export function FormatSelector({ value, onChange, className, campaignMode = 'reg
 
   return (
     <div className={cn('space-y-1.5', className)}>
-      <div className="flex items-baseline justify-between gap-2">
-        <div className="flex items-center gap-1.5 min-w-0">
+      <div className="flex items-center justify-between gap-2 min-w-0">
+        <div className="flex items-center gap-1.5 shrink-0">
           <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
             Formato
           </span>
@@ -41,8 +41,11 @@ export function FormatSelector({ value, onChange, className, campaignMode = 'reg
             </span>
           )}
         </div>
-        <span className="text-[10px] font-semibold text-muted-foreground truncate" title={current.description}>
-          {current.description} · {orientationLabel(value, campaignMode, campaignBrand)}
+        <span
+          className="text-[10px] font-semibold text-muted-foreground truncate text-right min-w-0"
+          title={`${current.description} · ${orientationLabel(value, campaignMode, campaignBrand)}`}
+        >
+          {current.caption} · {orientationLabel(value, campaignMode, campaignBrand)}
         </span>
       </div>
 

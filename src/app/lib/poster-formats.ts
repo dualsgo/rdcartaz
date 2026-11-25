@@ -47,6 +47,17 @@ export function doesItemMatchCampaignMode(campaign: string | undefined, mode: Ca
   return kind === null;
 }
 
+export const CAMPAIGN_SHEET_LINKS = {
+  friday: {
+    label: 'Planilha Oficial Happy / Best Friday',
+    url: 'https://docs.google.com/spreadsheets/d/1PG2uBH5cLNOAiDOYbqBV-BY5DmIVo4gxdRk3a2oTqhY/edit?usp=drivesdk',
+  },
+  '50off': {
+    label: 'Planilha Oficial Campanha 50%',
+    url: 'https://docs.google.com/spreadsheets/d/1DvpX4wbtVJMqIMu1IAAB1WQdWDLnb0ckGHMuZLFWq6E/edit?gid=1792452009#gid=1792452009',
+  },
+} as const;
+
 export function getCampaignModeLabel(mode: CampaignMode = 'regular', campaignBrand?: 'rihappy' | 'pbkids'): string {
   if (mode === 'friday') return campaignBrand === 'pbkids' ? 'Best Friday' : 'Happy Friday';
   if (mode === '50off') return 'Campanha 50%';

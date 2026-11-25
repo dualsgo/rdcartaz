@@ -34,6 +34,7 @@ export type PosterSettings = {
   happyFridayEnabled?: boolean;
   campaignBrand?: 'rihappy' | 'pbkids';
   campaignMode?: CampaignMode;
+  campaignAssistantEnabled?: boolean;
   enabledFormats?: EnabledFormats;
 };
 
