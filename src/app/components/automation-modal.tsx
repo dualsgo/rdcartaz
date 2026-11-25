@@ -7,9 +7,10 @@ interface AutomationModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSelectFile: (mode: 'offer' | 'normal') => void;
+  showLabelsOption?: boolean;
 }
 
-export function AutomationModal({ isOpen, onClose, onSelectFile }: AutomationModalProps) {
+export function AutomationModal({ isOpen, onClose, onSelectFile, showLabelsOption = false }: AutomationModalProps) {
   if (!isOpen) return null;
 
   return (
@@ -51,15 +52,19 @@ export function AutomationModal({ isOpen, onClose, onSelectFile }: AutomationMod
           <div className="flex gap-4">
             <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-100 text-blue-700 font-bold flex items-center justify-center text-sm">2</div>
             <div className="space-y-1.5">
-              <h4 className="font-bold text-gray-900 text-sm">Escolha o que deseja gerar:</h4>
+              <h4 className="font-bold text-gray-900 text-sm">
+                {showLabelsOption ? 'Escolha o que deseja gerar:' : 'Importe o arquivo de ofertas:'}
+              </h4>
               <p className="text-xs text-gray-600 leading-relaxed">
-                Você pode filtrar apenas os produtos em oferta ou gerar as etiquetas normais (brancas) com o novo preço.
+                {showLabelsOption
+                  ? 'Você pode filtrar apenas os produtos em oferta ou gerar as etiquetas normais (brancas) com o novo preço.'
+                  : 'O sistema filtrará os produtos em oferta para gerar os cartazes automaticamente.'}
               </p>
             </div>
           </div>
 
           {/* Botões de ação */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+          <div className={showLabelsOption ? 'grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2' : 'grid grid-cols-1 gap-3 pt-2'}>
             <Button 
               onClick={() => {
                 onClose();
@@ -71,22 +76,24 @@ export function AutomationModal({ isOpen, onClose, onSelectFile }: AutomationMod
                 <Download className="h-4 w-4" />
                 <span>Gerar Ofertas</span>
               </div>
-              <span className="text-[9px] opacity-80 normal-case font-medium">(Cartaz Amarelo)</span>
+              <span className="text-[9px] opacity-80 normal-case font-medium">(Cartaz Oferta)</span>
             </Button>
             
-            <Button 
-              onClick={() => {
-                onClose();
-                onSelectFile('normal');
-              }}
-              className="h-16 bg-slate-700 hover:bg-slate-800 text-white font-black uppercase tracking-tight text-xs shadow-lg shadow-slate-200 flex flex-col items-center justify-center gap-1 group py-2"
-            >
-              <div className="flex items-center gap-2">
-                <Download className="h-4 w-4" />
-                <span>Gerar Etiquetas</span>
-              </div>
-              <span className="text-[9px] opacity-80 normal-case font-medium">(Branco / S. Oferta)</span>
-            </Button>
+            {showLabelsOption && (
+              <Button 
+                onClick={() => {
+                  onClose();
+                  onSelectFile('normal');
+                }}
+                className="h-16 bg-slate-700 hover:bg-slate-800 text-white font-black uppercase tracking-tight text-xs shadow-lg shadow-slate-200 flex flex-col items-center justify-center gap-1 group py-2"
+              >
+                <div className="flex items-center gap-2">
+                  <Download className="h-4 w-4" />
+                  <span>Gerar Etiquetas</span>
+                </div>
+                <span className="text-[9px] opacity-80 normal-case font-medium">(Branco / S. Oferta)</span>
+              </Button>
+            )}
           </div>
 
           <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 text-xs text-blue-900 space-y-1">

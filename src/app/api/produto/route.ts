@@ -13,7 +13,8 @@ function removeAliases(produtos: Record<string, ProdutoEntry>, keys: string[]): 
 export async function GET(request: NextRequest) {
     const q     = request.nextUrl.searchParams.get('q')?.trim();
     const list  = request.nextUrl.searchParams.get('list');
-    const page  = parseInt(request.nextUrl.searchParams.get('page') ?? '1', 10);
+    const rawPage = parseInt(request.nextUrl.searchParams.get('page') ?? '1', 10);
+    const page  = Number.isFinite(rawPage) && rawPage >= 1 ? rawPage : 1;
     const limit = 50;
 
     // ── Modo listagem paginada para o gerenciador ──
@@ -64,7 +65,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Parâmetro "q" inválido.' }, { status: 400 });
     }
     const produtos = loadProdutos();
-    const produto  = produtos[q];
+    const produto  = Object.prototype.hasOwnProperty.call(produtos, q) ? produtos[q] : undefined;
     if (!produto) return NextResponse.json({ error: 'Produto não encontrado.' }, { status: 404 });
     return NextResponse.json(produto);
 }

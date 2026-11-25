@@ -887,6 +887,7 @@ export default function Home() {
       <AutomationModal 
         isOpen={showAutomation} 
         onClose={() => setShowAutomation(false)} 
+        showLabelsOption={Boolean(settings.enabledFormats?.gondola || settings.enabledFormats?.vitrine)}
         onSelectFile={(mode) => {
           setImportMode(mode);
           fileInputRef.current?.click();
