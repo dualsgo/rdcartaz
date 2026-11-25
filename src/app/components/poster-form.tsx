@@ -97,8 +97,7 @@ type PosterFormProps = {
   onContinuousScanChange?: (value: boolean) => void;
   /** Foca a busca ao montar (ignorado em dispositivos touch) */
   autoFocus?: boolean;
-  onSwitchCampaignMode?: (mode: CampaignMode) => void;
-  onDisableAssistant?: () => void;
+  onAutoDetectMode?: (mode: CampaignMode) => void;
 };
 
 /* Leitores de código de barras USB (HID) "digitam" muito mais rápido que um humano. */
@@ -161,7 +160,7 @@ type ProductPayload = {
 export const PosterForm = forwardRef<PosterFormHandle, PosterFormProps>(function PosterForm(
   {
     data, setData, posterType, settings, onLookupStatusChange, onImportBatch, sessionProducts,
-    onAutoAdd, onSubmit, continuousScan = false, onContinuousScanChange, autoFocus = false, onSwitchCampaignMode, onDisableAssistant,
+    onAutoAdd, onSubmit, continuousScan = false, onContinuousScanChange, autoFocus = false, onAutoDetectMode,
   },
   ref
 ) {
@@ -199,11 +198,9 @@ export const PosterForm = forwardRef<PosterFormHandle, PosterFormProps>(function
   }, []);
 
   const [showWarning, setShowWarning] = useState(false);
-  const [campaignMismatch, setCampaignMismatch] = useState<{
+  const [autoDetectedInfo, setAutoDetectedInfo] = useState<{
+    mode: CampaignMode;
     description: string;
-    code: string;
-    expectedMode: CampaignMode;
-    actualMode: CampaignMode;
   } | null>(null);
   const [isManualMode, setIsManualMode] = useState(false);
   const [manualDescription, setManualDescription] = useState('');
@@ -229,7 +226,7 @@ export const PosterForm = forwardRef<PosterFormHandle, PosterFormProps>(function
   
   const assistantEnabled = Boolean(settings.campaignAssistantEnabled);
   const effectiveCampaignMode: CampaignMode = assistantEnabled
-    ? (settings.campaignMode === '50off' ? '50off' : 'friday')
+    ? (settings.campaignMode ?? 'friday')
     : 'regular';
 
   // Força o tipo 'oferta' para modelos que não possuem 'preço normal'
@@ -354,7 +351,7 @@ export const PosterForm = forwardRef<PosterFormHandle, PosterFormProps>(function
     setLookupStatus('idle');
     setIsManualMode(false);
     setShowWarning(false);
-    setCampaignMismatch(null);
+    setAutoDetectedInfo(null);
 
     if (autoScanTimer.current) {
       clearTimeout(autoScanTimer.current);
@@ -425,23 +422,21 @@ export const PosterForm = forwardRef<PosterFormHandle, PosterFormProps>(function
       };
     };
 
-    const applyFound = (produto: ProductPayload): PosterData | null => {
+    const applyFound = (produto: ProductPayload): PosterData => {
       const foundData = buildFoundData(produto);
-      if (assistantEnabled && !doesItemMatchCampaignMode(foundData.campaign, effectiveCampaignMode)) {
+      if (assistantEnabled) {
         const kind = getCampaignKind(foundData.campaign);
-        const actualMode: CampaignMode = kind === 'friday' ? 'friday' : kind === '50off' ? '50off' : 'regular';
-        setCampaignMismatch({
-          description: foundData.description,
-          code: foundData.code || query,
-          expectedMode: effectiveCampaignMode,
-          actualMode,
-        });
-        setLookupStatus('notfound');
-        onLookupStatusChange?.(false);
-        return null;
+        const detectedMode: CampaignMode = kind === 'friday' ? 'friday' : kind === '50off' ? '50off' : 'regular';
+        if (detectedMode !== effectiveCampaignMode) {
+          onAutoDetectMode?.(detectedMode);
+          setAutoDetectedInfo({ mode: detectedMode, description: foundData.description });
+        } else {
+          setAutoDetectedInfo(null);
+        }
+      } else {
+        setAutoDetectedInfo(null);
       }
 
-      setCampaignMismatch(null);
       setData(foundData);
       if (produto.priceFrom) priceFrom.setValue(produto.priceFrom);
       if (produto.priceFor) priceFor.setValue(produto.priceFor);
@@ -737,62 +732,24 @@ export const PosterForm = forwardRef<PosterFormHandle, PosterFormProps>(function
           </div>
         </div>
 
-        {campaignMismatch && (
-          <div
-            role="alert"
-            className="bg-red-50 border border-red-200 p-3.5 rounded-xl space-y-2.5 animate-in fade-in slide-in-from-top-2 duration-200"
-          >
-            <div className="flex items-start gap-2.5">
-              <div className="bg-red-100 p-1.5 rounded-lg shrink-0">
-                <AlertTriangle className="h-4 w-4 text-red-700" />
-              </div>
-              <div className="space-y-1 min-w-0">
-                <h4 className="font-black text-red-900 uppercase text-xs tracking-tight">
-                  Item não faz parte desta lista
-                </h4>
-                <p className="text-[11px] text-red-800 leading-snug">
-                  <span className="font-bold">{campaignMismatch.description}</span> ({campaignMismatch.code}) não pertence à lista de{' '}
-                  <span className="font-bold">{getCampaignModeLabel(campaignMismatch.expectedMode, settings.campaignBrand)}</span>.
-                  <br />
-                  Classificação atual: <span className="font-bold">{getCampaignModeLabel(campaignMismatch.actualMode, settings.campaignBrand)}</span>.
-                </p>
-              </div>
+        {autoDetectedInfo && (
+          <div className="bg-amber-50 border border-amber-200 px-3 py-2 rounded-xl flex items-center justify-between gap-2 animate-in fade-in duration-200">
+            <div className="flex items-center gap-2 min-w-0">
+              <Zap className="h-3.5 w-3.5 text-amber-600 fill-amber-500 shrink-0" />
+              <p className="text-[11px] text-amber-900 leading-snug truncate">
+                Enquadrado automaticamente em{' '}
+                <span className="font-black">{getCampaignModeLabel(autoDetectedInfo.mode, settings.campaignBrand)}</span>
+              </p>
             </div>
-            {(campaignMismatch.expectedMode === 'friday' || campaignMismatch.expectedMode === '50off') && (
+            {(autoDetectedInfo.mode === 'friday' || autoDetectedInfo.mode === '50off') && (
               <a
-                href={CAMPAIGN_SHEET_LINKS[campaignMismatch.expectedMode].url}
+                href={CAMPAIGN_SHEET_LINKS[autoDetectedInfo.mode].url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-between gap-2 py-1.5 px-3 bg-white hover:bg-red-100/50 text-red-900 border border-red-200 font-bold text-[10px] rounded-lg transition-colors"
+                className="text-[10px] font-bold text-amber-800 hover:underline inline-flex items-center gap-1 shrink-0"
               >
-                <span>{CAMPAIGN_SHEET_LINKS[campaignMismatch.expectedMode].label}</span>
-                <ExternalLink className="h-3 w-3 shrink-0 text-red-700" />
+                Planilha <ExternalLink className="h-2.5 w-2.5" />
               </a>
-            )}
-            {campaignMismatch.actualMode !== 'regular' && onSwitchCampaignMode && (
-              <button
-                type="button"
-                onClick={() => {
-                  const target = campaignMismatch.actualMode;
-                  setCampaignMismatch(null);
-                  onSwitchCampaignMode(target);
-                }}
-                className="w-full py-1.5 px-3 bg-red-600 hover:bg-red-700 text-white font-black text-[10px] uppercase tracking-wider rounded-lg transition-colors"
-              >
-                Mudar para {getCampaignModeLabel(campaignMismatch.actualMode, settings.campaignBrand)}
-              </button>
-            )}
-            {campaignMismatch.actualMode === 'regular' && onDisableAssistant && (
-              <button
-                type="button"
-                onClick={() => {
-                  setCampaignMismatch(null);
-                  onDisableAssistant();
-                }}
-                className="w-full py-1.5 px-3 bg-zinc-800 hover:bg-zinc-900 text-white font-black text-[10px] uppercase tracking-wider rounded-lg transition-colors"
-              >
-                Desativar Assistente (Fazer Cartaz Tradicional)
-              </button>
             )}
           </div>
         )}

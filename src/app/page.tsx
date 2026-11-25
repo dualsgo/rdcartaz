@@ -203,11 +203,11 @@ export default function Home() {
 
   const { toast } = useToast();
 
-  const saveSettings = (newSettings: PosterSettings) => {
+  const saveSettings = (newSettings: PosterSettings, preserveCurrent = false) => {
     const prevAssistant = Boolean(settings.campaignAssistantEnabled);
     const nextAssistant = Boolean(newSettings.campaignAssistantEnabled);
-    const prevEffectiveMode = prevAssistant ? (settings.campaignMode === '50off' ? '50off' : 'friday') : 'regular';
-    const nextEffectiveMode = nextAssistant ? (newSettings.campaignMode === '50off' ? '50off' : 'friday') : 'regular';
+    const prevEffectiveMode = prevAssistant ? (settings.campaignMode ?? 'friday') : 'regular';
+    const nextEffectiveMode = nextAssistant ? (newSettings.campaignMode ?? 'friday') : 'regular';
 
     setSettings(newSettings);
     localStorage.setItem('poster-settings', JSON.stringify(newSettings));
@@ -218,7 +218,7 @@ export default function Home() {
         isOpen: true,
         type: 'warning',
         title: 'Assistente de Campanhas Ativado',
-        message: 'Com o Assistente ativo, os itens são filtrados por campanha (Happy/Best Friday ou Campanha 50%) e cada produto só poderá gerar os cartazes pertinentes à sua lista oficial. Para fazer cartazes tradicionais de qualquer produto, desative o assistente.',
+        message: 'Com o Assistente ativo, o lote carregado é filtrado por lista (Happy/Best Friday, Campanha 50% ou Regulares). Ao digitar um código avulso, o sistema identifica automaticamente em qual lista ele se enquadra e exibe apenas os modelos válidos para aquele item.',
         links: [
           CAMPAIGN_SHEET_LINKS.friday,
           CAMPAIGN_SHEET_LINKS['50off'],
@@ -227,7 +227,7 @@ export default function Home() {
       });
     }
 
-    if (prevEffectiveMode !== nextEffectiveMode && nextAssistant) {
+    if (!preserveCurrent && prevEffectiveMode !== nextEffectiveMode && nextAssistant) {
       if (isProductReady && !doesItemMatchCampaignMode(currentPoster.campaign, nextEffectiveMode)) {
         setCurrentPoster(initialPosterData());
         setIsProductReady(false);
@@ -293,7 +293,7 @@ export default function Home() {
 
   const assistantEnabled = Boolean(settings.campaignAssistantEnabled);
   const campaignMode: CampaignMode = assistantEnabled
-    ? (settings.campaignMode === '50off' ? '50off' : 'friday')
+    ? (settings.campaignMode ?? 'friday')
     : 'regular';
   const currentFormat = getPosterFormat(posterType, campaignMode, settings.campaignBrand);
   const perPage = currentFormat.perPage;
@@ -360,6 +360,8 @@ export default function Home() {
         result = result.filter(item => getCampaignKind(item.campaign) === '50off');
       } else if (campaignMode === 'friday') {
         result = result.filter(item => getCampaignKind(item.campaign) === 'friday');
+      } else {
+        result = result.filter(item => getCampaignKind(item.campaign) === null);
       }
     }
 
@@ -1010,6 +1012,18 @@ export default function Home() {
                 >
                   Campanha 50%
                 </button>
+                <button
+                  type="button"
+                  onClick={() => saveSettings({ ...settings, campaignMode: 'regular' })}
+                  className={cn(
+                    'px-2 sm:px-2.5 py-1 rounded-md text-[9px] sm:text-[10px] font-black uppercase tracking-tight transition-all whitespace-nowrap',
+                    campaignMode === 'regular'
+                      ? 'bg-background text-foreground shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground'
+                  )}
+                >
+                  Regulares
+                </button>
               </div>
             )}
           </div>
@@ -1104,8 +1118,7 @@ export default function Home() {
                 onImportBatch={() => setShowAutomation(true)}
                 sessionProducts={sessionProducts}
                 onAutoAdd={handleAutoAdd}
-                onSwitchCampaignMode={(mode) => saveSettings({ ...settings, campaignAssistantEnabled: true, campaignMode: mode })}
-                onDisableAssistant={() => saveSettings({ ...settings, campaignAssistantEnabled: false })}
+                onAutoDetectMode={(mode) => saveSettings({ ...settings, campaignAssistantEnabled: true, campaignMode: mode }, true)}
                 onSubmit={handleAddToQueue}
                 continuousScan={continuousScan}
                 onContinuousScanChange={handleContinuousScanChange}

@@ -20,7 +20,7 @@ import { cn } from '@/lib/utils';
 
 function getEffectiveMode(settings?: PosterSettings) {
   return settings?.campaignAssistantEnabled
-    ? (settings?.campaignMode === '50off' ? '50off' : 'friday')
+    ? (settings?.campaignMode ?? 'friday')
     : 'regular';
 }
 
