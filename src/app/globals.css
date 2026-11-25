@@ -161,8 +161,8 @@
 
 @font-face {
   font-family: 'GOTHICB';
-  src: local('Century Gothic Bold'), local('Century Gothic'), url('/fonts/GOTHICBI.ttf') format('truetype');
-  font-weight: bold;
+  src: url('/fonts/GOTHICB.ttf') format('truetype');
+  font-weight: normal;
   font-style: normal;
 }
 
@@ -174,4 +174,4 @@
 .rd-pulse-soft {
   animation: rd-pulse-soft 2.4s infinite;
 }
-
+

@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Settings, Database, RotateCcw, Check, Loader2, FileSpreadsheet, CreditCard, Zap } from 'lucide-react';
-import type { PosterSettings } from '@/app/lib/types';
+import type { PosterSettings, EnabledFormats } from '@/app/lib/types';
 import { parseReportSemGiro } from '@/app/lib/poster-utils';
 import { cn } from '@/lib/utils';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -33,22 +33,34 @@ export function SettingsDialog({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [maxInstallments, setMaxInstallments] = useState(settings.maxInstallments.toString());
   const [minAmount, setMinAmount] = useState(settings.minInstallmentAmount.toString());
-  const [happyFridayEnabled, setHappyFridayEnabled] = useState(!!settings.happyFridayEnabled);
+  const [enabledFormats, setEnabledFormats] = useState<EnabledFormats>({
+    posters: settings.enabledFormats?.posters !== false,
+    gondola: settings.enabledFormats?.gondola === true,
+    vitrine: settings.enabledFormats?.vitrine === true,
+  });
 
   useEffect(() => {
     setMaxInstallments(settings.maxInstallments.toString());
     setMinAmount(settings.minInstallmentAmount.toString());
-    setHappyFridayEnabled(!!settings.happyFridayEnabled);
+    setEnabledFormats({
+      posters: settings.enabledFormats?.posters !== false,
+      gondola: settings.enabledFormats?.gondola === true,
+      vitrine: settings.enabledFormats?.vitrine === true,
+    });
   }, [settings]);
 
-  const handleToggleHappyFriday = (checked: boolean) => {
-    setHappyFridayEnabled(checked);
+  const handleToggleFormat = (key: keyof EnabledFormats, checked: boolean) => {
+    const next: EnabledFormats = { ...enabledFormats, [key]: checked };
+    // Garante que pelo menos um grupo de modelos permaneça ativo
+    if (!next.posters && !next.gondola && !next.vitrine) return;
+    setEnabledFormats(next);
     let parsedMax = parseInt(maxInstallments, 10) || 10;
     if (parsedMax !== 6) parsedMax = 10;
     onSave({
+      ...settings,
       maxInstallments: parsedMax,
       minInstallmentAmount: 29.99,
-      happyFridayEnabled: checked,
+      enabledFormats: next,
     });
   };
 
@@ -60,9 +72,10 @@ export function SettingsDialog({
     setMinAmount("29.99");
 
     onSave({
+      ...settings,
       maxInstallments: parsedMax,
       minInstallmentAmount: 29.99,
-      happyFridayEnabled,
+      enabledFormats,
     });
   };
 
@@ -110,54 +123,51 @@ export function SettingsDialog({
         </DialogHeader>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-2 items-stretch">
           
-          {/* COLUNA ESQUERDA: Parcelamento + Campanha Happy Friday */}
+          {/* COLUNA ESQUERDA: Modelos de Impressão + Parcelamento */}
           <div className="flex flex-col gap-4">
-            {/* Seção Campanha Happy Friday */}
-            <div className={cn(
-              "p-3.5 rounded-xl border transition-all duration-300 shadow-sm",
-              happyFridayEnabled
-                ? "bg-zinc-900 text-white border-amber-400/60"
-                : "bg-muted/40 border-border"
-            )}>
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <div className={cn(
-                    "w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors",
-                    happyFridayEnabled ? "bg-amber-400 text-zinc-950" : "bg-amber-500/10 text-amber-600"
-                  )}>
-                    <Zap className="h-4 w-4 fill-current" />
-                  </div>
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2">
-                      <h3 className={cn("text-sm font-bold leading-tight", happyFridayEnabled ? "text-white" : "text-gray-900")}>
-                        Campanha Happy Friday
-                      </h3>
-                      {happyFridayEnabled && (
-                        <span className="text-[9px] font-black uppercase px-1.5 py-0.5 rounded bg-amber-400 text-zinc-950 tracking-wider">
-                          Ativo
-                        </span>
-                      )}
-                    </div>
-                    <p className={cn(
-                      "text-[0.65rem] uppercase font-bold tracking-wider mt-0.5",
-                      happyFridayEnabled ? "text-amber-300/90" : "text-muted-foreground"
-                    )}>
-                      Esquenta Black Friday · 4.995 itens
-                    </p>
-                  </div>
-                </div>
-                <Switch
-                  id="happy-friday-toggle"
-                  checked={happyFridayEnabled}
-                  onCheckedChange={handleToggleHappyFriday}
-                />
+            {/* Seção de Modelos Ativos */}
+            <div className="p-3.5 rounded-xl border bg-muted/30 border-border shadow-sm space-y-2.5">
+              <div>
+                <h3 className="text-sm font-bold text-gray-900 leading-tight">Modelos de Impressão</h3>
+                <p className="text-[0.68rem] text-muted-foreground mt-0.5">
+                  Ative ou oculte os formatos exibidos no seletor principal.
+                </p>
               </div>
-              <p className={cn(
-                "text-[0.7rem] mt-2 leading-snug",
-                happyFridayEnabled ? "text-zinc-300" : "text-muted-foreground"
-              )}>
-                Destaca produtos da campanha na lista e ativa o layout secundário da campanha nos cartazes e etiquetas de vitrine.
-              </p>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between gap-2 rounded-lg bg-white px-3 py-2 border border-border/60">
+                  <div className="min-w-0">
+                    <span className="block text-xs font-bold text-gray-900">Cartazes (A4 / A5 / A6)</span>
+                    <span className="block text-[0.65rem] text-muted-foreground">Relíquias e campanhas</span>
+                  </div>
+                  <Switch
+                    id="toggle-format-posters"
+                    checked={enabledFormats.posters !== false}
+                    onCheckedChange={(checked) => handleToggleFormat('posters', checked)}
+                  />
+                </div>
+                <div className="flex items-center justify-between gap-2 rounded-lg bg-white px-3 py-2 border border-border/60">
+                  <div className="min-w-0">
+                    <span className="block text-xs font-bold text-gray-900">Etiqueta Gôndola (16/folha)</span>
+                    <span className="block text-[0.65rem] text-muted-foreground">Etiquetas de gôndola 90×34mm</span>
+                  </div>
+                  <Switch
+                    id="toggle-format-gondola"
+                    checked={enabledFormats.gondola === true}
+                    onCheckedChange={(checked) => handleToggleFormat('gondola', checked)}
+                  />
+                </div>
+                <div className="flex items-center justify-between gap-2 rounded-lg bg-white px-3 py-2 border border-border/60">
+                  <div className="min-w-0">
+                    <span className="block text-xs font-bold text-gray-900">Etiqueta Vitrine (16/folha)</span>
+                    <span className="block text-[0.65rem] text-muted-foreground">Etiquetas de vitrine 90×34mm</span>
+                  </div>
+                  <Switch
+                    id="toggle-format-vitrine"
+                    checked={enabledFormats.vitrine === true}
+                    onCheckedChange={(checked) => handleToggleFormat('vitrine', checked)}
+                  />
+                </div>
+              </div>
             </div>
 
             {/* Seção de Parcelamento */}

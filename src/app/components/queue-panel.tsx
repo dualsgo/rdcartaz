@@ -16,8 +16,8 @@ import {
   Tag,
   Zap
 } from 'lucide-react';
-import type { PosterData, PosterType } from '@/app/lib/types';
-import { getPosterFormat } from '@/app/lib/poster-formats';
+import type { PosterData, PosterType, CampaignMode } from '@/app/lib/types';
+import { getPosterFormat, getCampaignKind } from '@/app/lib/poster-formats';
 import { cn } from '@/lib/utils';
 
 /* ─────────────────────────── SheetGlyph ─────────────────────────── */
@@ -52,8 +52,8 @@ function SheetGlyph({ perPage, filled, orientation }: { perPage: number; filled:
 
 /* ─────────────────────────── SheetOccupancy ─────────────────────────── */
 // Ocupação da folha atual, calculada a partir das páginas reais de impressão
-export function SheetOccupancy({ printPages, posterType, happyFridayEnabled }: { printPages: PosterData[][]; posterType: PosterType; happyFridayEnabled?: boolean }) {
-  const fmt = getPosterFormat(posterType, happyFridayEnabled);
+export function SheetOccupancy({ printPages, posterType, campaignMode, campaignBrand }: { printPages: PosterData[][]; posterType: PosterType; campaignMode?: CampaignMode; campaignBrand?: 'rihappy' | 'pbkids' }) {
+  const fmt = getPosterFormat(posterType, campaignMode ?? 'regular', campaignBrand);
   const perPage = fmt.perPage;
   const totalSheets = printPages.length;
   const filled = totalSheets > 0 ? printPages[totalSheets - 1].length : 0;
@@ -118,12 +118,14 @@ type QueuePanelProps = {
   onStockFilterChange?: (stock: string) => void;
   priceRangeFilter?: 'all' | 'under-50' | '50-100' | 'over-100';
   onPriceRangeFilterChange?: (range: string) => void;
-  campaignFilter?: 'all' | 'happy-friday' | 'regular';
-  onCampaignFilterChange?: (campaign: 'all' | 'happy-friday' | 'regular') => void;
+  campaignFilter?: 'all' | '50off' | 'friday' | 'regular';
+  onCampaignFilterChange?: (campaign: 'all' | '50off' | 'friday' | 'regular') => void;
   availableSuppliers?: string[];
   hasStockData?: boolean;
   onResetFilters?: () => void;
   happyFridayEnabled?: boolean;
+  campaignMode?: CampaignMode;
+  campaignBrand?: 'rihappy' | 'pbkids';
   className?: string;
 };
 
@@ -157,6 +159,8 @@ export function QueuePanel({
   hasStockData = false,
   onResetFilters,
   happyFridayEnabled = false,
+  campaignMode = 'regular',
+  campaignBrand,
   className,
 }: QueuePanelProps) {
   const [showFilters, setShowFilters] = useState(false);
@@ -189,7 +193,6 @@ export function QueuePanel({
     priceRangeFilter !== 'all' ||
     queueFilter !== 'all' ||
     subTypeGroup !== 'offer-first' ||
-    (happyFridayEnabled && campaignFilter !== 'all') ||
     queueSort !== 'stock-desc';
 
   return (
@@ -206,26 +209,6 @@ export function QueuePanel({
             <span className="text-[10px] font-semibold text-muted-foreground tabular-nums whitespace-nowrap">
               {totalUnits} un.
             </span>
-          )}
-          {happyFridayEnabled && queue.length > 0 && (
-            <button
-              type="button"
-              onClick={() => onCampaignFilterChange?.(campaignFilter === 'happy-friday' ? 'all' : 'happy-friday')}
-              className={cn(
-                "inline-flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded-full font-black tabular-nums whitespace-nowrap transition-all border",
-                campaignFilter === 'happy-friday'
-                  ? "bg-amber-400 text-zinc-950 border-zinc-900 shadow-sm"
-                  : "bg-zinc-900 text-amber-400 border-amber-400/40 hover:bg-zinc-800"
-              )}
-              title={
-                campaignFilter === 'happy-friday'
-                  ? 'Mostrando apenas itens Happy Friday. Clique para mostrar todos.'
-                  : `Filtrar apenas os ${totalHappyFridayInQueue} itens da campanha Happy Friday`
-              }
-            >
-              <Zap className={cn("h-2.5 w-2.5", campaignFilter === 'happy-friday' ? "fill-zinc-950" : "fill-amber-400")} />
-              <span>{totalHappyFridayInQueue}</span>
-            </button>
           )}
         </div>
 
@@ -347,25 +330,6 @@ export function QueuePanel({
             </div>
           </div>
 
-          {/* Filtro por Campanha (exibido apenas quando Happy Friday está ativo nas configurações) */}
-          {happyFridayEnabled && (
-            <div className="space-y-1 pt-1 border-t border-border/40">
-              <span className="text-[10px] font-black uppercase tracking-wider text-amber-700 flex items-center gap-1.5">
-                <Zap className="h-3 w-3 text-amber-500 fill-amber-500" />
-                Campanha
-              </span>
-              <select
-                value={campaignFilter}
-                onChange={(e) => onCampaignFilterChange?.(e.target.value as 'all' | 'happy-friday' | 'regular')}
-                className="w-full h-7 px-2 text-[11px] font-bold bg-background border border-amber-300 rounded-md text-foreground focus:ring-1 focus:ring-amber-500 outline-none"
-              >
-                <option value="all">Todos os Itens ({queue.length})</option>
-                <option value="happy-friday">⚡ Somente Happy Friday ({totalHappyFridayInQueue})</option>
-                <option value="regular">Fora da Campanha ({queue.length - totalHappyFridayInQueue})</option>
-              </select>
-            </div>
-          )}
-
           {/* Filtro por Fornecedor (se houver fornecedores mapeados) */}
           {availableSuppliers.length > 0 && (
             <div className="space-y-1">
@@ -428,7 +392,7 @@ export function QueuePanel({
         </div>
       )}
 
-      <SheetOccupancy printPages={printPages} posterType={posterType} happyFridayEnabled={happyFridayEnabled} />
+      <SheetOccupancy printPages={printPages} posterType={posterType} campaignMode={campaignMode} campaignBrand={campaignBrand} />
 
       {/* ── Lista de Itens do Lote ── */}
       <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
@@ -480,7 +444,8 @@ export function QueuePanel({
 
                 const showHeader = startPage !== lastPage;
                 lastPage = startPage;
-                const isHappyFriday = happyFridayEnabled && item.campaign === 'ESQUENTA_BLACK';
+                const itemCampaignKind = getCampaignKind(item.campaign);
+                const isHappyFriday = itemCampaignKind !== null;
 
                 return (
                   <React.Fragment key={index}>
@@ -564,13 +529,22 @@ export function QueuePanel({
 
                         {/* Badges de Campanha, Estoque e Fornecedor */}
                         <div className="flex items-center gap-1.5 mt-1 flex-wrap">
-                          {isHappyFriday && (
+                          {itemCampaignKind === '50off' && (
                             <span
                               className="inline-flex items-center gap-1 text-[9px] font-black px-1.5 py-0.2 rounded bg-zinc-900 text-amber-400 border border-amber-400/40 uppercase tracking-tight"
-                              title="Produto selecionado para a campanha Happy Friday"
+                              title="Produto participante da Campanha 50% OFF"
                             >
-                              <Zap className="h-2.5 w-2.5 fill-amber-400 shrink-0" />
-                              Happy Friday
+                              <Zap className="h-2.5 w-2.5 fill-amber-400" />
+                              50% OFF
+                            </span>
+                          )}
+                          {itemCampaignKind === 'friday' && (
+                            <span
+                              className="inline-flex items-center gap-1 text-[9px] font-black px-1.5 py-0.2 rounded bg-amber-400 text-zinc-950 border border-zinc-900/20 uppercase tracking-tight"
+                              title={`Produto participante da campanha ${campaignBrand === 'pbkids' ? 'Best Friday' : 'Happy Friday'}`}
+                            >
+                              <Zap className="h-2.5 w-2.5 fill-zinc-950" />
+                              {campaignBrand === 'pbkids' ? 'Best Friday' : 'Happy Friday'}
                             </span>
                           )}
                           {item.stock !== undefined && item.stock !== null && (

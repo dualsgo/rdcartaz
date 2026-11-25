@@ -1,41 +1,61 @@
 'use client';
 
-import type { PosterType } from '@/app/lib/types';
-import { VISIBLE_FORMATS, getPosterFormat, orientationLabel } from '@/app/lib/poster-formats';
+import type { PosterType, CampaignMode, EnabledFormats } from '@/app/lib/types';
+import { getVisibleFormats, getPosterFormat, orientationLabel } from '@/app/lib/poster-formats';
 import { cn } from '@/lib/utils';
 
 type FormatSelectorProps = {
   value: PosterType;
   onChange: (type: PosterType) => void;
   className?: string;
-  happyFridayEnabled?: boolean;
+  campaignMode?: CampaignMode;
+  campaignBrand?: 'rihappy' | 'pbkids';
+  enabledFormats?: EnabledFormats;
 };
 
 /**
  * Seletor ÚNICO de formato de impressão (antes duplicado em header, formulário e prévia).
  * Segmented control compacto, com atalhos Alt+1..N.
  */
-export function FormatSelector({ value, onChange, className, happyFridayEnabled }: FormatSelectorProps) {
-  const current = getPosterFormat(value, happyFridayEnabled);
+export function FormatSelector({ value, onChange, className, campaignMode = 'regular', campaignBrand, enabledFormats }: FormatSelectorProps) {
+  const formats = getVisibleFormats(campaignMode, enabledFormats);
+  const current = getPosterFormat(value, campaignMode, campaignBrand);
+
+  const gridColsClass =
+    formats.length <= 2 ? 'grid-cols-2' :
+    formats.length === 3 ? 'grid-cols-3' :
+    formats.length === 4 ? 'grid-cols-4' : 'grid-cols-5';
 
   return (
     <div className={cn('space-y-1.5', className)}>
       <div className="flex items-baseline justify-between gap-2">
-        <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-          Formato
-        </span>
+        <div className="flex items-center gap-1.5 min-w-0">
+          <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+            Formato
+          </span>
+          {campaignMode !== 'regular' && (
+            <span className="text-[9px] font-black uppercase px-1.5 py-0.2 rounded bg-zinc-900 text-amber-400 tracking-wider whitespace-nowrap">
+              {campaignMode === 'friday'
+                ? (campaignBrand === 'pbkids' ? 'Best Friday' : 'Happy Friday')
+                : '50% OFF'}
+            </span>
+          )}
+        </div>
         <span className="text-[10px] font-semibold text-muted-foreground truncate" title={current.description}>
-          {current.description} · {orientationLabel(value)}
+          {current.description} · {orientationLabel(value, campaignMode, campaignBrand)}
         </span>
       </div>
 
       <div
         role="radiogroup"
         aria-label="Formato de impressão"
-        className="grid grid-cols-4 gap-1 p-1 bg-muted rounded-xl border border-border/50 shadow-inner"
+        className={cn(
+          'grid gap-1 p-1 bg-muted rounded-xl border border-border/50 shadow-inner',
+          gridColsClass
+        )}
       >
-        {VISIBLE_FORMATS.map((rawF, i) => {
-          const f = getPosterFormat(rawF.id, happyFridayEnabled);
+        {formats.map((rawF, i) => {
+          const f = getPosterFormat(rawF.id, campaignMode, campaignBrand);
           const active = value === f.id;
           return (
             <button

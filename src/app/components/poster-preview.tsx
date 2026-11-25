@@ -2,13 +2,8 @@
 
 import type { PosterData, PosterSettings } from '@/app/lib/types';
 import { parsePrice, formatCurrency, calculateInstallments } from '@/app/lib/poster-utils';
-import { PosterPreviewHappyFridayA5 } from './poster-preview-happy-friday-a5';
 
 export function PosterPreview(props: PosterData & { isImperdiveis?: boolean; settings: PosterSettings }) {
-  if (props.settings?.happyFridayEnabled) {
-    return <PosterPreviewHappyFridayA5 {...props} />;
-  }
-
   const {
     description,
     priceFrom,
@@ -27,7 +22,8 @@ export function PosterPreview(props: PosterData & { isImperdiveis?: boolean; set
   const valDe  = parsePrice(priceFrom);
   const valPor = parsePrice(priceFor);
 
-  const isHappyFriday = Boolean(settings?.happyFridayEnabled);
+  // Modelo tradicional Relíquias (A4/A6 horizontal)
+  const isHappyFriday = false;
   const hasDiscount = isOffer && valDe > 0 && valPor > 0 && valDe > valPor;
   const discount    = hasDiscount ? Math.round(((valDe - valPor) / valDe) * 100) : 0;
 

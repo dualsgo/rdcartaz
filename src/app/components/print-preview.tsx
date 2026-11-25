@@ -8,13 +8,41 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { PackageOpen } from 'lucide-react';
 import { PosterPreview } from '@/app/components/poster-preview';
+import { PosterPreviewHappyFridayA5 } from '@/app/components/poster-preview-happy-friday-a5';
+import { PosterPreviewHappyFridayA6V } from '@/app/components/poster-preview-happy-friday-a6v';
 import { PosterPreviewEtiquetaOficial } from '@/app/components/poster-preview-etiqueta-oficial';
 import { PosterPreviewVitrine } from '@/app/components/poster-preview-vitrine';
 import { PosterPreviewAereo } from '@/app/components/poster-preview-aereo';
 import { PosterPreviewTotem } from '@/app/components/poster-preview-totem';
 import type { PosterData, PosterSettings, PosterType } from '@/app/lib/types';
-import { POSTER_FORMATS } from '@/app/lib/poster-formats';
+import { getPosterFormat, doesItemMatchCampaignMode, getCampaignModeLabel } from '@/app/lib/poster-formats';
 import { cn } from '@/lib/utils';
+
+function renderPosterSlot(data: PosterData, slotSize: 'single' | 'a4' | 'a5' | 'a6', settings: PosterSettings) {
+  const mode = settings?.campaignMode ?? 'regular';
+  if (mode === '50off') {
+    const scaleMap = { single: 'scale(1)', a4: 'scale(1.45)', a5: 'scale(1)', a6: 'scale(0.66)' };
+    return (
+      <div style={{ width: '13.6cm', height: '18.0cm', transform: scaleMap[slotSize], transformOrigin: 'center center', flexShrink: 0 }}>
+        <PosterPreviewHappyFridayA5 {...data} settings={settings} />
+      </div>
+    );
+  }
+  if (mode === 'friday') {
+    const scaleMap = { single: 'scale(1)', a4: 'scale(2.05)', a5: 'scale(1.32)', a6: 'scale(0.95)' };
+    return (
+      <div style={{ width: '9.0cm', height: '13.6cm', transform: scaleMap[slotSize], transformOrigin: 'center center', flexShrink: 0 }}>
+        <PosterPreviewHappyFridayA6V {...data} settings={settings} />
+      </div>
+    );
+  }
+  const scaleMap = { single: 'scale(1)', a4: 'scale(2)', a5: 'scale(1)', a6: 'scale(0.95)' };
+  return (
+    <div style={{ width: '13.6cm', height: '9.0cm', transform: scaleMap[slotSize], transformOrigin: 'center center', flexShrink: 0 }}>
+      <PosterPreview {...data} isImperdiveis={false} settings={settings} />
+    </div>
+  );
+}
 
 /* ─────────────────────────── SinglePosterPreview ─────────────────────────── */
 // Mostra um cartaz individual em fundo cinza (simulação de papel).
@@ -34,7 +62,7 @@ export function SinglePosterPreview({
   const [ready, setReady] = useState(false);
   
   // Safety check to prevent crash if dimensions are missing
-  const dims = POSTER_FORMATS[posterType]?.singleDims || { w: 491, h: 340 };
+  const dims = getPosterFormat(posterType, settings?.campaignMode ?? 'regular', settings?.campaignBrand).singleDims;
   const { w, h } = dims;
 
   // Para o aéreo, o preview mostra apenas a área de conteúdo (75%),
@@ -89,6 +117,19 @@ export function SinglePosterPreview({
           <p className="text-sm font-medium">Busque um produto para ver o cartaz</p>
           <p className="text-xs opacity-60 text-center">Use o campo de busca ao lado para localizar ou cadastrar o produto</p>
         </div>
+      ) : !doesItemMatchCampaignMode(data.campaign, settings?.campaignMode ?? 'regular') ? (
+        <div className="flex flex-col items-center justify-center gap-2 text-center p-6 max-w-sm bg-white/95 rounded-xl border border-red-200 shadow-sm">
+          <p className="text-xs font-black uppercase tracking-tight text-red-700">
+            Item fora da lista selecionada
+          </p>
+          <p className="text-[11px] text-red-800 leading-snug">
+            Este produto não faz parte da lista de{' '}
+            <span className="font-bold">
+              {getCampaignModeLabel(settings?.campaignMode ?? 'regular', settings?.campaignBrand)}
+            </span>{' '}
+            e não pode ser exibido neste modelo.
+          </p>
+        </div>
       ) : (
         <div
           style={{
@@ -106,23 +147,9 @@ export function SinglePosterPreview({
         >
           {/* Cartaz deslocado para cima para esconder o branco inicial */}
           <div style={{ marginTop: blankOffsetPx > 0 ? `-${blankOffsetPx}px` : undefined, width: '100%', height: `${h}px` }}>
-            {posterType === 'reliquias' && (
+            {(posterType === 'reliquias' || posterType === 'campanha-a5' || posterType === 'reliquias-a6') && (
               <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <div style={{ width: '13.6cm', height: '9.0cm' }}>
-                  <PosterPreview {...data} isImperdiveis={false} settings={settings} />
-                </div>
-              </div>
-            )}
-            {posterType === 'reliquias-a6' && (
-              <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <div style={{ 
-                  width: '13.6cm', 
-                  height: settings?.happyFridayEnabled ? '18.0cm' : '9.0cm', 
-                  transform: settings?.happyFridayEnabled ? 'scale(0.85)' : 'scale(0.95)', 
-                  transformOrigin: 'center center' 
-                }}>
-                  <PosterPreview {...data} isImperdiveis={false} settings={settings} />
-                </div>
+                {renderPosterSlot(data, 'single', settings)}
               </div>
             )}
             {posterType === 'etiqueta-oficial' && <PosterPreviewEtiquetaOficial {...data} settings={settings} />}
@@ -151,24 +178,29 @@ export function PagePreview({
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(0.4);
   const totalPages = pages.length;
-  const orientation = POSTER_FORMATS[posterType]?.orientation || 'landscape';
+  const orientation = getPosterFormat(posterType, settings?.campaignMode ?? 'regular', settings?.campaignBrand).orientation;
   const isPortrait = orientation === 'portrait';
   const targetW = (isPortrait ? 210 : 297) * 3.78;
   const targetH = (isPortrait ? 297 : 210) * 3.78;
 
   useEffect(() => {
     if (!containerRef.current) return;
-    const observer = new ResizeObserver((entries) => {
-      const { width, height } = entries[0].contentRect;
-      const newScale = Math.min(width / targetW, height / targetH) * 0.95;
+    const updateScale = () => {
+      if (!containerRef.current) return;
+      const width = containerRef.current.clientWidth - 48;
+      const height = containerRef.current.clientHeight - 64;
+      if (width <= 0 || height <= 0) return;
+      const newScale = Math.min(width / targetW, height / targetH) * 0.94;
       setScale(Math.max(0.1, newScale));
-    });
+    };
+    updateScale();
+    const observer = new ResizeObserver(updateScale);
     observer.observe(containerRef.current);
     return () => observer.disconnect();
   }, [targetW, targetH]);
 
   return (
-    <div ref={containerRef} className="w-full h-full bg-muted/40 overflow-y-auto custom-scrollbar p-8">
+    <div ref={containerRef} className="w-full h-full bg-muted/40 overflow-y-auto custom-scrollbar px-6 py-8">
       <div className="flex flex-col items-center gap-12 pb-12">
         {pages.map((pageItems, idx) => (
           <div key={idx} className="relative group">
@@ -215,7 +247,11 @@ export function PageGrid({
 }) {
   const pageBgClass = 'bg-white';
   const allSlots = Array.from({ length: perPage }).map((_, i) => items[i] || null);
-  const isPortrait = posterType !== 'reliquias' && posterType !== 'reliquias-a6';
+  const mode = settings?.campaignMode ?? 'regular';
+  const hasCampaignItem = mode === 'friday' || mode === '50off';
+  const isPortrait =
+    posterType !== 'campanha-a5' &&
+    ((posterType !== 'reliquias' && posterType !== 'reliquias-a6') || hasCampaignItem);
 
   // Overlay das perfurações físicas do papel (sempre 16 gôndolas de ponta a ponta + margens)
   const renderPerforations = () => {
@@ -339,37 +375,25 @@ export function PageGrid({
     );
   }
 
-  // Relíquias A4 (Folha Inteira - 1 cartaz por folha A4 paisagem)
+  // A4 (Folha Inteira - 1 cartaz por folha A4)
   if (posterType === 'reliquias') {
     const d = items[0];
     return (
       <div 
         className={cn("w-full h-full relative flex items-center justify-center overflow-hidden", pageBgClass)}
         style={{
-          width: '297mm',
-          height: '210mm',
+          width: hasCampaignItem ? '210mm' : '297mm',
+          height: hasCampaignItem ? '297mm' : '210mm',
           boxSizing: 'border-box',
         }}
       >
-        {d && (
-          <div 
-            style={{ 
-              width: '13.6cm', 
-              height: '9.0cm', 
-              transform: 'scale(2)', 
-              transformOrigin: 'center center',
-              flexShrink: 0,
-            }}
-          >
-            <PosterPreview {...d} isImperdiveis={false} settings={settings} />
-          </div>
-        )}
+        {d && renderPosterSlot(d, 'a4', settings)}
       </div>
     );
   }
 
-  // Happy Friday A5 (2 cartazes por folha A4 paisagem)
-  if (posterType === 'reliquias-a6' && settings?.happyFridayEnabled) {
+  // Campanha A5 (2 cartazes por folha A4 paisagem)
+  if (posterType === 'campanha-a5') {
     return (
       <div 
         className={cn("w-full h-full relative", pageBgClass)}
@@ -393,19 +417,41 @@ export function PageGrid({
             className="flex items-center justify-center overflow-hidden box-border print:border-none"
             style={{ width: '13.6cm', height: '18.0cm' }}
           >
-            {d && (
-              <div 
-                style={{ 
-                  width: '13.6cm', 
-                  height: '18.0cm', 
-                  overflow: 'hidden' 
-                }}
-              >
-                <PosterPreview {...d} isImperdiveis={false} settings={settings} />
-              </div>
-            )}
+            {d && renderPosterSlot(d, 'a5', settings)}
           </div>
         ))}
+      </div>
+    );
+  }
+
+  // A6 Vertical para campanhas (4 cartazes por folha A4 retrato)
+  if (posterType === 'reliquias-a6' && hasCampaignItem) {
+    return (
+      <div 
+        className={cn("w-full h-full relative", pageBgClass)}
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(2, 9.0cm)',
+          gridTemplateRows: 'repeat(2, 13.6cm)',
+          justifyContent: 'center',
+          alignContent: 'center',
+          paddingTop: '14.2mm',
+          paddingBottom: '10.8mm',
+          paddingLeft: '16mm',
+          paddingRight: '14mm',
+          boxSizing: 'border-box',
+        }}
+      >
+        {allSlots.map((d, i) => (
+          <div 
+            key={i} 
+            className="flex items-center justify-center overflow-hidden box-border print:border-none"
+            style={{ width: '9.0cm', height: '13.6cm' }}
+          >
+            {d && renderPosterSlot(d, 'a6', settings)}
+          </div>
+        ))}
+        {renderPerforations()}
       </div>
     );
   }

@@ -6,12 +6,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Kbd } from '@/components/ui/kbd';
-import type { PosterData, PosterType, PosterSettings } from '@/app/lib/types';
+import type { PosterData, PosterType, PosterSettings, CampaignMode } from '@/app/lib/types';
 import { calculateInstallments } from '@/app/lib/poster-utils';
-import { isOfferOnlyFormat } from '@/app/lib/poster-formats';
+import { isOfferOnlyFormat, doesItemMatchCampaignMode, getCampaignKind, getCampaignModeLabel } from '@/app/lib/poster-formats';
 
 import { cn, isTouchDevice } from '@/lib/utils';
-import { Loader2, CheckCircle2, XCircle, Search, RotateCcw, Info, Camera, Sparkles, ScanBarcode, Zap } from 'lucide-react';
+import { Loader2, CheckCircle2, XCircle, Search, RotateCcw, Info, Camera, Sparkles, ScanBarcode, Zap, AlertTriangle } from 'lucide-react';
 import { BarcodeScanner, type ScanStatus } from './barcode-scanner';
 
 function centsToDisplay(cents: number): string {
@@ -97,6 +97,7 @@ type PosterFormProps = {
   onContinuousScanChange?: (value: boolean) => void;
   /** Foca a busca ao montar (ignorado em dispositivos touch) */
   autoFocus?: boolean;
+  onSwitchCampaignMode?: (mode: CampaignMode) => void;
 };
 
 /* Leitores de código de barras USB (HID) "digitam" muito mais rápido que um humano. */
@@ -153,12 +154,13 @@ function focusAndSelect(el: HTMLInputElement | null): boolean {
 type ProductPayload = {
   description: string; reference: string; ean?: string; code?: string; supplier?: string;
   priceFrom?: string; priceFor?: string; campaign?: string; category?: string;
+  offerValidityStart?: string; offerValidity?: string;
 };
 
 export const PosterForm = forwardRef<PosterFormHandle, PosterFormProps>(function PosterForm(
   {
     data, setData, posterType, settings, onLookupStatusChange, onImportBatch, sessionProducts,
-    onAutoAdd, onSubmit, continuousScan = false, onContinuousScanChange, autoFocus = false,
+    onAutoAdd, onSubmit, continuousScan = false, onContinuousScanChange, autoFocus = false, onSwitchCampaignMode,
   },
   ref
 ) {
@@ -196,6 +198,12 @@ export const PosterForm = forwardRef<PosterFormHandle, PosterFormProps>(function
   }, []);
 
   const [showWarning, setShowWarning] = useState(false);
+  const [campaignMismatch, setCampaignMismatch] = useState<{
+    description: string;
+    code: string;
+    expectedMode: CampaignMode;
+    actualMode: CampaignMode;
+  } | null>(null);
   const [isManualMode, setIsManualMode] = useState(false);
   const [manualDescription, setManualDescription] = useState('');
   const [manualCode, setManualCode] = useState('');
@@ -220,10 +228,10 @@ export const PosterForm = forwardRef<PosterFormHandle, PosterFormProps>(function
   
   // Força o tipo 'oferta' para modelos que não possuem 'preço normal'
   useEffect(() => {
-    if (isOfferOnlyFormat(posterType, settings.happyFridayEnabled)) {
+    if (isOfferOnlyFormat(posterType, settings.campaignMode)) {
       setData(prev => ({ ...prev, posterSubType: 'offer' }));
     }
-  }, [posterType, settings.happyFridayEnabled, setData]);
+  }, [posterType, settings.campaignMode, setData]);
   
   // Automatização inteligente do parcelamento
   useEffect(() => {
@@ -340,6 +348,7 @@ export const PosterForm = forwardRef<PosterFormHandle, PosterFormProps>(function
     setLookupStatus('idle');
     setIsManualMode(false);
     setShowWarning(false);
+    setCampaignMismatch(null);
 
     if (autoScanTimer.current) {
       clearTimeout(autoScanTimer.current);
@@ -399,17 +408,35 @@ export const PosterForm = forwardRef<PosterFormHandle, PosterFormProps>(function
         priceFor:  produto.priceFor  ?? '',
         campaign:  produto.campaign  ?? '',
         category:  produto.category  ?? '',
+        offerValidityStart: produto.offerValidityStart || data.offerValidityStart,
+        offerValidity:      produto.offerValidity      || data.offerValidity,
         // Formatos só-oferta (Relíquias/Totem) nunca podem virar "normal",
         // exceto quando o modo Happy Friday está ativo (permite cartaz de preço regular ou oferta).
-        posterSubType: isOfferOnlyFormat(posterType, settings.happyFridayEnabled)
+        posterSubType: isOfferOnlyFormat(posterType, settings.campaignMode)
           ? 'offer'
           : hasPriceFrom ? 'offer' : (produto.priceFor ? 'normal' : data.posterSubType),
         paymentOption: payOption,
       };
     };
 
-    const applyFound = (produto: ProductPayload): PosterData => {
+    const applyFound = (produto: ProductPayload): PosterData | null => {
       const foundData = buildFoundData(produto);
+      const currentMode = settings.campaignMode ?? 'regular';
+      if (!doesItemMatchCampaignMode(foundData.campaign, currentMode)) {
+        const kind = getCampaignKind(foundData.campaign);
+        const actualMode: CampaignMode = kind === 'friday' ? 'friday' : kind === '50off' ? '50off' : 'regular';
+        setCampaignMismatch({
+          description: foundData.description,
+          code: foundData.code || query,
+          expectedMode: currentMode,
+          actualMode,
+        });
+        setLookupStatus('notfound');
+        onLookupStatusChange?.(false);
+        return null;
+      }
+
+      setCampaignMismatch(null);
       setData(foundData);
       if (produto.priceFrom) priceFrom.setValue(produto.priceFrom);
       if (produto.priceFor) priceFor.setValue(produto.priceFor);
@@ -664,7 +691,7 @@ export const PosterForm = forwardRef<PosterFormHandle, PosterFormProps>(function
                 className="absolute z-50 w-full mt-1 bg-white border rounded-lg shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-100"
               >
                 {suggestions.map((s, i) => {
-                  const isHappyFriday = !!settings.happyFridayEnabled && s.campaign === 'ESQUENTA_BLACK';
+                  const sKind = getCampaignKind(s.campaign);
                   return (
                     <button
                       key={s.key}
@@ -675,7 +702,7 @@ export const PosterForm = forwardRef<PosterFormHandle, PosterFormProps>(function
                       tabIndex={-1}
                       className={cn(
                         'w-full text-left px-4 py-2.5 border-b last:border-0 flex flex-col transition-colors',
-                        isHappyFriday && 'border-l-2 border-l-amber-400 bg-amber-50/30',
+                        sKind && 'border-l-2 border-l-amber-400 bg-amber-50/30',
                         i === activeSuggestion ? 'bg-primary/5' : 'hover:bg-gray-50'
                       )}
                       onMouseEnter={() => setActiveSuggestion(i)}
@@ -683,10 +710,16 @@ export const PosterForm = forwardRef<PosterFormHandle, PosterFormProps>(function
                     >
                       <div className="flex items-center justify-between gap-2">
                         <span className="font-bold text-gray-900">{s.key}</span>
-                        {isHappyFriday && (
+                        {sKind === 'friday' && (
+                          <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase px-1.5 py-0.5 rounded bg-amber-400 text-zinc-950 tracking-tight shrink-0">
+                            <Zap className="h-2.5 w-2.5 fill-zinc-950" />
+                            {settings.campaignBrand === 'pbkids' ? 'Best Friday' : 'Happy Friday'}
+                          </span>
+                        )}
+                        {sKind === '50off' && (
                           <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase px-1.5 py-0.5 rounded bg-zinc-900 text-amber-400 border border-amber-400/40 tracking-tight shrink-0">
                             <Zap className="h-2.5 w-2.5 fill-amber-400" />
-                            Happy Friday
+                            50% OFF
                           </span>
                         )}
                       </div>
@@ -698,6 +731,43 @@ export const PosterForm = forwardRef<PosterFormHandle, PosterFormProps>(function
             )}
           </div>
         </div>
+
+        {campaignMismatch && (
+          <div
+            role="alert"
+            className="bg-red-50 border border-red-200 p-3.5 rounded-xl space-y-2.5 animate-in fade-in slide-in-from-top-2 duration-200"
+          >
+            <div className="flex items-start gap-2.5">
+              <div className="bg-red-100 p-1.5 rounded-lg shrink-0">
+                <AlertTriangle className="h-4 w-4 text-red-700" />
+              </div>
+              <div className="space-y-1 min-w-0">
+                <h4 className="font-black text-red-900 uppercase text-xs tracking-tight">
+                  Item não faz parte desta lista
+                </h4>
+                <p className="text-[11px] text-red-800 leading-snug">
+                  <span className="font-bold">{campaignMismatch.description}</span> ({campaignMismatch.code}) não pertence à lista de{' '}
+                  <span className="font-bold">{getCampaignModeLabel(campaignMismatch.expectedMode, settings.campaignBrand)}</span>.
+                  <br />
+                  Classificação atual: <span className="font-bold">{getCampaignModeLabel(campaignMismatch.actualMode, settings.campaignBrand)}</span>.
+                </p>
+              </div>
+            </div>
+            {onSwitchCampaignMode && (
+              <button
+                type="button"
+                onClick={() => {
+                  const target = campaignMismatch.actualMode;
+                  setCampaignMismatch(null);
+                  onSwitchCampaignMode(target);
+                }}
+                className="w-full py-1.5 px-3 bg-red-600 hover:bg-red-700 text-white font-black text-[10px] uppercase tracking-wider rounded-lg transition-colors"
+              >
+                Mudar para {getCampaignModeLabel(campaignMismatch.actualMode, settings.campaignBrand)}
+              </button>
+            )}
+          </div>
+        )}
 
         {showWarning && (
           <div className="bg-amber-50 border border-amber-200 p-4 rounded-xl space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
@@ -906,7 +976,7 @@ export const PosterForm = forwardRef<PosterFormHandle, PosterFormProps>(function
              <Label className="font-bold text-gray-900 uppercase tracking-tight text-sm">
                 2. Preços
              </Label>
-             {!isOfferOnlyFormat(posterType, settings.happyFridayEnabled) && (
+             {!isOfferOnlyFormat(posterType, settings.campaignMode) && (
                <div className="flex bg-muted p-1 rounded-xl shadow-inner border border-border/50">
                  <button
                    type="button"

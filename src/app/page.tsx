@@ -13,7 +13,8 @@ import { ImportModal } from '@/app/components/import-modal';
 import { AutomationModal } from '@/app/components/automation-modal';
 import { SecurityModal } from '@/app/components/security-modal';
 import type { PosterData, PosterSettings, PosterType } from '@/app/lib/types';
-import { POSTER_FORMATS, VISIBLE_FORMATS, getPosterFormat } from '@/app/lib/poster-formats';
+import { POSTER_FORMATS, VISIBLE_FORMATS, getPosterFormat, getVisibleFormats, getCampaignKind, isOfferOnlyFormat, doesItemMatchCampaignMode, getCampaignModeLabel } from '@/app/lib/poster-formats';
+import { useToast } from '@/hooks/use-toast';
 import { parseProductCSV, parseProductExcel, parsePrice, cleanSupplierName } from '@/app/lib/poster-utils';
 import { useHotkeys } from '@/hooks/use-hotkeys';
 import { Kbd } from '@/components/ui/kbd';
@@ -62,6 +63,9 @@ export default function Home() {
     maxInstallments: 10,
     minInstallmentAmount: 29.99,
     happyFridayEnabled: false,
+    campaignBrand: 'rihappy',
+    campaignMode: 'regular',
+    enabledFormats: { posters: true, gondola: false, vitrine: false },
   });
 
   const [sessionProducts, setSessionProducts] = useState<Record<string, any>>({});
@@ -195,10 +199,30 @@ export default function Home() {
     };
   }, [queue]);
 
+  const { toast } = useToast();
+
   const saveSettings = (newSettings: PosterSettings) => {
+    const prevMode = settings.campaignMode ?? 'regular';
+    const nextMode = newSettings.campaignMode ?? 'regular';
     setSettings(newSettings);
     localStorage.setItem('poster-settings', JSON.stringify(newSettings));
     localStorage.setItem('poster-settings-v2', JSON.stringify(newSettings));
+
+    if (prevMode !== nextMode) {
+      if (isProductReady && !doesItemMatchCampaignMode(currentPoster.campaign, nextMode)) {
+        setCurrentPoster(initialPosterData());
+        setIsProductReady(false);
+        setSelectedQueueIndex(null);
+        setFormKey(k => k + 1);
+        toast({
+          variant: 'destructive',
+          title: 'Item não faz parte desta lista',
+          description: `O produto selecionado foi ocultado porque não pertence a ${getCampaignModeLabel(nextMode, newSettings.campaignBrand)}.`,
+        });
+      } else if (selectedQueueIndex !== null && queue[selectedQueueIndex] && !doesItemMatchCampaignMode(queue[selectedQueueIndex].campaign, nextMode)) {
+        setSelectedQueueIndex(null);
+      }
+    }
   };
 
   const handleImportSessionData = async (items: any[]) => {
@@ -248,16 +272,24 @@ export default function Home() {
     setContinuousScan(false);
   };
 
-  const currentFormat = getPosterFormat(posterType, settings.happyFridayEnabled);
+  const campaignMode = settings.campaignMode ?? 'regular';
+  const currentFormat = getPosterFormat(posterType, campaignMode, settings.campaignBrand);
   const perPage = currentFormat.perPage;
   const orientation = currentFormat.orientation;
+
+  useEffect(() => {
+    const visible = getVisibleFormats(campaignMode, settings.enabledFormats);
+    if (visible.length > 0 && !visible.some(f => f.id === posterType)) {
+      setPosterType(visible[0].id);
+    }
+  }, [posterType, campaignMode, settings.enabledFormats]);
 
   const [queueSort, setQueueSort] = useState<'stock-desc' | 'stock-asc' | 'discount-desc' | 'price-asc' | 'price-desc' | 'name-asc' | 'none'>('stock-desc');
   const [subTypeGroup, setSubTypeGroup] = useState<'offer-first' | 'normal-first' | 'none'>('offer-first');
   const [supplierFilter, setSupplierFilter] = useState<string>('all');
   const [stockFilter, setStockFilter] = useState<'all' | 'with-stock' | 'no-stock'>('all');
   const [priceRangeFilter, setPriceRangeFilter] = useState<'all' | 'under-50' | '50-100' | 'over-100'>('all');
-  const [campaignFilter, setCampaignFilter] = useState<'all' | 'happy-friday' | 'regular'>('all');
+  const [campaignFilter, setCampaignFilter] = useState<'all' | '50off' | 'friday' | 'regular'>('all');
 
   const availableSuppliers = useMemo(() => {
     const set = new Set<string>();
@@ -301,12 +333,12 @@ export default function Home() {
       });
     }
 
-    if (settings.happyFridayEnabled && campaignFilter !== 'all') {
-      if (campaignFilter === 'happy-friday') {
-        result = result.filter(item => item.campaign === 'ESQUENTA_BLACK');
-      } else if (campaignFilter === 'regular') {
-        result = result.filter(item => item.campaign !== 'ESQUENTA_BLACK');
-      }
+    if (campaignMode === '50off') {
+      result = result.filter(item => getCampaignKind(item.campaign) === '50off');
+    } else if (campaignMode === 'friday') {
+      result = result.filter(item => getCampaignKind(item.campaign) === 'friday');
+    } else {
+      result = result.filter(item => getCampaignKind(item.campaign) === null);
     }
 
     if (queueSort !== 'none') {
@@ -333,7 +365,7 @@ export default function Home() {
     }
 
     return result;
-  }, [queue, queueFilter, supplierFilter, stockFilter, priceRangeFilter, campaignFilter, settings.happyFridayEnabled, queueSort, subTypeGroup]);
+  }, [queue, queueFilter, supplierFilter, stockFilter, priceRangeFilter, campaignMode, queueSort, subTypeGroup]);
 
   // Expande a fila considerando as quantidades de cada item para impressão
   const expandedQueue = useMemo(() => {
@@ -358,10 +390,10 @@ export default function Home() {
         currentPage = [];
       }
       
-      if (currentPage.length > 0 && subTypeGroup !== 'none') {
-        const isCurrentOffer = currentPage[0].posterSubType === 'offer';
-        const isItemOffer = item.posterSubType === 'offer';
-        if (isCurrentOffer !== isItemOffer) {
+      if (currentPage.length > 0) {
+        const sameCampaign = getCampaignKind(currentPage[0].campaign) === getCampaignKind(item.campaign);
+        const sameSubType = subTypeGroup === 'none' || (currentPage[0].posterSubType === item.posterSubType);
+        if (!sameCampaign || !sameSubType) {
           pages.push(currentPage);
           currentPage = [];
         }
@@ -420,7 +452,7 @@ export default function Home() {
     setPosterType(newType);
     if (isProductReady || (currentPoster.description && currentPoster.description !== 'DESCRIÇÃO DO PRODUTO')) {
       const format = getPosterFormat(newType);
-      const forceOffer = format.offerOnly && !(settings.happyFridayEnabled && (newType === 'reliquias' || newType === 'reliquias-a6'));
+      const forceOffer = isOfferOnlyFormat(newType, settings.happyFridayEnabled);
       setCurrentPoster(prev => ({
         ...prev,
         posterSubType: forceOffer ? 'offer' : prev.posterSubType,
@@ -625,7 +657,7 @@ export default function Home() {
     };
 
     // Alt+1 até Alt+N para trocar formato de impressão
-    VISIBLE_FORMATS.forEach((fmt, idx) => {
+    getVisibleFormats(campaignMode, settings.enabledFormats).forEach((fmt, idx) => {
       map[`alt+${idx + 1}`] = (e) => {
         e.preventDefault();
         handlePosterTypeChange(fmt.id);
@@ -675,8 +707,8 @@ export default function Home() {
 
           let filtered: any[] = [];
           if (importMode === 'offer') {
-            if (settings.happyFridayEnabled) {
-              // Com Happy Friday ativo, cartazes podem ser gerados tanto para ofertas quanto para preço regular
+            if (campaignMode === '50off') {
+              // Na campanha 50%, nem todos os itens estão em oferta DE/POR
               filtered = imported;
             } else {
               filtered = imported.filter((item: any) => item.posterSubType === 'offer');
@@ -719,6 +751,8 @@ export default function Home() {
                         description: item.description && item.description.length > 2 ? item.description : (dbItem.description || item.description),
                         campaign: dbItem.campaign || item.campaign || '',
                         category: dbItem.category || item.category || '',
+                        offerValidityStart: item.offerValidityStart || dbItem.offerValidityStart || '',
+                        offerValidity: item.offerValidity || dbItem.offerValidity || '',
                       };
                     }
                     return { ...item, campaign: item.campaign || '' };
@@ -840,8 +874,8 @@ export default function Home() {
       />
 
       {/* ── HEADER COMPACTO E LIMPO (SEM SELETOR REDUNDANTE) ── */}
-      <header className="no-print shrink-0 px-4 py-2.5 border-b bg-card z-20">
-        <div className="flex justify-between items-center gap-4">
+      <header className="no-print shrink-0 px-3 sm:px-4 py-2.5 border-b bg-card z-20">
+        <div className="flex flex-wrap justify-between items-center gap-2 lg:gap-4">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center shrink-0 shadow-sm">
               <span className="text-primary-foreground font-black text-sm tracking-tighter">RD</span>
@@ -855,7 +889,7 @@ export default function Home() {
               </span>
             </div>
             {hasSessionData && (
-              <div className="flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 border border-emerald-200 rounded-lg shrink-0 ml-1 shadow-sm animate-in fade-in">
+              <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 border border-emerald-200 rounded-lg shrink-0 ml-1 shadow-sm animate-in fade-in">
                 <ScanBarcode className="h-3.5 w-3.5 text-emerald-600 animate-pulse" />
                 <div className="flex flex-col leading-none">
                   <span className="text-[10px] font-black text-emerald-700 uppercase tracking-tight">Sem Giro Ativo</span>
@@ -863,18 +897,84 @@ export default function Home() {
                 </div>
               </div>
             )}
-            {settings.happyFridayEnabled && (
-              <div
-                className="flex items-center gap-1.5 px-2.5 py-1 bg-zinc-900 border border-amber-400/50 rounded-lg shrink-0 ml-1 shadow-sm animate-in fade-in"
-                title="Destaque da campanha Happy Friday ativado nas configurações"
+          </div>
+
+          <div className="flex items-center gap-1.5 flex-wrap w-full xl:w-auto xl:flex-1 order-3 xl:order-none">
+            {/* Seletor de Bandeira (Ri Happy / PB Kids) */}
+            <div
+              role="group"
+              aria-label="Selecionar bandeira"
+              className="flex items-center gap-0.5 p-0.5 bg-muted rounded-lg border border-border/60 shrink-0 shadow-sm"
+            >
+              <button
+                type="button"
+                onClick={() => saveSettings({ ...settings, campaignBrand: 'rihappy' })}
+                className={cn(
+                  'px-2 sm:px-2.5 py-1 rounded-md text-[9px] sm:text-[10px] font-black uppercase tracking-tight transition-all',
+                  (settings.campaignBrand ?? 'rihappy') === 'rihappy'
+                    ? 'bg-amber-400 text-zinc-950 shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                )}
               >
-                <Zap className="h-3.5 w-3.5 text-amber-400 fill-amber-400" />
-                <div className="flex flex-col leading-none">
-                  <span className="text-[10px] font-black text-amber-400 uppercase tracking-tight">Happy Friday</span>
-                  <span className="text-[8px] font-bold text-zinc-300 uppercase tracking-widest">Destaque ON</span>
-                </div>
-              </div>
-            )}
+                Ri Happy
+              </button>
+              <button
+                type="button"
+                onClick={() => saveSettings({ ...settings, campaignBrand: 'pbkids' })}
+                className={cn(
+                  'px-2 sm:px-2.5 py-1 rounded-md text-[9px] sm:text-[10px] font-black uppercase tracking-tight transition-all',
+                  settings.campaignBrand === 'pbkids'
+                    ? 'bg-zinc-900 text-amber-400 shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                )}
+              >
+                PB Kids
+              </button>
+            </div>
+
+            {/* Seletor de Modo / Campanha */}
+            <div
+              role="group"
+              aria-label="Selecionar campanha"
+              className="flex items-center gap-0.5 p-0.5 bg-muted rounded-lg border border-border/60 shrink-0 shadow-sm"
+            >
+              <button
+                type="button"
+                onClick={() => saveSettings({ ...settings, campaignMode: 'friday' })}
+                className={cn(
+                  'px-2 sm:px-2.5 py-1 rounded-md text-[9px] sm:text-[10px] font-black uppercase tracking-tight transition-all whitespace-nowrap',
+                  campaignMode === 'friday'
+                    ? 'bg-amber-400 text-zinc-950 shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                )}
+              >
+                {settings.campaignBrand === 'pbkids' ? 'Best Friday' : 'Happy Friday'}
+              </button>
+              <button
+                type="button"
+                onClick={() => saveSettings({ ...settings, campaignMode: '50off' })}
+                className={cn(
+                  'px-2 sm:px-2.5 py-1 rounded-md text-[9px] sm:text-[10px] font-black uppercase tracking-tight transition-all whitespace-nowrap',
+                  campaignMode === '50off'
+                    ? 'bg-zinc-900 text-amber-400 shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                )}
+              >
+                Campanha 50%
+              </button>
+              <button
+                type="button"
+                onClick={() => saveSettings({ ...settings, campaignMode: 'regular' })}
+                className={cn(
+                  'px-2 sm:px-2.5 py-1 rounded-md text-[9px] sm:text-[10px] font-black uppercase tracking-tight transition-all whitespace-nowrap',
+                  campaignMode === 'regular'
+                    ? 'bg-background text-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                )}
+              >
+                Ofertas Regulares
+              </button>
+            </div>
           </div>
 
           <div className="flex items-center gap-2">
@@ -948,7 +1048,9 @@ export default function Home() {
               <FormatSelector 
                 value={posterType} 
                 onChange={handlePosterTypeChange} 
-                happyFridayEnabled={settings.happyFridayEnabled}
+                campaignMode={campaignMode}
+                campaignBrand={settings.campaignBrand}
+                enabledFormats={settings.enabledFormats}
               />
             </div>
 
@@ -965,6 +1067,7 @@ export default function Home() {
                 onImportBatch={() => setShowAutomation(true)}
                 sessionProducts={sessionProducts}
                 onAutoAdd={handleAutoAdd}
+                onSwitchCampaignMode={(mode) => saveSettings({ ...settings, campaignMode: mode })}
                 onSubmit={handleAddToQueue}
                 continuousScan={continuousScan}
                 onContinuousScanChange={handleContinuousScanChange}
@@ -1050,7 +1153,8 @@ export default function Home() {
               onCampaignFilterChange={setCampaignFilter}
               availableSuppliers={availableSuppliers}
               hasStockData={hasStockData}
-              happyFridayEnabled={!!settings.happyFridayEnabled}
+              campaignMode={campaignMode}
+              campaignBrand={settings.campaignBrand}
               onResetFilters={() => {
                 setSupplierFilter('all');
                 setStockFilter('all');
@@ -1205,7 +1309,8 @@ export default function Home() {
                 onCampaignFilterChange={setCampaignFilter}
                 availableSuppliers={availableSuppliers}
                 hasStockData={hasStockData}
-                happyFridayEnabled={!!settings.happyFridayEnabled}
+                campaignMode={campaignMode}
+                campaignBrand={settings.campaignBrand}
                 onResetFilters={() => {
                   setSupplierFilter('all');
                   setStockFilter('all');

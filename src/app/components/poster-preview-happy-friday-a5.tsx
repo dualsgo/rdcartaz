@@ -5,7 +5,6 @@ import { parsePrice, formatCurrency } from '@/app/lib/poster-utils';
 
 export function PosterPreviewHappyFridayA5({
   description,
-  priceFrom,
   priceFor,
   code,
   reference,
@@ -14,12 +13,14 @@ export function PosterPreviewHappyFridayA5({
   offerValidityStart,
   offerValidity,
   customDefectReason,
+  settings,
 }: PosterData & { isImperdiveis?: boolean; settings: PosterSettings }) {
-  const valDe = parsePrice(priceFrom);
+  const isPbKids = settings?.campaignBrand === 'pbkids';
+  const bgUrl = isPbKids
+    ? "url('/backgrounds/OFERTA_PB_A5V_Preview.png')"
+    : "url('/backgrounds/OFERTA-IMP_A5V_343888522_Preview.png')";
   const valPor = parsePrice(priceFor);
-
-  const hasDiscount = valDe > 0 && valPor > 0 && valDe > valPor;
-  const discountVal = hasDiscount ? Math.round(((valDe - valPor) / valDe) * 100) : 50;
+  const discountVal = 50;
 
   const [porInteger, porDecimal] = formatCurrency(valPor).split(',');
 
@@ -36,7 +37,7 @@ export function PosterPreviewHappyFridayA5({
   else if (porInteger.length === 4) priceNumFontSize = '98pt';
 
   // Texto da mecânica secundária
-  const promoSecondaryText = customDefectReason || 'A cada R$ 100, desbloqueis 50% OFF neste produto!';
+  const promoSecondaryText = customDefectReason || 'A cada R$ 100, desbloqueie 50% OFF neste produto!';
 
   // Descrição secundária (categoria / fornecedor ou repetindo a descrição conforme padrão Pricefy)
   const secondaryDescription = category || supplier || description;
@@ -53,9 +54,10 @@ export function PosterPreviewHappyFridayA5({
         width: '13.6cm',
         backgroundRepeat: 'no-repeat',
         backgroundSize: 'contain',
+        backgroundPosition: 'center top',
         margin: '0 auto',
         backgroundColor: 'white',
-        backgroundImage: "url('/backgrounds/OFERTA-IMP_A5V_343888522_Preview.png')",
+        backgroundImage: bgUrl,
         boxSizing: 'border-box',
         overflow: 'hidden',
       }}
@@ -91,8 +93,9 @@ export function PosterPreviewHappyFridayA5({
           style={{
             fontSize: '17.55pt',
             fontFamily: 'Roboto, sans-serif',
+            fontWeight: 400,
             color: 'white',
-            lineHeight: '1.05',
+            lineHeight: '110%',
             display: 'block',
             textAlign: 'center',
           }}
@@ -106,20 +109,21 @@ export function PosterPreviewHappyFridayA5({
             fontFamily: 'Roboto, sans-serif',
             fontWeight: 'bold',
             color: 'white',
-            lineHeight: '0.95',
+            lineHeight: '110%',
             display: 'block',
             textAlign: 'center',
           }}
         >
-          {discountVal}%
+          50%
         </span>
         <span
           id="field_descontoHappy"
           style={{
             fontSize: '11.7pt',
             fontFamily: 'Roboto, sans-serif',
+            fontWeight: 400,
             color: 'white',
-            lineHeight: '1.05',
+            lineHeight: '110%',
             display: 'block',
             textAlign: 'center',
           }}
@@ -184,25 +188,24 @@ export function PosterPreviewHappyFridayA5({
         </div>
       </div>
 
-      {/* ── DESCRIÇÃO PRINCIPAL DO PRODUTO ── */}
+      {/* ── DESCRIÇÃO PRINCIPAL DO PRODUTO (caixa fixa em 6.76cm) ── */}
       <div
         id="field_produtoDescricaoPrincipalCartaz"
-        className="label-text"
         style={{
           position: 'absolute',
-          fontSize: descFontSize,
-          fontFamily: 'Roboto, sans-serif',
-          fontWeight: 'bold',
-          color: 'black',
-          lineHeight: '1.15',
           top: '6.76cm',
           left: '0.65cm',
-          textAlign: 'center',
-          width: '12.415cm',
+          width: '12.3cm',
           height: '2.21cm',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
+          fontSize: descFontSize,
+          fontFamily: 'Roboto, sans-serif',
+          fontWeight: 'bold',
+          color: 'black',
+          lineHeight: '115%',
+          textAlign: 'center',
           overflow: 'hidden',
           boxSizing: 'border-box',
         }}
@@ -222,25 +225,24 @@ export function PosterPreviewHappyFridayA5({
         </p>
       </div>
 
-      {/* ── DESCRIÇÃO SECUNDÁRIA DO PRODUTO ── */}
+      {/* ── DESCRIÇÃO SECUNDÁRIA DO PRODUTO (caixa fixa em 8.97cm) ── */}
       <div
         id="field_produtoDescricaoSecundariaCartaz"
-        className="label-text"
         style={{
           position: 'absolute',
-          fontSize: '16pt',
-          fontFamily: 'Roboto, sans-serif',
-          fontWeight: 'bold',
-          color: 'black',
-          lineHeight: '1.15',
           top: '8.97cm',
           left: '0.65cm',
-          textAlign: 'center',
-          width: '12.415cm',
+          width: '12.3cm',
           height: '0.65cm',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
+          fontSize: '15.6pt',
+          fontFamily: 'Roboto, sans-serif',
+          fontWeight: 'bold',
+          color: 'black',
+          lineHeight: '115%',
+          textAlign: 'center',
           overflow: 'hidden',
           boxSizing: 'border-box',
         }}
@@ -259,92 +261,72 @@ export function PosterPreviewHappyFridayA5({
         </p>
       </div>
 
-      {/* ── CIFRÃO R$ ── */}
+      {/* ── BLOCO DE PREÇO (área disponível 1.3cm..13.065cm, R$ no topo, UN sob os centavos) ── */}
       <div
-        id="field_simbolo"
-        className="label-text"
-        style={{
-          position: 'absolute',
-          fontSize: '14.3pt',
-          fontFamily: 'Roboto, sans-serif',
-          fontWeight: 'bold',
-          color: 'black',
-          lineHeight: '0.935em',
-          top: '10.5238cm',
-          left: '0.588793cm',
-          textAlign: 'left',
-          width: '1.3cm',
-        }}
-      >
-        R$
-      </div>
-
-      {/* ── PREÇO VIGENTE (Inteiro e Centavos) ── */}
-      <div
-        id="field_valorVigente"
         style={{
           position: 'absolute',
           top: '10.4073cm',
-          left: '1.20629cm',
+          left: '1.3cm',
+          width: '11.765cm',
+          height: '2.925cm',
           display: 'flex',
-          alignItems: 'baseline',
-          lineHeight: '0.735em',
+          alignItems: 'center',
+          justifyContent: 'center',
         }}
       >
         <div
-          id="field_valorVigente_num"
-          className="label-text"
+          id="field_valorVigente"
           style={{
-            fontSize: priceNumFontSize,
-            fontFamily: 'GOTHICB, GOTHICBI, "Century Gothic", sans-serif',
-            fontWeight: 'bold',
-            color: 'black',
+            position: 'relative',
+            display: 'inline-flex',
+            alignItems: 'flex-start',
             lineHeight: '0.735em',
-            textAlign: 'right',
-            width: '6.52002cm',
-            height: '2.91042cm',
+            fontFamily: 'GOTHICB, "Century Gothic", sans-serif',
+            fontWeight: 400,
+            fontSize: priceNumFontSize,
+            color: 'black',
             whiteSpace: 'nowrap',
           }}
         >
-          {porInteger}
-        </div>
-        <div
-          id="field_valorVigente_cen"
-          className="label-text"
-          style={{
-            fontSize: priceNumFontSize,
-            fontFamily: 'GOTHICB, GOTHICBI, "Century Gothic", sans-serif',
-            fontWeight: 'bold',
-            color: 'black',
-            lineHeight: '0.735em',
-            textAlign: 'left',
-            width: '5.4324cm',
-            height: '3.76497cm',
-            whiteSpace: 'nowrap',
-          }}
-        >
-          ,{porDecimal}
-        </div>
-      </div>
+          {/* Cifrão R$ alinhado próximo ao topo do dígito */}
+          <span
+            id="field_simbolo"
+            style={{
+              position: 'absolute',
+              top: '0.10cm',
+              right: '100%',
+              marginRight: '0.22cm',
+              fontSize: '14.3pt',
+              fontFamily: 'Roboto, sans-serif',
+              fontWeight: 'bold',
+              color: 'black',
+              lineHeight: '0.935em',
+            }}
+          >
+            R$
+          </span>
 
-      {/* ── UNIDADE DE MEDIDA (UN) ── */}
-      <div
-        id="field_produtoApresentacao"
-        className="label-text"
-        style={{
-          position: 'absolute',
-          fontSize: '16.25pt',
-          fontFamily: 'Roboto, sans-serif',
-          fontWeight: 'bold',
-          color: 'black',
-          lineHeight: '0.935em',
-          top: '13.4511cm',
-          left: '9.02631cm',
-          textAlign: 'left',
-          width: '2.275cm',
-        }}
-      >
-        UN
+          <span id="field_valorVigente_num">{porInteger}</span>
+          <span id="field_valorVigente_cen">,{porDecimal}</span>
+
+          {/* Unidade UN centralizada logo abaixo dos centavos */}
+          <span
+            id="field_produtoApresentacao"
+            style={{
+              position: 'absolute',
+              top: '100%',
+              right: '1.15cm',
+              marginTop: '0.28cm',
+              fontSize: '16.25pt',
+              fontFamily: 'Roboto, sans-serif',
+              fontWeight: 'bold',
+              color: 'black',
+              lineHeight: '0.935em',
+            }}
+          >
+            UN
+          </span>
+        </div>
       </div>
 
       {/* ── VALIDADE DA OFERTA ── */}
@@ -369,13 +351,13 @@ export function PosterPreviewHappyFridayA5({
             Oferta válida {offerValidityStart ? `de ${offerValidityStart} ` : ''}
             {offerValidity ? `a ${offerValidity}` : ''}
             <br />
-            Mediante estoque
+            Mediante estoque.
           </>
         ) : (
           <>
             Oferta válida de 02/11/2024 a 31/12/9999
             <br />
-            Mediante estoque
+            Mediante estoque.
           </>
         )}
       </div>

@@ -12,6 +12,8 @@ export type ProdutoEntry = {
     priceFor?: string;
     campaign?: string;
     category?: string;
+    offerValidityStart?: string;
+    offerValidity?: string;
 };
 
 export type SuggestItem = { key: string; description: string; searchDesc: string; campaign?: string };

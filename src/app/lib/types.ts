@@ -20,12 +20,23 @@ export type PosterData = {
   category?: string;
 };
 
+export type CampaignMode = 'friday' | '50off' | 'regular';
+
+export type EnabledFormats = {
+  posters?: boolean; // A4 / A5 / A6 (padrão: true)
+  gondola?: boolean; // etiqueta-oficial (padrão: false)
+  vitrine?: boolean; // vitrine (padrão: false)
+};
+
 export type PosterSettings = {
   maxInstallments: number;
   minInstallmentAmount: number;
   happyFridayEnabled?: boolean;
+  campaignBrand?: 'rihappy' | 'pbkids';
+  campaignMode?: CampaignMode;
+  enabledFormats?: EnabledFormats;
 };
 
-export type PosterType = 'reliquias' | 'reliquias-a6' | 'etiqueta-oficial' | 'aereo' | 'totem' | 'vitrine';
+export type PosterType = 'reliquias' | 'campanha-a5' | 'reliquias-a6' | 'etiqueta-oficial' | 'aereo' | 'totem' | 'vitrine';
 
 

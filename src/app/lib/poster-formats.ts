@@ -1,4 +1,4 @@
-import type { PosterType } from './types';
+import type { PosterType, CampaignMode, EnabledFormats } from './types';
 
 /**
  * Fonte única de verdade para os formatos de impressão.
@@ -30,6 +30,29 @@ export type PosterFormat = {
 const CARTAZ = { singular: 'cartaz', plural: 'cartazes' };
 const ETIQUETA = { singular: 'etiqueta', plural: 'etiquetas' };
 
+export type CampaignKind = '50off' | 'friday' | null;
+
+export function getCampaignKind(campaign?: string): CampaignKind {
+  if (!campaign) return null;
+  const upper = campaign.toUpperCase();
+  if (upper === 'ESQUENTA_BLACK' || upper === '50_OFF') return '50off';
+  if (upper === 'HAPPY_FRIDAY' || upper === 'BEST_FRIDAY') return 'friday';
+  return null;
+}
+
+export function doesItemMatchCampaignMode(campaign: string | undefined, mode: CampaignMode = 'regular'): boolean {
+  const kind = getCampaignKind(campaign);
+  if (mode === 'friday') return kind === 'friday';
+  if (mode === '50off') return kind === '50off';
+  return kind === null;
+}
+
+export function getCampaignModeLabel(mode: CampaignMode = 'regular', campaignBrand?: 'rihappy' | 'pbkids'): string {
+  if (mode === 'friday') return campaignBrand === 'pbkids' ? 'Best Friday' : 'Happy Friday';
+  if (mode === '50off') return 'Campanha 50%';
+  return 'Ofertas Regulares';
+}
+
 // A ordem de declaração define a ordem no seletor e os atalhos Alt+1..N
 export const POSTER_FORMATS: Record<PosterType, PosterFormat> = {
   reliquias: {
@@ -44,6 +67,20 @@ export const POSTER_FORMATS: Record<PosterType, PosterFormat> = {
     unit: CARTAZ,
     offerOnly: true,
     visible: true,
+  },
+  // Exibido dinamicamente quando o item pertence a uma campanha (50% ou Happy/Best Friday)
+  'campanha-a5': {
+    id: 'campanha-a5',
+    label: 'Campanha A5',
+    shortLabel: 'A5',
+    caption: '2/folha',
+    description: '2 cartazes A5 por folha A4',
+    perPage: 2,
+    orientation: 'landscape',
+    singleDims: { w: 514, h: 680 }, // 13.6cm x 18.0cm
+    unit: CARTAZ,
+    offerOnly: true,
+    visible: false,
   },
   'reliquias-a6': {
     id: 'reliquias-a6',
@@ -116,29 +153,96 @@ export const POSTER_FORMATS: Record<PosterType, PosterFormat> = {
 
 export const VISIBLE_FORMATS: PosterFormat[] = Object.values(POSTER_FORMATS).filter(f => f.visible);
 
-export function getPosterFormat(type: PosterType, happyFridayEnabled?: boolean): PosterFormat {
+export function getVisibleFormats(
+  modeOrCampaign?: CampaignMode | string,
+  enabledFormats?: EnabledFormats,
+): PosterFormat[] {
+  const isCampaign =
+    modeOrCampaign === 'friday' ||
+    modeOrCampaign === '50off' ||
+    (modeOrCampaign !== 'regular' && getCampaignKind(modeOrCampaign) !== null);
+
+  const showPosters = enabledFormats?.posters !== false;
+  const showGondola = enabledFormats?.gondola === true;
+  const showVitrine = enabledFormats?.vitrine === true;
+
+  return Object.values(POSTER_FORMATS).filter(f => {
+    if (f.id === 'reliquias' || f.id === 'reliquias-a6') return showPosters;
+    if (f.id === 'campanha-a5') return showPosters && isCampaign;
+    if (f.id === 'etiqueta-oficial') return showGondola;
+    if (f.id === 'vitrine') return showVitrine;
+    return false;
+  });
+}
+
+export function getPosterFormat(
+  type: PosterType,
+  modeOrCampaign?: CampaignMode | string | boolean,
+  campaignBrand?: 'rihappy' | 'pbkids',
+): PosterFormat {
   const base = POSTER_FORMATS[type] ?? POSTER_FORMATS.reliquias;
-  if (happyFridayEnabled && type === 'reliquias-a6') {
+  const kind: CampaignKind =
+    modeOrCampaign === 'friday' ? 'friday'
+      : modeOrCampaign === '50off' ? '50off'
+        : modeOrCampaign === 'regular' ? null
+          : typeof modeOrCampaign === 'string' ? getCampaignKind(modeOrCampaign)
+            : null;
+
+  if (!kind) return base;
+
+  const isFriday = kind === 'friday';
+  const isPbKids = campaignBrand === 'pbkids';
+  const campaignLabel = isFriday
+    ? (isPbKids ? 'Best Friday' : 'Happy Friday')
+    : 'Campanha 50% OFF';
+
+  if (type === 'reliquias') {
     return {
       ...base,
-      label: 'Happy Friday A5',
-      shortLabel: 'A5',
-      caption: '2/folha',
-      description: 'Campanha Happy Friday · 2 cartazes A5 por folha A4',
-      perPage: 2,
-      singleDims: { w: 514, h: 680 },
+      label: `${campaignLabel} A4`,
+      description: `${campaignLabel} · 1 cartaz por folha A4`,
+      orientation: 'portrait',
+      offerOnly: isFriday,
+      singleDims: isFriday ? { w: 340, h: 514 } : { w: 514, h: 680 },
+    };
+  }
+  if (type === 'campanha-a5') {
+    return {
+      ...base,
+      label: `${campaignLabel} A5`,
+      description: `${campaignLabel} · 2 cartazes A5 por folha A4`,
+      orientation: 'landscape',
+      offerOnly: isFriday,
+      singleDims: isFriday ? { w: 340, h: 514 } : { w: 514, h: 680 },
+    };
+  }
+  if (type === 'reliquias-a6') {
+    return {
+      ...base,
+      label: `${campaignLabel} A6`,
+      shortLabel: 'A6',
+      caption: '4/folha',
+      description: `${campaignLabel} · 4 cartazes A6 Vertical por folha A4`,
+      perPage: 4,
+      orientation: 'portrait',
+      offerOnly: isFriday,
+      singleDims: isFriday ? { w: 340, h: 514 } : { w: 514, h: 680 },
     };
   }
   return base;
 }
 
-export function isOfferOnlyFormat(type: PosterType, happyFridayEnabled?: boolean): boolean {
-  if (happyFridayEnabled && (type === 'reliquias' || type === 'reliquias-a6')) {
+export function isOfferOnlyFormat(type: PosterType, mode?: CampaignMode | boolean): boolean {
+  if (mode === '50off' && (type === 'reliquias' || type === 'campanha-a5' || type === 'reliquias-a6')) {
     return false;
   }
   return getPosterFormat(type).offerOnly;
 }
 
-export function orientationLabel(type: PosterType): 'Paisagem' | 'Retrato' {
-  return getPosterFormat(type).orientation === 'landscape' ? 'Paisagem' : 'Retrato';
+export function orientationLabel(
+  type: PosterType,
+  modeOrCampaign?: CampaignMode | string | boolean,
+  campaignBrand?: 'rihappy' | 'pbkids',
+): 'Paisagem' | 'Retrato' {
+  return getPosterFormat(type, modeOrCampaign, campaignBrand).orientation === 'landscape' ? 'Paisagem' : 'Retrato';
 }
